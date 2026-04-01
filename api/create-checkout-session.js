@@ -1,5 +1,3 @@
-const Stripe = require('stripe');
-
 const PRODUCTS = {
   'morning-mist': {
     name: 'The Morning Mist',
@@ -61,52 +59,57 @@ module.exports = async function handler(req, res) {
   const unitAmount = product.prices[size];
   if (!unitAmount) return res.status(400).json({ error: 'Invalid size' });
 
-  if (!process.env.STRIPE_SECRET_KEY) {
-    return res.status(500).json({ error: 'Stripe is not configured' });
-  }
-
-  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2024-12-18.acacia'
-  });
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) return res.status(500).json({ error: 'Stripe is not configured' });
 
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   const host = req.headers['x-forwarded-host'] || req.headers.host;
   const origin = `${protocol}://${host}`;
 
+  // Build form-encoded body for Stripe REST API directly (no SDK dependency)
+  const params = new URLSearchParams({
+    'payment_method_types[]': 'card',
+    'line_items[0][price_data][currency]': 'usd',
+    'line_items[0][price_data][product_data][name]': product.name,
+    'line_items[0][price_data][product_data][description]': `${SIZE_LABELS[size]} · ${product.description}`,
+    'line_items[0][price_data][product_data][images][0]': product.image,
+    'line_items[0][price_data][unit_amount]': String(unitAmount),
+    'line_items[0][quantity]': '1',
+    'mode': 'payment',
+    'shipping_address_collection[allowed_countries][0]': 'US',
+    'shipping_address_collection[allowed_countries][1]': 'CA',
+    'shipping_address_collection[allowed_countries][2]': 'GB',
+    'shipping_address_collection[allowed_countries][3]': 'AU',
+    'shipping_address_collection[allowed_countries][4]': 'NZ',
+    'shipping_address_collection[allowed_countries][5]': 'TT',
+    'metadata[product_id]': productId,
+    'metadata[size]': size,
+    'metadata[customer_name]': shippingName || '',
+    'success_url': `${origin}/order-success.html?session_id={CHECKOUT_SESSION_ID}`,
+    'cancel_url': `${origin}/print-checkout.html?product=${productId}`
+  });
+  if (customerEmail) params.set('customer_email', customerEmail);
+
   try {
-    const session = await stripe.checkout.sessions.create({
-      payment_method_types: ['card'],
-      line_items: [
-        {
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: product.name,
-              description: `${SIZE_LABELS[size]} · ${product.description}`,
-              images: [product.image]
-            },
-            unit_amount: unitAmount
-          },
-          quantity: 1
-        }
-      ],
-      mode: 'payment',
-      customer_email: customerEmail || undefined,
-      shipping_address_collection: {
-        allowed_countries: ['US', 'CA', 'GB', 'AU', 'NZ', 'TT']
+    const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/x-www-form-urlencoded'
       },
-      metadata: {
-        product_id: productId,
-        size,
-        customer_name: shippingName || ''
-      },
-      success_url: `${origin}/order-success.html?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${origin}/print-checkout.html?product=${productId}`
+      body: params.toString()
     });
 
-    res.status(200).json({ url: session.url });
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error('Stripe API error:', data.error);
+      return res.status(502).json({ error: data.error?.message || 'Stripe error' });
+    }
+
+    res.status(200).json({ url: data.url });
   } catch (err) {
-    console.error('Stripe error:', err.message);
-    res.status(500).json({ error: err.message });
+    console.error('Fetch error:', err.message);
+    res.status(500).json({ error: 'Failed to connect to Stripe: ' + err.message });
   }
 };
