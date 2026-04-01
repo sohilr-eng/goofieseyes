@@ -21,6 +21,7 @@ const POSTS_DIR = path.join(CONTENT_DIR, 'posts');
 const DATA_DIR = path.join(CONTENT_DIR, 'data');
 const PORTFOLIOS_FILE = path.join(DATA_DIR, 'portfolios.json');
 const PRINTS_FILE = path.join(DATA_DIR, 'prints.json');
+const JOURNAL_FILE = path.join(DATA_DIR, 'journal.json');
 
 // ─── Ensure directories exist ─────────────────────────────────────────────────
 [PHOTOS_DIR, RAW_UPLOADS_DIR, POSTS_DIR, DATA_DIR].forEach((dir) => {
@@ -34,6 +35,44 @@ if (!fs.existsSync(PORTFOLIOS_FILE)) {
 if (!fs.existsSync(PRINTS_FILE)) {
   fs.writeFileSync(PRINTS_FILE, JSON.stringify({ prints: [] }, null, 2));
 }
+
+// ─── Rebuild journal.json from markdown posts ─────────────────────────────────
+function rebuildJournalJson() {
+  try {
+    if (!fs.existsSync(POSTS_DIR)) {
+      writeJSON(JOURNAL_FILE, { posts: [] });
+      return;
+    }
+    const files = fs.readdirSync(POSTS_DIR)
+      .filter((f) => f.endsWith('.md'))
+      .sort()
+      .reverse();
+
+    const posts = files.map((file) => {
+      const filePath = path.join(POSTS_DIR, file);
+      const parsed = parseFrontmatter(filePath);
+      if (!parsed) return null;
+      return {
+        filename: file,
+        slug: parsed.data.slug || file.replace(/^\d{4}-\d{2}-\d{2}-/, '').replace('.md', ''),
+        title: parsed.data.title || 'Untitled',
+        date: parsed.data.date || '',
+        status: parsed.data.status || 'draft',
+        tags: parsed.data.tags || [],
+        coverImage: parsed.data.coverImage || null,
+        body: parsed.content.trim()
+      };
+    }).filter(Boolean);
+
+    writeJSON(JOURNAL_FILE, { posts });
+    console.log(`[journal] Rebuilt journal.json — ${posts.length} posts`);
+  } catch (err) {
+    console.error('[journal] Failed to rebuild journal.json:', err.message);
+  }
+}
+
+// Build on startup so the file is always in sync
+rebuildJournalJson();
 
 // ─── App setup ────────────────────────────────────────────────────────────────
 const app = express();
@@ -297,6 +336,7 @@ app.post('/api/posts', (req, res) => {
 
     const fileContent = matter.stringify(body || '', frontmatter);
     fs.writeFileSync(filePath, fileContent, 'utf8');
+    rebuildJournalJson();
 
     console.log(`[posts] Saved: ${filename}`);
     res.json({ success: true, filename, slug: postSlug });
@@ -357,6 +397,7 @@ app.put('/api/posts/:slug', (req, res) => {
     const fileContent = matter.stringify(body || '', frontmatter);
     if (newPath !== oldPath && fs.existsSync(oldPath)) fs.unlinkSync(oldPath);
     fs.writeFileSync(newPath, fileContent, 'utf8');
+    rebuildJournalJson();
 
     console.log(`[posts] Updated: ${newFilename}`);
     res.json({ success: true, filename: newFilename, slug: postSlug });
@@ -382,6 +423,7 @@ app.delete('/api/posts/:slug', (req, res) => {
     if (!match) return res.status(404).json({ error: 'Post not found' });
 
     fs.unlinkSync(path.join(POSTS_DIR, match));
+    rebuildJournalJson();
     console.log(`[posts] Deleted: ${match}`);
     res.json({ success: true });
   } catch (err) {
