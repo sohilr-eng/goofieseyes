@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Order Confirmed | GoofiesEyes</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --accent: #C9927A; --accent-light: #E0B89A; --accent-rgb: 201, 146, 122;
+      --bg: #0D0B09; --bg-2: #141210;
+      --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
+      --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+      --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; }
+    ::selection { background: var(--accent); color: #fff; }
+    h1, h2, h3 { font-family: var(--font-display); }
+
+    .success-card {
+      max-width: 520px; width: 100%; text-align: center;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 20px; padding: 56px 48px; backdrop-filter: blur(12px);
+    }
+
+    .check-circle {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: rgba(var(--accent-rgb), 0.12); border: 1.5px solid rgba(var(--accent-rgb), 0.35);
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 32px;
+    }
+
+    .success-title {
+      font-size: 2.2rem; font-weight: 700; letter-spacing: -0.04em;
+      margin-bottom: 16px; color: var(--text);
+    }
+    .success-title em { font-style: italic; color: var(--accent); }
+
+    .success-body {
+      font-size: 1rem; color: var(--text-secondary); line-height: 1.7;
+      font-weight: 300; margin-bottom: 40px;
+    }
+
+    .order-ref {
+      font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
+      background: var(--bg-2); border: 1px solid var(--card-border);
+      border-radius: 8px; padding: 12px 20px; margin-bottom: 40px;
+      letter-spacing: 0.05em;
+    }
+
+    .btn-primary {
+      display: inline-block; background: var(--accent); color: #fff;
+      padding: 14px 32px; border-radius: 8px; text-decoration: none;
+      font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.25);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(var(--accent-rgb), 0.4); }
+
+    .btn-secondary {
+      display: inline-block; color: var(--text-secondary); padding: 14px 24px;
+      text-decoration: none; font-size: 0.9rem; transition: color 0.2s;
+      font-weight: 400;
+    }
+    .btn-secondary:hover { color: var(--accent); }
+
+    .actions { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
+
+    .logo-link {
+      position: fixed; top: 28px; left: 50%; transform: translateX(-50%);
+      display: flex; align-items: center; gap: 10px; text-decoration: none;
+    }
+    .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text-secondary); }
+  </style>
+</head>
+<body>
+
+<a href="index.html" class="logo-link">
+  <svg viewBox="0 0 52 26" width="40" height="20" fill="none">
+    <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
+    <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
+    <circle cx="26" cy="13" r="3" fill="#C9927A"/>
+  </svg>
+  <span class="logo-name">GoofiesEyes</span>
+</a>
+
+<div class="success-card">
+  <div class="check-circle">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9927A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  </div>
+
+  <h1 class="success-title">Order <em>confirmed.</em></h1>
+
+  <p class="success-body">
+    Thank you for your purchase. Your fine art print is now being prepared for production.
+    You'll receive a confirmation email shortly with tracking details once it ships.
+  </p>
+
+  <div id="order-ref" class="order-ref">Processing your order…</div>
+
+  <div class="actions">
+    <a href="prints.html" class="btn-primary">Shop More Prints</a>
+    <a href="index.html" class="btn-secondary">Back to Home</a>
+  </div>
+</div>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const refEl = document.getElementById('order-ref');
+
+  if (sessionId) {
+    const short = sessionId.replace('cs_', '').substring(0, 16).toUpperCase();
+    refEl.textContent = 'Order ref: ' + short;
+  } else {
+    refEl.textContent = 'Your order has been received.';
+  }
+</script>
+
+</body>
+</html>
