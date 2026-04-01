@@ -3,7 +3,60 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>GoofiesEyes — Photography</title>
+  <title>Fine Art Photography Portfolio | GoofiesEyes</title>
+  <meta name="description" content="Fine art photography by GoofiesEyes — portrait, landscape, editorial &amp; documentary work. Commission a session or browse gallery-quality prints. Seeing the world differently, one frame at a time." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://goofieseyes.vercel.app/" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Fine Art Photography Portfolio | GoofiesEyes" />
+  <meta property="og:description" content="Fine art photography — portrait, landscape, editorial &amp; documentary. Commission a session or browse gallery-quality prints. Seeing the world differently." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://goofieseyes.vercel.app/" />
+  <meta property="og:image" content="https://goofieseyes.vercel.app/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="GoofiesEyes Fine Art Photography Portfolio" />
+  <meta property="og:site_name" content="GoofiesEyes" />
+
+  <!-- Twitter / X Card -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Fine Art Photography Portfolio | GoofiesEyes" />
+  <meta name="twitter:description" content="Fine art photography — portrait, landscape, editorial &amp; documentary. Commission a session or browse gallery-quality prints." />
+  <meta name="twitter:image" content="https://goofieseyes.vercel.app/og-image.jpg" />
+
+  <!-- Schema.org Structured Data -->
+  <script type="application/ld+json">
+  [
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "GoofiesEyes",
+      "url": "https://goofieseyes.vercel.app/",
+      "description": "Fine art photography portfolio — portrait, landscape, editorial, and documentary visual storytelling."
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "Person",
+      "name": "GoofiesEyes",
+      "url": "https://goofieseyes.vercel.app/",
+      "jobTitle": "Fine Art Photographer",
+      "knowsAbout": ["portrait photography", "landscape photography", "editorial photography", "documentary photography", "fine art prints"],
+      "sameAs": []
+    },
+    {
+      "@context": "https://schema.org",
+      "@type": "CreativeWork",
+      "name": "GoofiesEyes Photography Portfolio",
+      "creator": {
+        "@type": "Person",
+        "name": "GoofiesEyes"
+      },
+      "description": "A fine art photography portfolio featuring portrait, landscape, editorial, documentary work and limited edition prints.",
+      "url": "https://goofieseyes.vercel.app/"
+    }
+  ]
+  </script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -284,7 +337,10 @@
       <span class="logo-name">GoofiesEyes</span>
     </a>
     <div class="nav-links">
-      <a href="#features">Work</a>
+      <a href="index.html" class="active">Home</a>
+      <a href="portfolios.html">Portfolios</a>
+      <a href="prints.html">Prints</a>
+      <a href="journal.html">Journal</a>
       <a href="#specs">About</a>
       <a href="#cta" class="nav-cta">Book a Session</a>
     </div>
@@ -361,7 +417,7 @@
       <div class="feature-card reveal">
         <div class="feature-icon">🎭</div>
         <h3>Portrait Photography</h3>
-        <p>Soul-first storytelling. I photograph people the way they actually are — complex, luminous, and entirely themselves.</p>
+        <p>Soul-first portrait photography. I capture people the way they actually are — complex, luminous, and entirely themselves. Available for personal portraits, creative headshots, and editorial sessions.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon">🌿</div>
@@ -381,12 +437,12 @@
       <div class="feature-card reveal">
         <div class="feature-icon">🖼</div>
         <h3>Fine Art Prints</h3>
-        <p>Gallery-quality archival prints for collectors and discerning walls. Each one hand-selected, signed, and numbered.</p>
+        <p>Gallery-quality archival fine art prints for collectors and discerning walls. Browse limited edition landscape and portrait prints — each one hand-selected, signed, and individually numbered.</p>
       </div>
       <div class="feature-card reveal">
         <div class="feature-icon">◎</div>
         <h3>Custom Commissions</h3>
-        <p>Your vision interpreted through Goofie's eye. Brief me on what you're after and we'll create something that outlasts the brief.</p>
+        <p>Your vision interpreted through Goofie's eye. Commission a photography project — portrait, editorial, or documentary — and I'll create something that outlasts the brief.</p>
       </div>
     </div>
   </div>
@@ -399,7 +455,7 @@
     <p class="section-label">Let's create together</p>
     <h2 class="reveal">Ready to see the<br>world <em>differently?</em></h2>
     <p class="reveal">Whether you need a portrait, a commission, or just want to talk about light — I'd love to hear from you.</p>
-    <button class="btn-primary-lg" id="ctaBtn">Book a Session</button>
+    <a href="mailto:hello@goofieseyes.com" class="btn-primary-lg" id="ctaBtn">Book a Session</a>
   </div>
 </section>
 
@@ -425,8 +481,10 @@
     <span class="logo-name">GoofiesEyes</span>
   </div>
   <div class="footer-links">
-    <a href="#hero">Home</a>
-    <a href="#features">Work</a>
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">Portfolios</a>
+    <a href="prints.html">Prints</a>
+    <a href="journal.html">Journal</a>
     <a href="#specs">About</a>
     <a href="#cta">Contact</a>
   </div>
