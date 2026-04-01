@@ -210,20 +210,18 @@
       background: linear-gradient(to top, var(--bg) 0%, transparent 100%);
     }
 
-    /* ─── SPECS ─── */
-    #specs { position: relative; z-index: 1; padding: 100px 32px; background: linear-gradient(var(--bg), var(--bg-2), var(--bg)); }
-    .specs-inner { max-width: 1000px; margin: 0 auto; text-align: center; }
-    .section-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 16px; }
+    /* ─── MANIFESTO ─── */
+    #specs { position: relative; z-index: 1; padding: 130px 32px; background: linear-gradient(var(--bg), var(--bg-2), var(--bg)); }
+    .specs-inner { max-width: 860px; margin: 0 auto; text-align: center; }
+    .section-label { font-family: var(--font-mono); font-size: 0.65rem; letter-spacing: 0.3em; text-transform: uppercase; color: var(--accent); margin-bottom: 28px; }
     .section-title { font-size: clamp(1.8rem, 4vw, 2.8rem); font-weight: 700; letter-spacing: -0.04em; margin-bottom: 64px; color: var(--text); }
     .section-title em { font-style: italic; color: var(--accent); }
-    .specs-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
-    .spec-divider { width: 1px; background: var(--card-border); }
-    .spec-item { padding: 20px; }
-    .spec-number { font-family: var(--font-display); font-size: clamp(2.5rem, 5vw, 4rem); font-weight: 700; color: var(--text); display: block; line-height: 1; transition: text-shadow 0.3s ease; }
-    .spec-number.counting { text-shadow: 0 0 24px rgba(var(--accent-rgb), 0.45); color: var(--accent-light); }
-    .spec-suffix { color: var(--accent); }
-    .spec-label { font-size: 0.82rem; color: var(--text-secondary); margin-top: 10px; display: block; letter-spacing: 0.04em; }
-    @media (max-width: 768px) { .specs-grid { grid-template-columns: repeat(2, 1fr); } .spec-number { font-size: 2.2rem; } }
+    .manifesto { position: relative; }
+    .manifesto-rule { width: 40px; height: 1px; background: linear-gradient(90deg, transparent, var(--accent), transparent); margin: 0 auto 52px; }
+    .manifesto-rule.rule-below { margin: 52px auto 0; }
+    .manifesto-mark { font-family: var(--font-display); font-size: clamp(10rem, 22vw, 20rem); color: var(--accent); opacity: 0.055; position: absolute; top: -80px; left: 50%; transform: translateX(-50%); line-height: 1; user-select: none; pointer-events: none; letter-spacing: -0.05em; }
+    .manifesto-quote { font-family: var(--font-display); font-size: clamp(1.9rem, 3.4vw, 3.1rem); font-style: italic; font-weight: 300; color: var(--text); line-height: 1.5; letter-spacing: -0.025em; position: relative; z-index: 1; }
+    .manifesto-quote em { font-style: normal; color: var(--accent-light); }
 
     /* ─── FEATURES ─── */
     #features { position: relative; z-index: 1; padding: 60px 32px 100px; }
@@ -382,28 +380,15 @@
   </div>
 </section>
 
-<!-- Specs -->
+<!-- Manifesto -->
 <section id="specs">
   <div class="specs-inner">
-    <p class="section-label">By the numbers</p>
-    <h2 class="section-title reveal">The numbers that <em>matter.</em></h2>
-    <div class="specs-grid">
-      <div class="spec-item">
-        <span class="spec-number" data-target="500" data-suffix="+">0</span>
-        <span class="spec-label">Photographs taken</span>
-      </div>
-      <div class="spec-item">
-        <span class="spec-number" data-target="7" data-suffix="+">0</span>
-        <span class="spec-label">Years behind the lens</span>
-      </div>
-      <div class="spec-item">
-        <span class="spec-number" data-target="30" data-suffix="+">0</span>
-        <span class="spec-label">Projects completed</span>
-      </div>
-      <div class="spec-item">
-        <span class="spec-number" data-target="100" data-suffix="%">0</span>
-        <span class="spec-label">Passion poured in</span>
-      </div>
+    <p class="section-label">What I'm here for</p>
+    <div class="manifesto reveal">
+      <div class="manifesto-rule"></div>
+      <span class="manifesto-mark" aria-hidden="true">"</span>
+      <p class="manifesto-quote">There's so much <em>beauty</em> in this world<br>if you would slow down<br>and take a look.</p>
+      <div class="manifesto-rule rule-below"></div>
     </div>
   </div>
 </section>
@@ -702,43 +687,6 @@ window.addEventListener('scroll', () => {
     ticking = true;
   }
 }, { passive: true });
-
-// ════════════════════════════════════════════════
-//  COUNT-UP
-// ════════════════════════════════════════════════
-function easeOutExpo(t) { return t === 1 ? 1 : 1 - Math.pow(2, -10 * t); }
-
-function countUp(el, target, suffix, duration) {
-  const start = performance.now();
-  el.classList.add('counting');
-  function tick(now) {
-    const p = Math.min((now - start) / duration, 1);
-    const val = easeOutExpo(p) * target;
-    el.innerHTML = (target % 1 === 0 ? Math.floor(val) : val.toFixed(1)) + '<span class="spec-suffix">' + suffix + '</span>';
-    if (p < 1) requestAnimationFrame(tick);
-    else { el.innerHTML = target + '<span class="spec-suffix">' + suffix + '</span>'; el.classList.remove('counting'); }
-  }
-  requestAnimationFrame(tick);
-}
-
-const specObs = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (e.isIntersecting) {
-      e.target.querySelectorAll('.spec-item').forEach((item, i) => {
-        setTimeout(() => {
-          const el = item.querySelector('.spec-number');
-          const t = parseFloat(el.dataset.target);
-          const s = el.dataset.suffix || '';
-          countUp(el, t, s, 2000);
-        }, i * 220);
-      });
-      specObs.unobserve(e.target);
-    }
-  });
-}, { threshold: 0.3 });
-
-const specsSection = document.getElementById('specs');
-if (specsSection) specObs.observe(specsSection);
 
 // ════════════════════════════════════════════════
 //  REVEAL ON SCROLL
