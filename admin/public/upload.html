@@ -1,0 +1,450 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Upload Photos — GoofiesEyes Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-sidebar: #0f0f13;
+      --bg-main: #16161e;
+      --bg-card: rgba(255,255,255,0.04);
+      --border-card: rgba(255,255,255,0.08);
+      --accent: #7c5cbf;
+      --accent-hover: #9370db;
+      --text: #e8e8ed;
+      --text-muted: #888899;
+      --success: #4caf7d;
+      --warning: #e6a817;
+      --danger: #e05c5c;
+      --sidebar-width: 220px;
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; border-right: 1px solid var(--border-card); }
+    .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border-card); }
+    .sidebar-logo h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .sidebar-logo span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,92,191,0.08); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-card); font-size: 11px; color: var(--text-muted); }
+
+    .main { margin-left: var(--sidebar-width); flex: 1; padding: 32px 36px; }
+    .page-header { margin-bottom: 28px; }
+    .page-header h2 { font-size: 24px; font-weight: 700; }
+    .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Drop zone */
+    .drop-zone {
+      border: 2px dashed rgba(124,92,191,0.5);
+      border-radius: 12px;
+      background: rgba(124,92,191,0.05);
+      padding: 60px 40px;
+      text-align: center;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 24px;
+    }
+
+    .drop-zone:hover, .drop-zone.drag-over {
+      border-color: var(--accent);
+      background: rgba(124,92,191,0.12);
+    }
+
+    .drop-zone .dz-icon { font-size: 48px; margin-bottom: 12px; }
+    .drop-zone h3 { font-size: 18px; font-weight: 600; margin-bottom: 8px; }
+    .drop-zone p { font-size: 13px; color: var(--text-muted); }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border-card); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+    input[type="file"] { display: none; }
+
+    /* File preview list */
+    .files-section { margin-bottom: 24px; }
+    .files-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+
+    .file-item {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 16px;
+      display: grid;
+      grid-template-columns: 120px 1fr;
+      gap: 20px;
+    }
+
+    .file-preview {
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+    }
+
+    .file-preview img {
+      width: 120px;
+      height: 90px;
+      object-fit: cover;
+      display: block;
+    }
+
+    .file-meta { display: flex; flex-direction: column; gap: 2px; }
+    .file-name { font-size: 13px; font-weight: 600; }
+    .file-size { font-size: 12px; color: var(--text-muted); margin-bottom: 10px; }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: 4px; }
+    .form-field label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .form-field input, .form-field select, .form-field textarea {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .form-field input:focus, .form-field select:focus { border-color: var(--accent); }
+    .form-field select option { background: #1e1e28; }
+
+    .print-price-row { display: none; }
+    .print-price-row.visible { display: flex; flex-direction: column; gap: 4px; }
+
+    .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+      padding: 4px 0;
+    }
+
+    .checkbox-row input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
+
+    /* Progress bar */
+    .progress-wrap { margin-top: 10px; }
+    .progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--accent); width: 0%; transition: width 0.2s; border-radius: 2px; }
+    .progress-label { font-size: 11px; color: var(--text-muted); margin-top: 4px; }
+
+    .status-badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 20px;
+      margin-top: 6px;
+    }
+
+    .status-success { background: rgba(76,175,125,0.2); color: var(--success); }
+    .status-error { background: rgba(224,92,92,0.2); color: var(--danger); }
+
+    .upload-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    /* Uploaded section */
+    .uploaded-section { margin-top: 32px; }
+    .uploaded-section h3 { font-size: 16px; font-weight: 600; margin-bottom: 16px; }
+    .uploaded-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 12px;
+    }
+
+    .uploaded-thumb {
+      border-radius: 8px;
+      overflow: hidden;
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+    }
+
+    .uploaded-thumb img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+    .uploaded-thumb .label { padding: 6px 8px; font-size: 10px; color: var(--text-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GoofiesEyes</h1>
+    <span>Admin Portal</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+    <a href="upload.html" class="nav-item active"><span class="icon">📷</span> Upload Photos</a>
+    <a href="portfolio.html" class="nav-item"><span class="icon">🖼️</span> Portfolios</a>
+    <a href="journal.html" class="nav-item"><span class="icon">✍️</span> Journal</a>
+    <a href="prints.html" class="nav-item"><span class="icon">🖨️</span> Prints</a>
+  </nav>
+  <div class="sidebar-footer">localhost:3000</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <h2>Upload Photos</h2>
+    <p>Drag and drop images to upload, optimize, and assign to portfolios</p>
+  </div>
+
+  <!-- Drop zone -->
+  <div class="drop-zone" id="drop-zone">
+    <div class="dz-icon">📷</div>
+    <h3>Drop images here</h3>
+    <p>or <a href="#" style="color:var(--accent)" onclick="document.getElementById('file-input').click();event.preventDefault()">browse files</a></p>
+    <p style="margin-top:8px;font-size:11px">JPEG, PNG, TIFF, WebP accepted — max 2400px (auto-resized)</p>
+  </div>
+  <input type="file" id="file-input" accept="image/*" multiple />
+
+  <!-- File list -->
+  <div class="files-section" id="files-section" style="display:none">
+    <h3>Selected Files</h3>
+    <div id="file-list"></div>
+  </div>
+
+  <!-- Actions -->
+  <div class="upload-actions" id="upload-actions" style="display:none">
+    <button class="btn btn-primary" id="upload-btn" onclick="uploadAll()">⬆️ Upload All</button>
+    <button class="btn btn-secondary" onclick="clearFiles()">Clear</button>
+    <span id="upload-status" style="font-size:13px;color:var(--text-muted)"></span>
+  </div>
+
+  <!-- Uploaded -->
+  <div class="uploaded-section" id="uploaded-section" style="display:none">
+    <h3>Uploaded ✓</h3>
+    <div class="uploaded-grid" id="uploaded-grid"></div>
+  </div>
+</main>
+
+<script>
+  let selectedFiles = [];
+  let portfolios = [];
+
+  // Load portfolios for dropdown
+  async function loadPortfolios() {
+    try {
+      const res = await fetch('/api/portfolios');
+      const data = await res.json();
+      portfolios = data.portfolios || [];
+    } catch(e) { portfolios = []; }
+  }
+
+  loadPortfolios();
+
+  // Drop zone
+  const dropZone = document.getElementById('drop-zone');
+  const fileInput = document.getElementById('file-input');
+
+  dropZone.addEventListener('click', () => fileInput.click());
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    dropZone.classList.add('drag-over');
+  });
+
+  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+
+  dropZone.addEventListener('drop', (e) => {
+    e.preventDefault();
+    dropZone.classList.remove('drag-over');
+    handleFiles(Array.from(e.dataTransfer.files).filter(f => f.type.startsWith('image/')));
+  });
+
+  fileInput.addEventListener('change', () => {
+    handleFiles(Array.from(fileInput.files));
+    fileInput.value = '';
+  });
+
+  function handleFiles(files) {
+    selectedFiles = [...selectedFiles, ...files];
+    renderFileList();
+  }
+
+  function renderFileList() {
+    const section = document.getElementById('files-section');
+    const list = document.getElementById('file-list');
+    const actions = document.getElementById('upload-actions');
+
+    if (selectedFiles.length === 0) {
+      section.style.display = 'none';
+      actions.style.display = 'none';
+      return;
+    }
+
+    section.style.display = 'block';
+    actions.style.display = 'flex';
+
+    list.innerHTML = selectedFiles.map((file, i) => {
+      const url = URL.createObjectURL(file);
+      const sizeKB = (file.size / 1024).toFixed(0);
+      const portfolioOptions = portfolios.map(p =>
+        `<option value="${p.id}">${p.name}</option>`
+      ).join('');
+
+      return `
+        <div class="file-item" id="file-item-${i}">
+          <div class="file-preview">
+            <img src="${url}" alt="${file.name}" />
+          </div>
+          <div class="file-meta">
+            <div class="file-name">${file.name}</div>
+            <div class="file-size">${sizeKB} KB</div>
+            <div class="form-grid">
+              <div class="form-field">
+                <label>Title</label>
+                <input type="text" id="title-${i}" value="${file.name.replace(/\.[^.]+$/, '')}" />
+              </div>
+              <div class="form-field">
+                <label>Portfolio</label>
+                <select id="portfolio-${i}">
+                  <option value="">— No portfolio —</option>
+                  ${portfolioOptions}
+                </select>
+              </div>
+              <div class="form-field">
+                <label>Tags (comma-separated)</label>
+                <input type="text" id="tags-${i}" placeholder="landscape, nature, golden-hour" />
+              </div>
+              <div class="form-field">
+                <label>Alt text</label>
+                <input type="text" id="alt-${i}" placeholder="Descriptive alt text" />
+              </div>
+            </div>
+            <div class="checkbox-row" style="margin-top:8px">
+              <input type="checkbox" id="print-${i}" onchange="togglePrice(${i})" />
+              <label for="print-${i}">Available as print</label>
+            </div>
+            <div class="form-field print-price-row" id="price-row-${i}">
+              <label>Print price ($)</label>
+              <input type="number" id="price-${i}" placeholder="120" min="0" step="0.01" style="max-width:120px" />
+            </div>
+            <div class="progress-wrap" id="progress-wrap-${i}" style="display:none">
+              <div class="progress-bar"><div class="progress-fill" id="progress-${i}"></div></div>
+              <div class="progress-label" id="progress-label-${i}">Uploading…</div>
+            </div>
+            <div id="status-${i}"></div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function togglePrice(i) {
+    const checked = document.getElementById(`print-${i}`).checked;
+    const row = document.getElementById(`price-row-${i}`);
+    row.classList.toggle('visible', checked);
+  }
+
+  async function uploadAll() {
+    const btn = document.getElementById('upload-btn');
+    btn.disabled = true;
+    btn.textContent = '⏳ Uploading…';
+
+    let successCount = 0;
+    let failCount = 0;
+
+    for (let i = 0; i < selectedFiles.length; i++) {
+      const file = selectedFiles[i];
+      const progressWrap = document.getElementById(`progress-wrap-${i}`);
+      const progressFill = document.getElementById(`progress-${i}`);
+      const progressLabel = document.getElementById(`progress-label-${i}`);
+      const statusEl = document.getElementById(`status-${i}`);
+
+      progressWrap.style.display = 'block';
+      progressFill.style.width = '10%';
+
+      const formData = new FormData();
+      formData.append('photo', file);
+      formData.append('title', document.getElementById(`title-${i}`).value);
+      formData.append('portfolio', document.getElementById(`portfolio-${i}`).value);
+      formData.append('tags', document.getElementById(`tags-${i}`).value);
+      formData.append('alt', document.getElementById(`alt-${i}`).value);
+      formData.append('printAvailable', document.getElementById(`print-${i}`).checked);
+      formData.append('printPrice', document.getElementById(`price-${i}`)?.value || '0');
+
+      try {
+        progressFill.style.width = '40%';
+
+        const res = await fetch('/api/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        progressFill.style.width = '100%';
+
+        if (data.success) {
+          progressLabel.textContent = 'Done!';
+          progressFill.style.background = 'var(--success)';
+          statusEl.innerHTML = `<span class="status-badge status-success">✓ Uploaded as ${data.filename}</span>`;
+          addToUploaded(data.filename);
+          successCount++;
+        } else {
+          throw new Error(data.error || 'Upload failed');
+        }
+      } catch (err) {
+        progressFill.style.width = '100%';
+        progressFill.style.background = 'var(--danger)';
+        progressLabel.textContent = 'Failed';
+        statusEl.innerHTML = `<span class="status-badge status-error">✗ ${err.message}</span>`;
+        failCount++;
+      }
+    }
+
+    document.getElementById('upload-status').textContent =
+      `${successCount} uploaded${failCount > 0 ? `, ${failCount} failed` : ''}`;
+
+    btn.disabled = false;
+    btn.innerHTML = '⬆️ Upload All';
+    selectedFiles = [];
+  }
+
+  function addToUploaded(filename) {
+    const section = document.getElementById('uploaded-section');
+    const grid = document.getElementById('uploaded-grid');
+    section.style.display = 'block';
+
+    const thumb = document.createElement('div');
+    thumb.className = 'uploaded-thumb';
+    thumb.innerHTML = `
+      <img src="/content/photos/${filename}" alt="${filename}" loading="lazy" />
+      <div class="label">${filename}</div>
+    `;
+    grid.prepend(thumb);
+  }
+
+  function clearFiles() {
+    selectedFiles = [];
+    renderFileList();
+    document.getElementById('upload-status').textContent = '';
+  }
+</script>
+</body>
+</html>

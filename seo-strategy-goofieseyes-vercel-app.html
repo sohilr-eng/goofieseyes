@@ -1,0 +1,1067 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SEO Audit — GoofiesEyes</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --bg: #0a0a0f;
+    --bg-card: rgba(255,255,255,0.03);
+    --bg-card-hover: rgba(255,255,255,0.055);
+    --border: rgba(255,255,255,0.08);
+    --border-hover: rgba(255,255,255,0.15);
+    --text: #e8e8ed;
+    --text-secondary: #8b8b9e;
+    --text-muted: #5a5a6e;
+    --accent: #6366f1;
+    --accent-glow: rgba(99,102,241,0.25);
+    --green: #22c55e;
+    --green-bg: rgba(34,197,94,0.1);
+    --green-border: rgba(34,197,94,0.2);
+    --yellow: #eab308;
+    --yellow-bg: rgba(234,179,8,0.1);
+    --yellow-border: rgba(234,179,8,0.2);
+    --red: #ef4444;
+    --red-bg: rgba(239,68,68,0.1);
+    --red-border: rgba(239,68,68,0.2);
+    --blue: #3b82f6;
+    --blue-bg: rgba(59,130,246,0.1);
+    --orange: #f97316;
+    --orange-bg: rgba(249,115,22,0.1);
+    --orange-border: rgba(249,115,22,0.2);
+    --radius: 16px;
+    --radius-sm: 10px;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.6;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; top: -50%; left: -50%; width: 200%; height: 200%;
+    background:
+      radial-gradient(ellipse at 20% 50%, rgba(99,102,241,0.05) 0%, transparent 50%),
+      radial-gradient(ellipse at 80% 20%, rgba(139,92,246,0.03) 0%, transparent 50%);
+    z-index: -1;
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+  .container { max-width: 1100px; margin: 0 auto; padding: 0 28px; }
+
+  /* ── HEADER ── */
+  .header { padding: 56px 0 0; text-align: center; }
+  .header-eyebrow {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 16px; border: 1px solid var(--border); border-radius: 100px;
+    font-size: 11px; font-weight: 500; color: var(--text-secondary);
+    text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 24px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .header-eyebrow .live-dot {
+    width: 6px; height: 6px; border-radius: 50%; background: var(--green);
+    box-shadow: 0 0 8px var(--green); animation: blink 2s ease-in-out infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .header h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem); font-weight: 700;
+    letter-spacing: -0.04em; color: var(--text); line-height: 1.05;
+    margin-bottom: 16px;
+  }
+  .header h1 span { color: var(--accent); }
+  .header-meta { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 48px; }
+  .header-meta a { color: var(--accent); text-decoration: none; }
+
+  /* ── SCORE RING ── */
+  .score-hero {
+    padding: 48px 0 60px;
+    display: flex; flex-direction: column; align-items: center; gap: 32px;
+  }
+  .score-ring-wrap { position: relative; width: 200px; height: 200px; }
+  .score-ring-wrap svg { transform: rotate(-90deg); }
+  .score-ring-wrap .score-label {
+    position: absolute; inset: 0; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; text-align: center;
+  }
+  .score-number {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 3rem; font-weight: 700; line-height: 1; color: var(--text);
+  }
+  .score-denom { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+  .score-verdict {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem; font-weight: 600; margin-top: 4px;
+  }
+  .score-cards {
+    display: flex; gap: 14px; flex-wrap: wrap; justify-content: center;
+    max-width: 760px;
+  }
+  .score-card {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px 24px; text-align: center;
+    min-width: 130px; flex: 1;
+  }
+  .score-card .sc-label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; font-family: 'JetBrains Mono', monospace; }
+  .score-card .sc-val {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.6rem; font-weight: 700;
+  }
+  .sc-val.good { color: var(--green); }
+  .sc-val.warn { color: var(--yellow); }
+  .sc-val.bad { color: var(--red); }
+
+  /* ── SECTION ── */
+  .audit-section { padding: 0 0 60px; }
+  .section-head { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+  .section-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.1rem; flex-shrink: 0;
+  }
+  .section-head h2 {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 600;
+  }
+  .section-score-badge {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace;
+    font-size: 12px; padding: 4px 12px; border-radius: 100px; font-weight: 600;
+  }
+
+  /* ── FINDING CARDS ── */
+  .findings { display: flex; flex-direction: column; gap: 12px; }
+  .finding {
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 20px 22px;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .finding:hover { border-color: var(--border-hover); background: var(--bg-card-hover); }
+  .finding-header { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 10px; }
+  .priority-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; margin-top: 6px; }
+  .priority-dot.critical { background: var(--red); box-shadow: 0 0 8px var(--red); }
+  .priority-dot.high { background: var(--orange); box-shadow: 0 0 8px var(--orange); }
+  .priority-dot.medium { background: var(--yellow); box-shadow: 0 0 8px var(--yellow); }
+  .priority-dot.low { background: var(--blue); box-shadow: 0 0 8px var(--blue); }
+  .finding-title { font-weight: 600; font-size: 0.95rem; flex: 1; }
+  .badge {
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 600;
+    padding: 3px 10px; border-radius: 100px; text-transform: uppercase; letter-spacing: 0.5px;
+    flex-shrink: 0;
+  }
+  .badge.critical { background: var(--red-bg); border: 1px solid var(--red-border); color: var(--red); }
+  .badge.high { background: var(--orange-bg); border: 1px solid var(--orange-border); color: var(--orange); }
+  .badge.medium { background: var(--yellow-bg); border: 1px solid var(--yellow-border); color: var(--yellow); }
+  .badge.low { background: var(--blue-bg); border: 1px solid rgba(59,130,246,0.2); color: var(--blue); }
+  .badge.pass { background: var(--green-bg); border: 1px solid var(--green-border); color: var(--green); }
+
+  .finding-body { font-size: 0.87rem; color: var(--text-secondary); line-height: 1.65; }
+  .finding-body p { margin-bottom: 8px; }
+  .finding-body p:last-child { margin-bottom: 0; }
+
+  .fix-block {
+    margin-top: 12px; padding: 12px 16px;
+    background: rgba(255,255,255,0.025); border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 8px; border-left: 3px solid var(--accent);
+  }
+  .fix-label { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--accent); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+  .fix-block code {
+    font-family: 'JetBrains Mono', monospace; font-size: 0.78rem;
+    color: #c4c4d4; line-height: 1.7; white-space: pre-wrap; word-break: break-all;
+    display: block;
+  }
+
+  .pass-row {
+    background: var(--green-bg); border-color: var(--green-border);
+  }
+  .pass-row .finding-title { color: #a7f3d0; }
+
+  /* ── DIVIDER ── */
+  .divider { border: none; border-top: 1px solid var(--border); margin: 0 0 60px; }
+
+  /* ── KEYWORD TABLE ── */
+  .kw-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+  .kw-table th {
+    text-align: left; padding: 10px 14px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; text-transform: uppercase;
+    letter-spacing: 1px; color: var(--text-muted); border-bottom: 1px solid var(--border);
+  }
+  .kw-table td { padding: 11px 14px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
+  .kw-table tr:last-child td { border-bottom: none; }
+  .kw-table tr:hover td { background: rgba(255,255,255,0.02); }
+  .kw-intent { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-family: 'JetBrains Mono', monospace; font-weight: 600; }
+  .kw-intent.info { background: var(--blue-bg); color: var(--blue); }
+  .kw-intent.trans { background: var(--green-bg); color: var(--green); }
+  .kw-intent.comm { background: var(--orange-bg); color: var(--orange); }
+  .kw-priority { font-size: 10px; padding: 2px 8px; border-radius: 100px; font-family: 'JetBrains Mono', monospace; }
+  .kw-priority.p1 { background: rgba(239,68,68,0.12); color: #f87171; }
+  .kw-priority.p2 { background: var(--orange-bg); color: var(--orange); }
+  .kw-priority.p3 { background: var(--yellow-bg); color: var(--yellow); }
+
+  /* ── ACTION PLAN ── */
+  .action-plan { display: flex; flex-direction: column; gap: 10px; }
+  .action-item {
+    display: flex; gap: 16px; align-items: flex-start;
+    background: var(--bg-card); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 16px 20px;
+  }
+  .action-num {
+    font-family: 'Space Grotesk', sans-serif; font-size: 1.2rem; font-weight: 700;
+    color: var(--accent); min-width: 28px; line-height: 1.3;
+  }
+  .action-body h4 { font-size: 0.92rem; font-weight: 600; margin-bottom: 4px; }
+  .action-body p { font-size: 0.83rem; color: var(--text-secondary); }
+  .action-time {
+    margin-left: auto; font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    color: var(--text-muted); padding: 3px 10px; border-radius: 100px;
+    border: 1px solid var(--border); white-space: nowrap;
+  }
+
+  /* ── FOOTER ── */
+  .report-footer { padding: 40px 0 60px; text-align: center; border-top: 1px solid var(--border); margin-top: 20px; }
+  .report-footer p { font-size: 0.8rem; color: var(--text-muted); }
+
+  @media (max-width: 640px) {
+    .score-cards { flex-direction: column; }
+    .kw-table { font-size: 0.78rem; }
+    .kw-table th:nth-child(3), .kw-table td:nth-child(3) { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ── HEADER ── -->
+  <div class="header">
+    <div class="header-eyebrow">
+      <span class="live-dot"></span>
+      SEO Site Audit &mdash; Mode 2: Full Website
+    </div>
+    <h1>GoofiesEyes<br><span>SEO Strategy Report</span></h1>
+    <p class="header-meta">
+      Audited: <a href="https://goofieseyes.vercel.app" target="_blank">goofieseyes.vercel.app</a>
+      &nbsp;&bull;&nbsp; Generated: March 2026
+      &nbsp;&bull;&nbsp; Pages crawled: 1 (single-page site)
+    </p>
+  </div>
+
+  <!-- ── OVERALL SCORE ── -->
+  <div class="score-hero">
+    <div class="score-ring-wrap">
+      <svg width="200" height="200" viewBox="0 0 200 200">
+        <circle cx="100" cy="100" r="85" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="14"/>
+        <circle cx="100" cy="100" r="85" fill="none"
+          stroke="url(#scoreGrad)" stroke-width="14"
+          stroke-linecap="round"
+          stroke-dasharray="534"
+          stroke-dashoffset="321"
+          style="transition: stroke-dashoffset 1.2s cubic-bezier(0.16,1,0.3,1)"/>
+        <defs>
+          <linearGradient id="scoreGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" stop-color="#f97316"/>
+            <stop offset="100%" stop-color="#ef4444"/>
+          </linearGradient>
+        </defs>
+      </svg>
+      <div class="score-label">
+        <span class="score-number" id="scoreNum">0</span>
+        <span class="score-denom">/ 100</span>
+        <span class="score-verdict" style="color:#f97316">Needs Work</span>
+      </div>
+    </div>
+
+    <div class="score-cards">
+      <div class="score-card">
+        <div class="sc-label">On-Page SEO</div>
+        <div class="sc-val warn">42</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Technical SEO</div>
+        <div class="sc-val bad">28</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Content Depth</div>
+        <div class="sc-val bad">20</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Social / OG</div>
+        <div class="sc-val warn">45</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">Schema</div>
+        <div class="sc-val warn">35</div>
+      </div>
+      <div class="score-card">
+        <div class="sc-label">E-E-A-T</div>
+        <div class="sc-val bad">22</div>
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 1. TECHNICAL SEO -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--red-bg); color:var(--red)">⚙️</div>
+      <h2>Technical SEO</h2>
+      <span class="section-score-badge" style="background:var(--red-bg); color:var(--red); border:1px solid var(--red-border)">28 / 100</span>
+    </div>
+
+    <div class="findings">
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">No robots.txt file</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>Fetching <code>https://goofieseyes.vercel.app/robots.txt</code> returns a 404. Without a robots.txt, search engines have no crawl directives — and you miss the opportunity to point Googlebot to your sitemap. While Googlebot will still crawl without one, it's a missing trust signal and a missed indexing opportunity.</p>
+          <div class="fix-block">
+            <div class="fix-label">Create: /robots.txt</div>
+            <code>User-agent: *
+Allow: /
+
+Sitemap: https://goofieseyes.vercel.app/sitemap.xml</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">No sitemap.xml</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>Fetching <code>/sitemap.xml</code> returns a 404. A sitemap is how you formally tell Google every URL you want indexed, their last-modified date, and their priority. For a single-page site it takes 5 minutes to create and guarantees faster indexing.</p>
+          <div class="fix-block">
+            <div class="fix-label">Create: /sitemap.xml</div>
+            <code>&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"&gt;
+  &lt;url&gt;
+    &lt;loc&gt;https://goofieseyes.vercel.app/&lt;/loc&gt;
+    &lt;lastmod&gt;2026-03-31&lt;/lastmod&gt;
+    &lt;priority&gt;1.0&lt;/priority&gt;
+  &lt;/url&gt;
+&lt;/urlset&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">Canonical URL points to a domain that doesn't exist</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>Your canonical tag reads: <code>https://www.goofieseyes.com/</code>. This domain is not registered — the site lives at <code>goofieseyes.vercel.app</code>. A canonical pointing to a non-existent URL tells Google to credit a dead domain with the authority this page earns. Fix immediately to ensure your Vercel URL gets full credit.</p>
+          <div class="fix-block">
+            <div class="fix-label">Replace in &lt;head&gt;</div>
+            <code>&lt;link rel="canonical" href="https://goofieseyes.vercel.app/" /&gt;</code>
+          </div>
+          <p style="margin-top:10px">📌 <strong>Note:</strong> If you purchase the domain <code>goofieseyes.com</code> in future, update the canonical to match — don't leave it pointing to Vercel after you migrate.</p>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">OG URL has wrong domain and includes /index.html</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>The <code>og:url</code> tag reads <code>https://www.goofieseyes.com/index.html</code> — wrong domain, wrong URL format. Social platforms use og:url to de-duplicate shares. When someone shares your site, aggregated like/share counts will be split between URLs rather than consolidated.</p>
+          <div class="fix-block">
+            <div class="fix-label">Fix in &lt;head&gt;</div>
+            <code>&lt;meta property="og:url" content="https://goofieseyes.vercel.app/" /&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">Page load: ~127 JPEG frames = potentially 15–25 MB uncompressed</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>The scroll animation preloads all 127 JPEG frames before showing the site. Google's Core Web Vitals — especially Largest Contentful Paint (LCP) and Total Blocking Time — are ranking signals. A 15–25 MB initial payload will score poorly, especially on mobile connections. The loader hides the LCP element which is a good mitigation, but the bytes still need to transfer.</p>
+          <p><strong>Recommendations:</strong></p>
+          <p>① Re-export frames at 85% JPEG quality instead of the current max quality (<code>-q:v 2</code> in FFmpeg). Aim for &lt;80KB per frame = total &lt;10MB.<br>② Consider serving WebP frames (40% smaller than JPEG at same quality) via a WebP-with-JPEG-fallback pattern.<br>③ Lazy-start: Begin the preload after the hero's first paint, not blocking it.</p>
+          <div class="fix-block">
+            <div class="fix-label">FFmpeg flag to reduce file size</div>
+            <code>ffmpeg -i video.mp4 -vf "fps=18,scale=1280:-2" -q:v 5 frames/frame_%04d.jpg
+# -q:v 5 = good quality, ~50-80KB/frame vs ~200KB at q:v 2
+# scale=1280:-2 = halve the width (1920 is overkill for canvas on most screens)</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding pass-row">
+        <div class="finding-header">
+          <span class="priority-dot low"></span>
+          <span class="finding-title">✓ HTTPS enforced via Vercel</span>
+          <span class="badge pass">Pass</span>
+        </div>
+        <div class="finding-body">
+          <p>Vercel automatically provisions and renews an SSL certificate. All traffic is HTTPS. This is a confirmed Google ranking signal.</p>
+        </div>
+      </div>
+
+      <div class="finding pass-row">
+        <div class="finding-header">
+          <span class="priority-dot low"></span>
+          <span class="finding-title">✓ lang="en" attribute present</span>
+          <span class="badge pass">Pass</span>
+        </div>
+        <div class="finding-body">
+          <p>The <code>&lt;html lang="en"&gt;</code> attribute is set. This helps Google understand the page language and avoids duplicate content issues in multilingual search results.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 2. ON-PAGE SEO -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--yellow-bg); color:var(--yellow)">📄</div>
+      <h2>On-Page SEO</h2>
+      <span class="section-score-badge" style="background:var(--yellow-bg); color:var(--yellow); border:1px solid var(--yellow-border)">42 / 100</span>
+    </div>
+
+    <div class="findings">
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">Two H1 tags on the same page</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>The page has two H1 elements: <em>"Fine Art Photography"</em> and <em>"GOOFIE'S EYES."</em>. Google officially supports multiple H1s, but in practice a single, keyword-rich H1 is the strongest on-page ranking signal you have. Two H1s dilute this signal. One should be demoted to H2 or converted into a styled span/div.</p>
+          <div class="fix-block">
+            <div class="fix-label">Recommended heading hierarchy</div>
+            <code>H1: "GoofiesEyes — Fine Art Photography"  (one H1, above the fold)
+H2: "The Craft Behind Every Shot"         (scroll animation section)
+H2: "The Numbers That Matter"             (specs)
+H2: "The Work, Explored"                  (features)
+H2: "The Eye That Never Blinks"           (Three.js section)
+H2: "Ready to See the World Differently?" (CTA)</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">Meta description too short — 102 chars (target: 150–160)</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>Current: <em>"GoofiesEyes Fine Art Photography. Portrait, landscape, editorial, and documentary visual storytelling."</em> (102 chars). This won't fill the full snippet preview in Google, leaving click-through potential on the table. A strong description acts as an organic ad — use every character.</p>
+          <div class="fix-block">
+            <div class="fix-label">Suggested replacement (153 chars)</div>
+            <code>&lt;meta name="description" content="Fine art photography by GoofiesEyes — portrait, landscape, editorial &amp; documentary work. Commission a session or browse prints. Seeing the world differently, one frame at a time." /&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">Title tag is good but keyword placement could be improved</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>Current title: <em>"GoofiesEyes — Fine Art Photography Portfolio"</em> (45 chars). Brand-first titles work once you have brand recognition — but unknown brands should lead with the descriptive keyword so people reading search results click before they know the brand. 45 chars is safely under the 60-char cutoff.</p>
+          <div class="fix-block">
+            <div class="fix-label">Suggested alternative</div>
+            <code>&lt;title&gt;Fine Art Photography Portfolio | GoofiesEyes&lt;/title&gt;
+&lt;!-- 48 chars — keyword-first, brand still present --&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">No robots meta tag — crawl intent not declared</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>There's no <code>&lt;meta name="robots"&gt;</code> tag. While Google indexes pages by default, explicitly declaring indexing intent is a best practice and prevents accidental noindex issues when staging environments inherit your code.</p>
+          <div class="fix-block">
+            <div class="fix-label">Add to &lt;head&gt;</div>
+            <code>&lt;meta name="robots" content="index, follow" /&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot medium"></span>
+          <span class="finding-title">Spec section shows placeholder zeroes — kills credibility</span>
+          <span class="badge medium">Medium</span>
+        </div>
+        <div class="finding-body">
+          <p>The "numbers that matter" section currently count-animates to 0 for all four metrics (Photographs, Years, Projects, Passion). This is worse than having no stat section — it signals to visitors (and indirectly to Google via user engagement signals) that the site is incomplete. Replace with real, honest numbers. Even small numbers are better than zero.</p>
+          <div class="fix-block">
+            <div class="fix-label">Example real numbers to use</div>
+            <code>Photographs: 1,200+   (or however many you've taken)
+Years:        3+        (years shooting)
+Projects:     47+       (sessions/commissions completed)
+Passion:      ∞         (this one can stay abstract)</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot medium"></span>
+          <span class="finding-title">No keyword in any anchor text for internal navigation</span>
+          <span class="badge medium">Medium</span>
+        </div>
+        <div class="finding-body">
+          <p>All internal navigation uses generic anchor text: "Work", "About", "Book a Session". While these are anchor links (not actual page links), the text still contributes to Google's understanding of the page's topic. Consider rewording at least one to include a keyword.</p>
+          <div class="fix-block">
+            <div class="fix-label">Suggested nav text updates</div>
+            <code>"Work"          → "Portfolio"  (more descriptive for photography)
+"About"         → "About Me"   (signals personal brand)
+"Book a Session" → keep        (transactional — clear CTA)</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding pass-row">
+        <div class="finding-header">
+          <span class="priority-dot low"></span>
+          <span class="finding-title">✓ Title tag length is within 60-char limit</span>
+          <span class="badge pass">Pass</span>
+        </div>
+        <div class="finding-body">
+          <p>"GoofiesEyes — Fine Art Photography Portfolio" is 45 characters — safely under the 60-char threshold where Google truncates with "…" in search results.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 3. CONTENT DEPTH & E-E-A-T -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--red-bg); color:var(--red)">✍️</div>
+      <h2>Content Depth &amp; E-E-A-T</h2>
+      <span class="section-score-badge" style="background:var(--red-bg); color:var(--red); border:1px solid var(--red-border)">20 / 100</span>
+    </div>
+
+    <div class="findings">
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">Site has no actual photography — only a 3D camera model</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>This is the most fundamental SEO issue for a photography portfolio. Google indexes <em>content</em> — for a photography site, that means actual photographs with descriptive file names, alt text, captions, and surrounding context. The current site shows only a scroll-animated 3D deconstruction of a camera, with no gallery of actual work.</p>
+          <p>Google Image Search alone drives enormous traffic for photographers. Without real images on the page, you're invisible in the channel most likely to drive clients to your door.</p>
+          <div class="fix-block">
+            <div class="fix-label">What to add</div>
+            <code>• A gallery section with 12–24 of your best photographs
+• Each image with: descriptive file name (e.g. "portrait-golden-hour-london.jpg")
+                   alt text (e.g. "Fine art portrait photography, golden hour London")
+• Captions with natural keyword use
+• Images in WebP format with JPEG fallback for page speed</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">No blog or multi-page content — single page cannot rank for multiple keywords</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>Photography SEO research consistently shows that photographers with 30+ indexed pages consistently outrank those with 5 or fewer, even if the portfolio itself is stronger. A blog lets you target long-tail keywords like "best portrait photography tips", "how to find the right photographer for your wedding", or "fine art print sizes explained" — all of which drive qualified traffic.</p>
+          <p>You don't need to post daily. 2–4 in-depth articles per month targeting specific questions your ideal client types into Google will compound over 6–12 months into meaningful organic traffic.</p>
+          <div class="fix-block">
+            <div class="fix-label">Recommended content structure</div>
+            <code>/                   → Portfolio homepage (current)
+/about              → Your story, your process, your gear, your philosophy
+/portfolio          → Gallery of work, filterable by type
+/blog               → SEO articles (2–4 per month)
+/contact            → Contact form + booking calendar
+/prints             → Fine art prints for sale (if applicable)</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">No "About" page — major E-E-A-T gap</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>Google's E-E-A-T framework (Experience, Expertise, Authoritativeness, Trustworthiness) heavily rewards sites where there's a clear human author behind the content. An About page that shares your photography background, your process, your location, and your style gives Google the signals it needs to classify you as an expert, not a content farm.</p>
+          <p>It also helps potential clients decide whether to book you — human connection converts. A short bio and a face behind the lens makes a measurable difference to enquiry rates.</p>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">No contact or booking form — "Book a Session" links go nowhere</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>All "Book a Session" and "View Gallery" CTAs link to <code>#cta</code>, which is a section with a CTA paragraph but no actual form, email link, or booking tool. A visitor who's ready to hire you has nowhere to go. This directly damages conversion rate, and high bounce rates from engaged-but-frustrated visitors are a negative engagement signal.</p>
+          <div class="fix-block">
+            <div class="fix-label">Quick fix (no backend needed)</div>
+            <code>&lt;!-- Replace the CTA button with a mailto link --&gt;
+&lt;a href="mailto:hello@goofieseyes.com" class="btn-primary"&gt;
+  Book a Session
+&lt;/a&gt;
+
+&lt;!-- Or embed a free Calendly/Tally.so form in the CTA section --&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot medium"></span>
+          <span class="finding-title">Feature card descriptions are creative but keyword-sparse</span>
+          <span class="badge medium">Medium</span>
+        </div>
+        <div class="finding-body">
+          <p>The six service cards (Portrait, Landscape, Editorial, Documentary, Fine Art Prints, Custom Commissions) have evocative copy but almost no searchable keywords. Someone searching "hire a portrait photographer" or "buy fine art prints online" would find nothing to confirm this page is relevant.</p>
+          <div class="fix-block">
+            <div class="fix-label">Example: enrich Portrait card naturally</div>
+            <code>Current: "Soul-first storytelling. I photograph people the way they actually are —
+complex, luminous, and entirely themselves."
+
+Improved: "Soul-first portrait photography. I capture people the way they actually are —
+complex, luminous, and entirely themselves. Available for personal portraits,
+professional headshots, and creative editorial sessions."</code>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 4. SCHEMA MARKUP -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--yellow-bg); color:var(--yellow)">🔖</div>
+      <h2>Schema Markup</h2>
+      <span class="section-score-badge" style="background:var(--yellow-bg); color:var(--yellow); border:1px solid var(--yellow-border)">35 / 100</span>
+    </div>
+
+    <div class="findings">
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">Schema is WebSite only — missing Person and LocalBusiness</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>The current JSON-LD only declares a <code>WebSite</code> type with name and URL. For a personal photography brand this misses two high-value schema types: <code>Person</code> (signals who the photographer is, enabling Knowledge Panel potential) and <code>LocalBusiness</code> (connects you to local Google Search and Maps results).</p>
+          <div class="fix-block">
+            <div class="fix-label">Replace the current JSON-LD block with this</div>
+            <code>&lt;script type="application/ld+json"&gt;
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "GoofiesEyes",
+    "url": "https://goofieseyes.vercel.app/",
+    "description": "Fine art photography portfolio — portrait, landscape, editorial, and documentary."
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "name": "GoofiesEyes",
+    "url": "https://goofieseyes.vercel.app/",
+    "jobTitle": "Fine Art Photographer",
+    "sameAs": [
+      "https://www.instagram.com/goofieseyes",
+      "https://www.behance.net/goofieseyes"
+    ]
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "PhotographAction",
+    "agent": { "@type": "Person", "name": "GoofiesEyes" },
+    "description": "Fine art portrait, landscape, editorial, and documentary photography."
+  }
+]
+&lt;/script&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot medium"></span>
+          <span class="finding-title">No ImageGallery or ImageObject schema for photographs</span>
+          <span class="badge medium">Medium</span>
+        </div>
+        <div class="finding-body">
+          <p>Once you add actual photographs to the site (see Content Depth section), wrap them in <code>ImageObject</code> schema. This gives Google metadata to display your images as rich results in Image Search, with your name and site as the source — driving brand recognition in search.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 5. SOCIAL / OPEN GRAPH -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--orange-bg); color:var(--orange)">📱</div>
+      <h2>Social / Open Graph</h2>
+      <span class="section-score-badge" style="background:var(--orange-bg); color:var(--orange); border:1px solid var(--orange-border)">45 / 100</span>
+    </div>
+
+    <div class="findings">
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot critical"></span>
+          <span class="finding-title">No og:image — links shared on social show no preview image</span>
+          <span class="badge critical">Critical</span>
+        </div>
+        <div class="finding-body">
+          <p>When your site is shared on Instagram DMs, Twitter/X, LinkedIn, WhatsApp, or iMessage, platforms pull the <code>og:image</code> to generate a preview card. Without it, the link appears as plain text — no image, no context. For a photography brand, sharing a link with no image preview is a missed brand impression every single time.</p>
+          <div class="fix-block">
+            <div class="fix-label">Steps to fix</div>
+            <code>1. Create a 1200×630px social card image (use Canva or Figma)
+   — Show one of your best photographs with the GoofiesEyes logo overlaid
+   — Export as og-image.jpg and place it in your site root
+
+2. Add to &lt;head&gt;:
+&lt;meta property="og:image" content="https://goofieseyes.vercel.app/og-image.jpg" /&gt;
+&lt;meta property="og:image:width" content="1200" /&gt;
+&lt;meta property="og:image:height" content="630" /&gt;
+&lt;meta property="og:image:alt" content="GoofiesEyes Fine Art Photography" /&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding">
+        <div class="finding-header">
+          <span class="priority-dot high"></span>
+          <span class="finding-title">No Twitter/X Card meta tags</span>
+          <span class="badge high">High</span>
+        </div>
+        <div class="finding-body">
+          <p>Twitter/X uses its own meta tag format alongside OG tags. Without Twitter Card tags, X may fall back to a text-only link embed even if og:image is present (behavior varies). Add Twitter Card tags explicitly.</p>
+          <div class="fix-block">
+            <div class="fix-label">Add to &lt;head&gt;</div>
+            <code>&lt;meta name="twitter:card" content="summary_large_image" /&gt;
+&lt;meta name="twitter:title" content="GoofiesEyes — Fine Art Photography" /&gt;
+&lt;meta name="twitter:description" content="Fine art photography — portrait, landscape, editorial &amp; documentary. Commission a session or browse prints." /&gt;
+&lt;meta name="twitter:image" content="https://goofieseyes.vercel.app/og-image.jpg" /&gt;</code>
+          </div>
+        </div>
+      </div>
+
+      <div class="finding pass-row">
+        <div class="finding-header">
+          <span class="priority-dot low"></span>
+          <span class="finding-title">✓ og:title, og:description, og:type present</span>
+          <span class="badge pass">Pass</span>
+        </div>
+        <div class="finding-body">
+          <p>The three core OG tags are in place. The og:description could be expanded (same recommendation as meta description — use 150–160 chars).</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 6. KEYWORD STRATEGY -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:var(--blue-bg); color:var(--blue)">🔍</div>
+      <h2>Keyword Strategy</h2>
+    </div>
+
+    <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:24px; line-height:1.65">
+      Based on the site's service types (portrait, landscape, editorial, documentary, fine art prints, custom commissions)
+      and the global audience goal, here are the recommended keyword tiers. These are informed by what photographer
+      websites targeting global audiences are currently ranking for.
+    </p>
+
+    <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius); overflow:hidden; margin-bottom:24px">
+      <table class="kw-table">
+        <thead>
+          <tr>
+            <th>Keyword</th>
+            <th>Intent</th>
+            <th>Priority</th>
+            <th>Where to use</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>fine art photography portfolio</strong></td>
+            <td><span class="kw-intent info">Info</span></td>
+            <td><span class="kw-priority p1">P1 — Primary</span></td>
+            <td>Title tag, H1, meta description, first paragraph</td>
+          </tr>
+          <tr>
+            <td><strong>fine art photographer</strong></td>
+            <td><span class="kw-intent trans">Trans</span></td>
+            <td><span class="kw-priority p1">P1 — Primary</span></td>
+            <td>H1, About page, schema, body copy</td>
+          </tr>
+          <tr>
+            <td><strong>portrait photographer</strong></td>
+            <td><span class="kw-intent trans">Trans</span></td>
+            <td><span class="kw-priority p2">P2 — Secondary</span></td>
+            <td>Feature card copy, H2/H3, services section</td>
+          </tr>
+          <tr>
+            <td><strong>editorial photography</strong></td>
+            <td><span class="kw-intent comm">Comm</span></td>
+            <td><span class="kw-priority p2">P2 — Secondary</span></td>
+            <td>Feature card, portfolio captions, blog posts</td>
+          </tr>
+          <tr>
+            <td><strong>buy fine art prints online</strong></td>
+            <td><span class="kw-intent trans">Trans</span></td>
+            <td><span class="kw-priority p2">P2 — Secondary</span></td>
+            <td>Fine Art Prints card, prints page (if created)</td>
+          </tr>
+          <tr>
+            <td><strong>documentary photography</strong></td>
+            <td><span class="kw-intent info">Info</span></td>
+            <td><span class="kw-priority p2">P2 — Secondary</span></td>
+            <td>Feature card, blog content</td>
+          </tr>
+          <tr>
+            <td><strong>commission a photographer</strong></td>
+            <td><span class="kw-intent trans">Trans</span></td>
+            <td><span class="kw-priority p3">P3 — Long-tail</span></td>
+            <td>CTA section, contact page, blog post</td>
+          </tr>
+          <tr>
+            <td><strong>photography that tells a story</strong></td>
+            <td><span class="kw-intent info">Info</span></td>
+            <td><span class="kw-priority p3">P3 — Long-tail</span></td>
+            <td>Hero subtitle, about page</td>
+          </tr>
+          <tr>
+            <td><strong>landscape photography prints for sale</strong></td>
+            <td><span class="kw-intent trans">Trans</span></td>
+            <td><span class="kw-priority p3">P3 — Long-tail</span></td>
+            <td>Prints page, portfolio captions</td>
+          </tr>
+          <tr>
+            <td><strong>book a portrait session</strong></td>
+            <td><span class="kw-intent trans">Trans</span></td>
+            <td><span class="kw-priority p3">P3 — Long-tail</span></td>
+            <td>Contact page, booking CTA</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="finding" style="border-color:var(--blue-border, rgba(59,130,246,0.2))">
+      <div class="finding-header">
+        <span class="priority-dot medium" style="background:var(--blue)"></span>
+        <span class="finding-title">LSI / Semantic Keywords to weave into body copy</span>
+        <span class="badge" style="background:var(--blue-bg);border:1px solid rgba(59,130,246,0.2);color:var(--blue)">Semantic</span>
+      </div>
+      <div class="finding-body">
+        <p>These terms appear across top-ranking photography portfolio sites and signal topical depth to Google. Incorporate them naturally — 1–2 times each across the site:</p>
+        <p style="margin-top:8px; font-family:'JetBrains Mono',monospace; font-size:0.78rem; line-height:2; color:var(--text-secondary)">
+          visual storytelling &nbsp;&bull;&nbsp; photography session &nbsp;&bull;&nbsp; image composition &nbsp;&bull;&nbsp;
+          golden hour &nbsp;&bull;&nbsp; natural light &nbsp;&bull;&nbsp; studio photography &nbsp;&bull;&nbsp;
+          high resolution prints &nbsp;&bull;&nbsp; limited edition prints &nbsp;&bull;&nbsp; photography commission &nbsp;&bull;&nbsp;
+          creative direction &nbsp;&bull;&nbsp; long-form visual essay &nbsp;&bull;&nbsp; photojournalism &nbsp;&bull;&nbsp;
+          candid photography &nbsp;&bull;&nbsp; colour grading &nbsp;&bull;&nbsp; post-processing &nbsp;&bull;&nbsp;
+          RAW editing &nbsp;&bull;&nbsp; photo gallery &nbsp;&bull;&nbsp; photography portfolio &nbsp;&bull;&nbsp;
+          print on demand &nbsp;&bull;&nbsp; gallery-quality prints &nbsp;&bull;&nbsp; framed photography
+        </p>
+      </div>
+    </div>
+
+  </div>
+
+  <hr class="divider">
+
+  <!-- ══════════════════════════════════════════════ -->
+  <!-- 7. PRIORITISED ACTION PLAN -->
+  <!-- ══════════════════════════════════════════════ -->
+  <div class="audit-section">
+    <div class="section-head">
+      <div class="section-icon" style="background:rgba(99,102,241,0.12); color:var(--accent)">🚀</div>
+      <h2>Prioritised Action Plan</h2>
+    </div>
+
+    <p style="color:var(--text-secondary); font-size:0.88rem; margin-bottom:28px">
+      Fix these in order. The first four are critical and take under 30 minutes combined — they'll make the biggest
+      immediate difference to how Google interprets the site.
+    </p>
+
+    <div class="action-plan">
+
+      <div class="action-item" style="border-left:3px solid var(--red)">
+        <span class="action-num">1</span>
+        <div class="action-body">
+          <h4>Fix the canonical URL &amp; OG URL</h4>
+          <p>Change canonical from <code>goofieseyes.com</code> to <code>goofieseyes.vercel.app</code>. Fix og:url to match. This is a 2-minute code change that could currently be sending all your link equity to a domain nobody owns.</p>
+        </div>
+        <span class="action-time">~5 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--red)">
+        <span class="action-num">2</span>
+        <div class="action-body">
+          <h4>Create robots.txt and sitemap.xml</h4>
+          <p>Two small files that Google expects. Copy the exact code from the Technical SEO section above, create the files in your project root, and push to GitHub. Vercel will deploy instantly.</p>
+        </div>
+        <span class="action-time">~10 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--red)">
+        <span class="action-num">3</span>
+        <div class="action-body">
+          <h4>Fix the duplicate H1 — demote one to H2</h4>
+          <p>Find the two H1 tags in index.html, keep one as H1 (ideally "GoofiesEyes — Fine Art Photography"), convert the other to a visually styled span or H2. 5-minute fix.</p>
+        </div>
+        <span class="action-time">~5 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--orange)">
+        <span class="action-num">4</span>
+        <div class="action-body">
+          <h4>Add og:image, Twitter Card tags, robots meta, &amp; expand meta description</h4>
+          <p>Create a 1200×630px social card, upload it, and add the missing head tags as detailed in the Social and On-Page sections. This unblocks proper social sharing — critical for a visual brand.</p>
+        </div>
+        <span class="action-time">~30 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--orange)">
+        <span class="action-num">5</span>
+        <div class="action-body">
+          <h4>Upgrade the schema — add Person + sameAs social links</h4>
+          <p>Replace the minimal WebSite schema with the multi-type block from the Schema section. Add your real Instagram/Behance/social URLs in sameAs to strengthen Google's understanding of your digital presence.</p>
+        </div>
+        <span class="action-time">~15 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--orange)">
+        <span class="action-num">6</span>
+        <div class="action-body">
+          <h4>Replace the zero stats with real numbers</h4>
+          <p>Update the four count-up target values in the JS to real, honest numbers. Even if you've only shot 50 sessions, "50+ Sessions" is infinitely more credible than 0.</p>
+        </div>
+        <span class="action-time">~10 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--yellow)">
+        <span class="action-num">7</span>
+        <div class="action-body">
+          <h4>Add a real photograph gallery section with alt text</h4>
+          <p>This is the single biggest long-term SEO move. Add 12–24 of your actual photographs with descriptive filenames and alt text. This unlocks Google Image Search traffic, strengthens E-E-A-T, and gives clients proof of your work before they enquire.</p>
+        </div>
+        <span class="action-time">~2–4 hrs</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--yellow)">
+        <span class="action-num">8</span>
+        <div class="action-body">
+          <h4>Add a working contact method to the CTA section</h4>
+          <p>At minimum, add a mailto link. Ideally embed a free form (Tally.so, Typeform, Google Forms) so visitors can enquire without leaving the site. This directly converts traffic into business.</p>
+        </div>
+        <span class="action-time">~30 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--accent)">
+        <span class="action-num">9</span>
+        <div class="action-body">
+          <h4>Submit to Google Search Console</h4>
+          <p>Go to <a href="https://search.google.com/search-console" style="color:var(--accent)" target="_blank">search.google.com/search-console</a>, verify ownership via DNS TXT or HTML file, and submit your sitemap URL. This is how you get into Google's index intentionally and fast, rather than waiting to be crawled.</p>
+        </div>
+        <span class="action-time">~15 min</span>
+      </div>
+
+      <div class="action-item" style="border-left:3px solid var(--accent)">
+        <span class="action-num">10</span>
+        <div class="action-body">
+          <h4>Start an About page and one blog post</h4>
+          <p>A simple About page with your story, your process, and your style adds significant E-E-A-T signals. One blog post targeting "fine art photography vs commercial photography" or "how to commission a portrait photographer" starts you on the content ladder that compounds over 12–24 months into real organic traffic.</p>
+        </div>
+        <span class="action-time">~3–5 hrs</span>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- ── FOOTER ── -->
+  <div class="report-footer">
+    <p>SEO Audit for <strong>GoofiesEyes</strong> &mdash; goofieseyes.vercel.app &mdash; March 2026</p>
+    <p style="margin-top:6px">Generated by Claude Code &bull; Overall score: 34/100 &bull; 10 action items identified</p>
+  </div>
+
+</div>
+
+<script>
+  // Animate score counter
+  const scoreEl = document.getElementById('scoreNum');
+  const target = 34;
+  let current = 0;
+  const step = () => {
+    current = Math.min(target, current + 2);
+    scoreEl.textContent = current;
+    if (current < target) requestAnimationFrame(step);
+  };
+  setTimeout(() => requestAnimationFrame(step), 400);
+</script>
+
+</body>
+</html>

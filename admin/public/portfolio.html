@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Portfolios — GoofiesEyes Admin</title>
+  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-sidebar: #0f0f13;
+      --bg-main: #16161e;
+      --bg-card: rgba(255,255,255,0.04);
+      --border-card: rgba(255,255,255,0.08);
+      --accent: #7c5cbf;
+      --accent-hover: #9370db;
+      --text: #e8e8ed;
+      --text-muted: #888899;
+      --success: #4caf7d;
+      --warning: #e6a817;
+      --danger: #e05c5c;
+      --sidebar-width: 220px;
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* ── Nav Sidebar ── */
+    .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; border-right: 1px solid var(--border-card); }
+    .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border-card); }
+    .sidebar-logo h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .sidebar-logo span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,92,191,0.08); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-card); font-size: 11px; color: var(--text-muted); }
+
+    /* ── Main layout: left panel + right panel ── */
+    .main { margin-left: var(--sidebar-width); flex: 1; display: flex; min-height: 100vh; }
+
+    /* Left panel — portfolio list */
+    .panel-left {
+      width: 280px;
+      flex-shrink: 0;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-card);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .panel-header {
+      padding: 20px;
+      border-bottom: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .panel-header h2 { font-size: 16px; font-weight: 700; }
+
+    .portfolio-list { flex: 1; overflow-y: auto; padding: 8px 0; }
+
+    .portfolio-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px 20px;
+      cursor: pointer;
+      font-size: 14px;
+      color: var(--text-muted);
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .portfolio-item:hover { background: rgba(255,255,255,0.04); color: var(--text); }
+    .portfolio-item.active { background: rgba(124,92,191,0.08); color: var(--accent); border-left-color: var(--accent); }
+
+    .portfolio-item .port-icon { font-size: 18px; flex-shrink: 0; }
+    .portfolio-item .port-info { min-width: 0; }
+    .portfolio-item .port-name { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .portfolio-item .port-count { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+    .new-portfolio-btn {
+      margin: 12px 16px;
+      padding: 10px;
+      background: rgba(124,92,191,0.12);
+      border: 1px dashed rgba(124,92,191,0.4);
+      border-radius: 8px;
+      color: var(--accent);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-align: center;
+      transition: all 0.15s;
+    }
+
+    .new-portfolio-btn:hover { background: rgba(124,92,191,0.2); }
+
+    /* Right panel — portfolio editor */
+    .panel-right { flex: 1; padding: 32px 36px; overflow-y: auto; }
+
+    .page-header { margin-bottom: 28px; }
+    .page-header h2 { font-size: 24px; font-weight: 700; }
+    .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    /* Empty state */
+    .empty-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 60vh;
+      text-align: center;
+      color: var(--text-muted);
+    }
+    .empty-panel .big-icon { font-size: 56px; margin-bottom: 16px; }
+    .empty-panel p { font-size: 14px; margin-top: 6px; }
+
+    /* Portfolio meta editor */
+    .meta-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 20px 24px;
+      margin-bottom: 24px;
+    }
+
+    .meta-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .meta-card-header h3 { font-size: 15px; font-weight: 600; }
+
+    .meta-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+    }
+
+    .form-field { display: flex; flex-direction: column; gap: 5px; }
+    .form-field label { font-size: 12px; color: var(--text-muted); font-weight: 500; text-transform: uppercase; letter-spacing: 0.5px; }
+    .form-field input, .form-field textarea, .form-field select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 8px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .form-field input:focus, .form-field textarea:focus { border-color: var(--accent); }
+    .form-field textarea { resize: vertical; min-height: 64px; }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 7px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-danger { background: rgba(224,92,92,0.15); color: var(--danger); border: 1px solid rgba(224,92,92,0.3); }
+    .btn-danger:hover { background: rgba(224,92,92,0.25); }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border-card); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .btn-sm { padding: 5px 11px; font-size: 12px; }
+
+    /* Photo grid */
+    .photos-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .photos-header h3 { font-size: 15px; font-weight: 600; }
+    .photos-header p { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+      gap: 12px;
+    }
+
+    .photo-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+      cursor: grab;
+      transition: border-color 0.15s;
+    }
+
+    .photo-card:hover { border-color: rgba(124,92,191,0.4); }
+    .photo-card.sortable-ghost { opacity: 0.3; }
+    .photo-card.sortable-drag { cursor: grabbing; box-shadow: 0 8px 24px rgba(0,0,0,0.4); }
+
+    .photo-card img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-card .card-footer {
+      padding: 6px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 4px;
+    }
+
+    .photo-card .card-name {
+      font-size: 10px;
+      color: var(--text-muted);
+      flex: 1;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .photo-card .remove-btn {
+      background: none;
+      border: none;
+      color: var(--danger);
+      cursor: pointer;
+      font-size: 13px;
+      padding: 2px 4px;
+      opacity: 0.6;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+
+    .photo-card .remove-btn:hover { opacity: 1; }
+
+    .drag-handle {
+      position: absolute;
+      top: 6px;
+      left: 6px;
+      background: rgba(0,0,0,0.5);
+      border-radius: 4px;
+      padding: 2px 5px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.5);
+      cursor: grab;
+      user-select: none;
+    }
+
+    .cover-badge {
+      position: absolute;
+      top: 6px;
+      right: 6px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .set-cover-btn {
+      display: block;
+      width: 100%;
+      background: none;
+      border: none;
+      border-top: 1px solid var(--border-card);
+      color: var(--text-muted);
+      font-size: 10px;
+      padding: 5px;
+      cursor: pointer;
+      transition: color 0.15s;
+      text-align: center;
+    }
+
+    .set-cover-btn:hover { color: var(--accent); }
+
+    .empty-photos {
+      grid-column: 1 / -1;
+      text-align: center;
+      padding: 40px;
+      color: var(--text-muted);
+      font-size: 13px;
+      border: 1px dashed var(--border-card);
+      border-radius: 8px;
+    }
+
+    .empty-photos a { color: var(--accent); }
+
+    /* Modal */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: #1e1e28;
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      padding: 28px;
+      width: 420px;
+      max-width: 90vw;
+    }
+
+    .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
+    .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px; }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #2a2a3a;
+      border: 1px solid var(--border-card);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s;
+      z-index: 300;
+      pointer-events: none;
+    }
+
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(76,175,125,0.4); color: var(--success); }
+    .toast.error { border-color: rgba(224,92,92,0.4); color: var(--danger); }
+  </style>
+</head>
+<body>
+
+<!-- Nav Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GoofiesEyes</h1>
+    <span>Admin Portal</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+    <a href="upload.html" class="nav-item"><span class="icon">📷</span> Upload Photos</a>
+    <a href="portfolio.html" class="nav-item active"><span class="icon">🖼️</span> Portfolios</a>
+    <a href="journal.html" class="nav-item"><span class="icon">✍️</span> Journal</a>
+    <a href="prints.html" class="nav-item"><span class="icon">🖨️</span> Prints</a>
+  </nav>
+  <div class="sidebar-footer">localhost:3000</div>
+</aside>
+
+<!-- Main -->
+<div class="main">
+
+  <!-- Portfolio list panel -->
+  <div class="panel-left">
+    <div class="panel-header">
+      <h2>Portfolios</h2>
+    </div>
+    <div class="portfolio-list" id="portfolio-list">
+      <div style="padding:20px;font-size:13px;color:var(--text-muted)">Loading…</div>
+    </div>
+    <div class="new-portfolio-btn" onclick="openNewModal()">+ New Portfolio</div>
+  </div>
+
+  <!-- Editor panel -->
+  <div class="panel-right" id="panel-right">
+    <div class="empty-panel" id="empty-panel">
+      <div class="big-icon">🖼️</div>
+      <h3>Select a portfolio</h3>
+      <p>Choose one from the left, or create a new one</p>
+    </div>
+
+    <div id="editor-panel" style="display:none">
+      <!-- Meta editor -->
+      <div class="meta-card">
+        <div class="meta-card-header">
+          <h3>Portfolio Details</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-primary btn-sm" onclick="savePortfolio()">Save Changes</button>
+            <button class="btn btn-danger btn-sm" onclick="deletePortfolio()">Delete</button>
+          </div>
+        </div>
+        <div class="meta-grid">
+          <div class="form-field">
+            <label>Name</label>
+            <input type="text" id="port-name" placeholder="e.g. Landscape" />
+          </div>
+          <div class="form-field">
+            <label>Slug (URL)</label>
+            <input type="text" id="port-slug" placeholder="e.g. landscape" />
+          </div>
+          <div class="form-field" style="grid-column:1/-1">
+            <label>Description</label>
+            <textarea id="port-description" placeholder="A short description for this portfolio…"></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- Photos -->
+      <div class="photos-header">
+        <div>
+          <h3>Photos <span id="photo-count" style="color:var(--text-muted);font-weight:400;font-size:13px"></span></h3>
+          <p>Drag to reorder · Click ✕ to remove from portfolio</p>
+        </div>
+        <a href="upload.html" class="btn btn-secondary btn-sm">+ Add Photos</a>
+      </div>
+
+      <div class="photo-grid" id="photo-grid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- New Portfolio Modal -->
+<div class="modal-overlay" id="new-modal">
+  <div class="modal">
+    <h3>New Portfolio</h3>
+    <div style="display:flex;flex-direction:column;gap:14px">
+      <div class="form-field">
+        <label>Name</label>
+        <input type="text" id="new-name" placeholder="e.g. Street Photography" oninput="autoSlug()" />
+      </div>
+      <div class="form-field">
+        <label>Slug (URL path)</label>
+        <input type="text" id="new-slug" placeholder="e.g. street-photography" />
+      </div>
+      <div class="form-field">
+        <label>Description</label>
+        <textarea id="new-desc" placeholder="Optional short description…"></textarea>
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeNewModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="createPortfolio()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let portfoliosData = { portfolios: [] };
+  let allPhotos = [];
+  let activePortfolioId = null;
+  let sortable = null;
+
+  function slugify(s) {
+    return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  async function loadData() {
+    try {
+      const [portRes, photoRes] = await Promise.all([
+        fetch('/api/portfolios'),
+        fetch('/api/photos')
+      ]);
+      portfoliosData = await portRes.json();
+      const photoData = await photoRes.json();
+      allPhotos = photoData.photos || [];
+      renderPortfolioList();
+    } catch (e) {
+      showToast('Failed to load data', 'error');
+    }
+  }
+
+  function renderPortfolioList() {
+    const list = document.getElementById('portfolio-list');
+    const ports = portfoliosData.portfolios || [];
+
+    if (ports.length === 0) {
+      list.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--text-muted);text-align:center">No portfolios yet</div>';
+      return;
+    }
+
+    list.innerHTML = ports.map(p => `
+      <div class="portfolio-item ${p.id === activePortfolioId ? 'active' : ''}" onclick="selectPortfolio('${p.id}')">
+        <span class="port-icon">🖼️</span>
+        <div class="port-info">
+          <div class="port-name">${p.name}</div>
+          <div class="port-count">${(p.photos || []).length} photo${(p.photos || []).length !== 1 ? 's' : ''}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function selectPortfolio(id) {
+    activePortfolioId = id;
+    renderPortfolioList();
+
+    const port = portfoliosData.portfolios.find(p => p.id === id);
+    if (!port) return;
+
+    document.getElementById('empty-panel').style.display = 'none';
+    document.getElementById('editor-panel').style.display = 'block';
+
+    document.getElementById('port-name').value = port.name || '';
+    document.getElementById('port-slug').value = port.slug || '';
+    document.getElementById('port-description').value = port.description || '';
+
+    renderPhotoGrid(port);
+  }
+
+  function renderPhotoGrid(port) {
+    const grid = document.getElementById('photo-grid');
+    const photos = port.photos || [];
+
+    document.getElementById('photo-count').textContent = `(${photos.length})`;
+
+    if (photos.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-photos">
+          No photos in this portfolio yet.<br>
+          <a href="upload.html">Upload photos</a> and assign them here.
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = photos.map((photo, i) => `
+      <div class="photo-card" data-filename="${photo.filename}">
+        <div class="drag-handle">⠿</div>
+        ${photo.filename === port.cover ? '<div class="cover-badge">Cover</div>' : ''}
+        <img src="/content/photos/${photo.filename}" alt="${photo.alt || photo.filename}" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.05)';this.style.height='90px'" />
+        <button class="set-cover-btn" onclick="setCover('${photo.filename}')">Set as cover</button>
+        <div class="card-footer">
+          <span class="card-name">${photo.title || photo.filename}</span>
+          <button class="remove-btn" onclick="removePhoto('${photo.filename}')" title="Remove from portfolio">✕</button>
+        </div>
+      </div>
+    `).join('');
+
+    // Destroy old sortable
+    if (sortable) sortable.destroy();
+
+    sortable = Sortable.create(grid, {
+      animation: 150,
+      ghostClass: 'sortable-ghost',
+      dragClass: 'sortable-drag',
+      handle: '.drag-handle',
+      onEnd: () => {
+        const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+        if (!port) return;
+
+        const newOrder = Array.from(grid.querySelectorAll('.photo-card'))
+          .map(el => el.dataset.filename);
+
+        port.photos = newOrder.map((fn, i) => {
+          const p = port.photos.find(ph => ph.filename === fn);
+          return p ? { ...p, order: i + 1 } : null;
+        }).filter(Boolean);
+      }
+    });
+  }
+
+  function setCover(filename) {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    port.cover = filename;
+    renderPhotoGrid(port);
+  }
+
+  function removePhoto(filename) {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    if (!confirm(`Remove "${filename}" from this portfolio? (Photo stays on disk.)`)) return;
+    port.photos = (port.photos || []).filter(p => p.filename !== filename);
+    if (port.cover === filename) port.cover = (port.photos[0] || {}).filename || '';
+    renderPhotoGrid(port);
+    renderPortfolioList();
+  }
+
+  async function savePortfolio() {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+
+    port.name = document.getElementById('port-name').value.trim();
+    port.slug = document.getElementById('port-slug').value.trim() || slugify(port.name);
+    port.description = document.getElementById('port-description').value.trim();
+
+    try {
+      await fetch('/api/portfolios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(portfoliosData)
+      });
+      renderPortfolioList();
+      showToast('Portfolio saved!', 'success');
+    } catch (e) {
+      showToast('Save failed', 'error');
+    }
+  }
+
+  async function deletePortfolio() {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    if (!confirm(`Delete portfolio "${port.name}"? Photos on disk will NOT be deleted.`)) return;
+
+    portfoliosData.portfolios = portfoliosData.portfolios.filter(p => p.id !== activePortfolioId);
+    activePortfolioId = null;
+
+    document.getElementById('editor-panel').style.display = 'none';
+    document.getElementById('empty-panel').style.display = 'flex';
+
+    try {
+      await fetch('/api/portfolios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(portfoliosData)
+      });
+      renderPortfolioList();
+      showToast('Portfolio deleted', 'success');
+    } catch (e) {
+      showToast('Delete failed', 'error');
+    }
+  }
+
+  // New portfolio modal
+  function openNewModal() {
+    document.getElementById('new-name').value = '';
+    document.getElementById('new-slug').value = '';
+    document.getElementById('new-desc').value = '';
+    document.getElementById('new-modal').classList.add('open');
+    setTimeout(() => document.getElementById('new-name').focus(), 50);
+  }
+
+  function closeNewModal() {
+    document.getElementById('new-modal').classList.remove('open');
+  }
+
+  function autoSlug() {
+    const name = document.getElementById('new-name').value;
+    document.getElementById('new-slug').value = slugify(name);
+  }
+
+  async function createPortfolio() {
+    const name = document.getElementById('new-name').value.trim();
+    if (!name) return alert('Name is required');
+
+    const slug = document.getElementById('new-slug').value.trim() || slugify(name);
+    const description = document.getElementById('new-desc').value.trim();
+    const id = slug + '-' + Date.now();
+
+    const newPort = { id, slug, name, description, cover: '', photos: [] };
+    portfoliosData.portfolios.push(newPort);
+
+    try {
+      await fetch('/api/portfolios', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(portfoliosData)
+      });
+      closeNewModal();
+      renderPortfolioList();
+      selectPortfolio(id);
+      showToast(`Portfolio "${name}" created`, 'success');
+    } catch (e) {
+      portfoliosData.portfolios.pop();
+      showToast('Create failed', 'error');
+    }
+  }
+
+  // Close modal on overlay click
+  document.getElementById('new-modal').addEventListener('click', (e) => {
+    if (e.target === document.getElementById('new-modal')) closeNewModal();
+  });
+
+  // Keyboard shortcut: Escape closes modal
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') closeNewModal();
+    if (e.key === 's' && (e.ctrlKey || e.metaKey) && activePortfolioId) {
+      e.preventDefault();
+      savePortfolio();
+    }
+  });
+
+  loadData();
+</script>
+</body>
+</html>

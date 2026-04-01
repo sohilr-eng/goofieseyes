@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Journal — GoofiesEyes Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-sidebar: #0f0f13;
+      --bg-main: #16161e;
+      --bg-card: rgba(255,255,255,0.04);
+      --border-card: rgba(255,255,255,0.08);
+      --accent: #7c5cbf;
+      --accent-hover: #9370db;
+      --text: #e8e8ed;
+      --text-muted: #888899;
+      --success: #4caf7d;
+      --warning: #e6a817;
+      --danger: #e05c5c;
+      --sidebar-width: 220px;
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--text); display: flex; min-height: 100vh; }
+
+    /* Nav sidebar */
+    .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; border-right: 1px solid var(--border-card); }
+    .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border-card); }
+    .sidebar-logo h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .sidebar-logo span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,92,191,0.08); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-card); font-size: 11px; color: var(--text-muted); }
+
+    /* Two-panel layout */
+    .main { margin-left: var(--sidebar-width); flex: 1; display: flex; min-height: 100vh; }
+
+    /* Left: post list */
+    .panel-left {
+      width: 300px;
+      flex-shrink: 0;
+      background: var(--bg-sidebar);
+      border-right: 1px solid var(--border-card);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: sticky;
+      top: 0;
+    }
+
+    .panel-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .panel-header h2 { font-size: 16px; font-weight: 700; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 14px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-danger { background: rgba(224,92,92,0.15); color: var(--danger); border: 1px solid rgba(224,92,92,0.3); }
+    .btn-danger:hover { background: rgba(224,92,92,0.25); }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border-card); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+    .btn-success { background: rgba(76,175,125,0.15); color: var(--success); border: 1px solid rgba(76,175,125,0.3); }
+    .btn-success:hover { background: rgba(76,175,125,0.25); }
+    .btn-lg { padding: 10px 20px; font-size: 14px; }
+
+    .post-list { flex: 1; overflow-y: auto; }
+
+    .post-item {
+      padding: 14px 20px;
+      cursor: pointer;
+      border-bottom: 1px solid var(--border-card);
+      border-left: 3px solid transparent;
+      transition: all 0.15s;
+    }
+
+    .post-item:hover { background: rgba(255,255,255,0.04); }
+    .post-item.active { background: rgba(124,92,191,0.08); border-left-color: var(--accent); }
+
+    .post-item-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .post-item-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .post-item-date { font-size: 11px; color: var(--text-muted); }
+
+    .badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .badge-published { background: rgba(76,175,125,0.2); color: var(--success); }
+    .badge-draft { background: rgba(230,168,23,0.2); color: var(--warning); }
+
+    /* Right: editor */
+    .panel-right { flex: 1; display: flex; flex-direction: column; min-height: 100vh; }
+
+    .editor-toolbar {
+      padding: 14px 24px;
+      border-bottom: 1px solid var(--border-card);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: var(--bg-sidebar);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    .toolbar-left { display: flex; align-items: center; gap: 8px; }
+    .toolbar-right { display: flex; align-items: center; gap: 8px; }
+
+    .post-title-input {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 20px;
+      font-weight: 700;
+      outline: none;
+      flex: 1;
+      min-width: 200px;
+    }
+
+    .post-title-input::placeholder { color: var(--text-muted); }
+
+    /* Meta bar */
+    .meta-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 10px 24px;
+      border-bottom: 1px solid var(--border-card);
+      background: rgba(255,255,255,0.02);
+      flex-wrap: wrap;
+    }
+
+    .meta-field { display: flex; align-items: center; gap: 8px; }
+    .meta-field label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+    .meta-field input, .meta-field select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 12px;
+      padding: 5px 9px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+    }
+    .meta-field input:focus, .meta-field select:focus { border-color: var(--accent); }
+    .meta-field select option { background: #1e1e28; }
+    .meta-field input[type="date"] { color-scheme: dark; }
+
+    /* Markdown editor */
+    .editor-body { flex: 1; display: flex; flex-direction: column; }
+
+    .editor-area {
+      flex: 1;
+      background: none;
+      border: none;
+      color: var(--text);
+      font-family: 'Courier New', 'Consolas', monospace;
+      font-size: 14px;
+      line-height: 1.8;
+      padding: 28px 36px;
+      outline: none;
+      resize: none;
+      min-height: 400px;
+    }
+
+    .editor-area::placeholder { color: var(--text-muted); }
+
+    /* Cover photo picker */
+    .cover-picker {
+      padding: 0 24px 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .cover-label { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+
+    .cover-select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 5px;
+      color: var(--text);
+      font-size: 12px;
+      padding: 5px 9px;
+      outline: none;
+      flex: 1;
+      max-width: 300px;
+    }
+    .cover-select option { background: #1e1e28; }
+
+    .cover-preview { width: 60px; height: 40px; object-fit: cover; border-radius: 4px; display: none; }
+
+    /* Empty state */
+    .empty-editor {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: var(--text-muted);
+      padding: 40px;
+    }
+    .empty-editor .big-icon { font-size: 56px; margin-bottom: 16px; }
+    .empty-editor h3 { font-size: 20px; font-weight: 700; margin-bottom: 8px; color: var(--text); }
+    .empty-editor p { font-size: 14px; }
+
+    /* Word count */
+    .word-count {
+      padding: 8px 24px;
+      font-size: 11px;
+      color: var(--text-muted);
+      border-top: 1px solid var(--border-card);
+      text-align: right;
+    }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #2a2a3a;
+      border: 1px solid var(--border-card);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s;
+      z-index: 300;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(76,175,125,0.4); color: var(--success); }
+    .toast.error { border-color: rgba(224,92,92,0.4); color: var(--danger); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GoofiesEyes</h1>
+    <span>Admin Portal</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+    <a href="upload.html" class="nav-item"><span class="icon">📷</span> Upload Photos</a>
+    <a href="portfolio.html" class="nav-item"><span class="icon">🖼️</span> Portfolios</a>
+    <a href="journal.html" class="nav-item active"><span class="icon">✍️</span> Journal</a>
+    <a href="prints.html" class="nav-item"><span class="icon">🖨️</span> Prints</a>
+  </nav>
+  <div class="sidebar-footer">localhost:3000</div>
+</aside>
+
+<div class="main">
+
+  <!-- Post list -->
+  <div class="panel-left">
+    <div class="panel-header">
+      <h2>Posts</h2>
+      <button class="btn btn-primary" onclick="newPost()">+ New</button>
+    </div>
+    <div class="post-list" id="post-list">
+      <div style="padding:20px;font-size:13px;color:var(--text-muted)">Loading…</div>
+    </div>
+  </div>
+
+  <!-- Editor -->
+  <div class="panel-right" id="panel-right">
+
+    <!-- Empty state -->
+    <div class="empty-editor" id="empty-editor">
+      <div class="big-icon">✍️</div>
+      <h3>No post selected</h3>
+      <p>Pick a post from the list, or create a new one</p>
+      <button class="btn btn-primary btn-lg" onclick="newPost()" style="margin-top:20px">Write a Post</button>
+    </div>
+
+    <!-- Editor form (hidden until post selected) -->
+    <div id="editor-form" style="display:none;flex:1;display:none;flex-direction:column">
+
+      <!-- Title + actions toolbar -->
+      <div class="editor-toolbar">
+        <input type="text" class="post-title-input" id="post-title" placeholder="Post title…" />
+        <div class="toolbar-right">
+          <button class="btn btn-danger" id="delete-btn" onclick="deletePost()" style="display:none">Delete</button>
+          <button class="btn btn-secondary" onclick="toggleStatus()"><span id="status-btn-label">Draft</span></button>
+          <button class="btn btn-primary" onclick="savePost()">Save</button>
+        </div>
+      </div>
+
+      <!-- Meta bar -->
+      <div class="meta-bar">
+        <div class="meta-field">
+          <label>Date</label>
+          <input type="date" id="post-date" />
+        </div>
+        <div class="meta-field">
+          <label>Tags</label>
+          <input type="text" id="post-tags" placeholder="landscape, travel, film" style="width:220px" />
+        </div>
+        <div class="meta-field">
+          <label>Slug</label>
+          <input type="text" id="post-slug" placeholder="auto-generated" style="width:180px" />
+        </div>
+      </div>
+
+      <!-- Cover photo -->
+      <div class="cover-picker">
+        <span class="cover-label">Cover Photo</span>
+        <select class="cover-select" id="cover-select" onchange="updateCoverPreview()">
+          <option value="">— None —</option>
+        </select>
+        <img class="cover-preview" id="cover-preview" alt="cover preview" />
+      </div>
+
+      <!-- Markdown body -->
+      <div class="editor-body">
+        <textarea class="editor-area" id="editor-area" placeholder="Write your post in Markdown…
+
+# Heading
+**bold**, *italic*, [link](url)
+
+![alt text](photo-filename.webp)" oninput="updateWordCount()"></textarea>
+      </div>
+
+      <div class="word-count" id="word-count">0 words</div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  let posts = [];
+  let allPhotos = [];
+  let currentSlug = null;   // null = new post
+  let currentStatus = 'draft';
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  function slugify(s) {
+    return s.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+  }
+
+  async function loadPosts() {
+    try {
+      const [postsRes, photosRes] = await Promise.all([
+        fetch('/api/posts'),
+        fetch('/api/photos')
+      ]);
+      const postsData = await postsRes.json();
+      const photosData = await photosRes.json();
+      posts = postsData.posts || [];
+      allPhotos = photosData.photos || [];
+      renderPostList();
+      populateCoverSelect();
+    } catch (e) {
+      showToast('Failed to load posts', 'error');
+    }
+  }
+
+  function renderPostList() {
+    const list = document.getElementById('post-list');
+    if (posts.length === 0) {
+      list.innerHTML = '<div style="padding:20px;font-size:13px;color:var(--text-muted);text-align:center">No posts yet</div>';
+      return;
+    }
+
+    list.innerHTML = posts.map(p => `
+      <div class="post-item ${p.slug === currentSlug ? 'active' : ''}" onclick="loadPost('${p.slug}')">
+        <div class="post-item-title">${p.title}</div>
+        <div class="post-item-meta">
+          <span class="post-item-date">${p.date || 'No date'}</span>
+          <span class="badge badge-${p.status || 'draft'}">${p.status || 'draft'}</span>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  function populateCoverSelect() {
+    const sel = document.getElementById('cover-select');
+    const current = sel.value;
+    sel.innerHTML = '<option value="">— None —</option>' +
+      allPhotos.map(p => `<option value="${p.filename}">${p.title || p.filename}</option>`).join('');
+    sel.value = current;
+  }
+
+  async function loadPost(slug) {
+    try {
+      const res = await fetch(`/api/posts/${slug}`);
+      if (!res.ok) throw new Error('Not found');
+      const data = await res.json();
+      const fm = data.frontmatter || {};
+
+      currentSlug = slug;
+      currentStatus = fm.status || 'draft';
+
+      showEditor(true);
+      renderPostList();
+
+      document.getElementById('post-title').value = fm.title || '';
+      document.getElementById('post-date').value = fm.date || '';
+      document.getElementById('post-tags').value = (fm.tags || []).join(', ');
+      document.getElementById('post-slug').value = fm.slug || slug;
+      document.getElementById('editor-area').value = data.body || '';
+      document.getElementById('cover-select').value = fm.coverImage || '';
+      updateCoverPreview();
+      updateStatusBtn();
+      updateWordCount();
+
+      document.getElementById('delete-btn').style.display = 'inline-flex';
+    } catch (e) {
+      showToast('Failed to load post', 'error');
+    }
+  }
+
+  function newPost() {
+    currentSlug = null;
+    currentStatus = 'draft';
+    showEditor(true);
+    renderPostList();
+
+    document.getElementById('post-title').value = '';
+    document.getElementById('post-date').value = new Date().toISOString().split('T')[0];
+    document.getElementById('post-tags').value = '';
+    document.getElementById('post-slug').value = '';
+    document.getElementById('editor-area').value = '';
+    document.getElementById('cover-select').value = '';
+    updateCoverPreview();
+    updateStatusBtn();
+    updateWordCount();
+
+    document.getElementById('delete-btn').style.display = 'none';
+    setTimeout(() => document.getElementById('post-title').focus(), 50);
+  }
+
+  function showEditor(show) {
+    document.getElementById('empty-editor').style.display = show ? 'none' : 'flex';
+    document.getElementById('editor-form').style.display = show ? 'flex' : 'none';
+  }
+
+  function toggleStatus() {
+    currentStatus = currentStatus === 'draft' ? 'published' : 'draft';
+    updateStatusBtn();
+  }
+
+  function updateStatusBtn() {
+    const btn = document.getElementById('status-btn-label');
+    btn.textContent = currentStatus === 'published' ? 'Published' : 'Draft';
+    btn.parentElement.className = currentStatus === 'published'
+      ? 'btn btn-success' : 'btn btn-secondary';
+  }
+
+  function updateCoverPreview() {
+    const val = document.getElementById('cover-select').value;
+    const img = document.getElementById('cover-preview');
+    if (val) {
+      img.src = `/content/photos/${val}`;
+      img.style.display = 'block';
+    } else {
+      img.style.display = 'none';
+    }
+  }
+
+  function updateWordCount() {
+    const text = document.getElementById('editor-area').value;
+    const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+    document.getElementById('word-count').textContent = `${words} word${words !== 1 ? 's' : ''}`;
+  }
+
+  async function savePost() {
+    const title = document.getElementById('post-title').value.trim();
+    if (!title) { showToast('Title is required', 'error'); return; }
+
+    const slugInput = document.getElementById('post-slug').value.trim();
+    const postSlug = slugInput || slugify(title);
+    const body = {
+      title,
+      slug: postSlug,
+      date: document.getElementById('post-date').value,
+      status: currentStatus,
+      tags: document.getElementById('post-tags').value,
+      coverImage: document.getElementById('cover-select').value,
+      body: document.getElementById('editor-area').value
+    };
+
+    try {
+      let res;
+      if (currentSlug) {
+        res = await fetch(`/api/posts/${currentSlug}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ ...body, newSlug: postSlug })
+        });
+      } else {
+        res = await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+      }
+
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Save failed');
+
+      currentSlug = data.slug;
+      document.getElementById('post-slug').value = data.slug;
+      document.getElementById('delete-btn').style.display = 'inline-flex';
+
+      await loadPosts();
+      showToast('Post saved!', 'success');
+    } catch (e) {
+      showToast(e.message || 'Save failed', 'error');
+    }
+  }
+
+  async function deletePost() {
+    if (!currentSlug) return;
+    if (!confirm('Delete this post permanently?')) return;
+
+    try {
+      const res = await fetch(`/api/posts/${currentSlug}`, { method: 'DELETE' });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Delete failed');
+
+      currentSlug = null;
+      showEditor(false);
+      await loadPosts();
+      showToast('Post deleted', 'success');
+    } catch (e) {
+      showToast(e.message || 'Delete failed', 'error');
+    }
+  }
+
+  // Keyboard shortcuts
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 's' && (e.ctrlKey || e.metaKey)) {
+      e.preventDefault();
+      if (document.getElementById('editor-form').style.display !== 'none') savePost();
+    }
+  });
+
+  loadPosts();
+</script>
+</body>
+</html>

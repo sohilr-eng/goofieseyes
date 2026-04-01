@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — GoofiesEyes Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-sidebar: #0f0f13;
+      --bg-main: #16161e;
+      --bg-card: rgba(255,255,255,0.04);
+      --border-card: rgba(255,255,255,0.08);
+      --accent: #7c5cbf;
+      --accent-hover: #9370db;
+      --text: #e8e8ed;
+      --text-muted: #888899;
+      --success: #4caf7d;
+      --warning: #e6a817;
+      --danger: #e05c5c;
+      --sidebar-width: 220px;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      background: var(--bg-main);
+      color: var(--text);
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* ── Sidebar ── */
+    .sidebar {
+      width: var(--sidebar-width);
+      background: var(--bg-sidebar);
+      display: flex;
+      flex-direction: column;
+      position: fixed;
+      top: 0; left: 0;
+      height: 100vh;
+      z-index: 100;
+      border-right: 1px solid var(--border-card);
+    }
+
+    .sidebar-logo {
+      padding: 24px 20px 20px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .sidebar-logo h1 {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      color: var(--text);
+    }
+
+    .sidebar-logo span {
+      font-size: 11px;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    .sidebar-nav {
+      flex: 1;
+      padding: 12px 0;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 20px;
+      color: var(--text-muted);
+      text-decoration: none;
+      font-size: 14px;
+      font-weight: 500;
+      transition: all 0.15s ease;
+      border-left: 3px solid transparent;
+    }
+
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,92,191,0.08); }
+
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+
+    .sidebar-footer {
+      padding: 16px 20px;
+      border-top: 1px solid var(--border-card);
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ── Main content ── */
+    .main {
+      margin-left: var(--sidebar-width);
+      flex: 1;
+      padding: 32px 36px;
+      min-height: 100vh;
+    }
+
+    .page-header {
+      margin-bottom: 28px;
+    }
+
+    .page-header h2 {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .page-header p {
+      font-size: 14px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    /* ── Stats row ── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+
+    .stat-card .label {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 600;
+    }
+
+    .stat-card .value {
+      font-size: 36px;
+      font-weight: 700;
+      color: var(--text);
+      margin-top: 6px;
+      line-height: 1;
+    }
+
+    .stat-card .sub {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 6px;
+    }
+
+    /* ── Two-column layout ── */
+    .two-col {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-bottom: 32px;
+    }
+
+    .card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 20px 24px;
+    }
+
+    .card-title {
+      font-size: 14px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 16px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    /* ── Photo grid ── */
+    .photo-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .photo-thumb {
+      border-radius: 6px;
+      overflow: hidden;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-card);
+    }
+
+    .photo-thumb img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+    }
+
+    .photo-thumb .label {
+      padding: 6px 8px;
+      font-size: 10px;
+      color: var(--text-muted);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .photo-placeholder {
+      aspect-ratio: 4/3;
+      background: rgba(255,255,255,0.03);
+      border: 1px dashed var(--border-card);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ── Posts list ── */
+    .post-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border-card);
+    }
+
+    .post-item:last-child { border-bottom: none; }
+
+    .post-item .post-title {
+      font-size: 14px;
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    .post-item .post-date {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 2px;
+    }
+
+    .badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .badge-published { background: rgba(76,175,125,0.2); color: var(--success); }
+    .badge-draft { background: rgba(230,168,23,0.2); color: var(--warning); }
+
+    /* ── Publish section ── */
+    .publish-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+    }
+
+    .publish-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 16px;
+    }
+
+    .publish-info h3 {
+      font-size: 16px;
+      font-weight: 600;
+    }
+
+    .publish-info p {
+      font-size: 13px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s ease;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: rgba(255,255,255,0.08);
+      color: var(--text);
+      border: 1px solid var(--border-card);
+    }
+
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+    .terminal {
+      background: #0a0a0f;
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: #a0ffb0;
+      min-height: 80px;
+      max-height: 280px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+      word-break: break-all;
+      display: none;
+    }
+
+    .terminal.visible { display: block; }
+
+    .git-status {
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      padding: 10px 14px;
+      margin-top: 12px;
+      white-space: pre-wrap;
+    }
+
+    .empty-state {
+      text-align: center;
+      padding: 32px 16px;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    .empty-state .icon { font-size: 32px; margin-bottom: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- Sidebar -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GoofiesEyes</h1>
+    <span>Admin Portal</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item active">
+      <span class="icon">🏠</span> Dashboard
+    </a>
+    <a href="upload.html" class="nav-item">
+      <span class="icon">📷</span> Upload Photos
+    </a>
+    <a href="portfolio.html" class="nav-item">
+      <span class="icon">🖼️</span> Portfolios
+    </a>
+    <a href="journal.html" class="nav-item">
+      <span class="icon">✍️</span> Journal
+    </a>
+    <a href="prints.html" class="nav-item">
+      <span class="icon">🖨️</span> Prints
+    </a>
+  </nav>
+  <div class="sidebar-footer">localhost:3000</div>
+</aside>
+
+<!-- Main -->
+<main class="main">
+  <div class="page-header">
+    <h2>Dashboard</h2>
+    <p>Overview of your photography website content</p>
+  </div>
+
+  <!-- Stats -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="label">Photos</div>
+      <div class="value" id="stat-photos">—</div>
+      <div class="sub">across all portfolios</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Portfolios</div>
+      <div class="value" id="stat-portfolios">—</div>
+      <div class="sub">collections</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Posts</div>
+      <div class="value" id="stat-posts">—</div>
+      <div class="sub">journal entries</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Prints</div>
+      <div class="value" id="stat-prints">—</div>
+      <div class="sub">available for purchase</div>
+    </div>
+  </div>
+
+  <!-- Publish -->
+  <div class="publish-card">
+    <div class="publish-top">
+      <div class="publish-info">
+        <h3>Push to Site</h3>
+        <p id="last-push-time">Last push: never</p>
+      </div>
+      <button class="btn btn-primary" id="push-btn" onclick="publishSite()">
+        🚀 Push to Site
+      </button>
+    </div>
+    <div class="git-status" id="git-status">Loading git status…</div>
+    <div class="terminal" id="terminal"></div>
+  </div>
+
+  <!-- Bottom two-col -->
+  <div class="two-col">
+    <!-- Recent uploads -->
+    <div class="card">
+      <div class="card-title">Recent Uploads</div>
+      <div class="photo-grid" id="recent-photos">
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="icon">📷</div>
+          Loading…
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent posts -->
+    <div class="card">
+      <div class="card-title">Recent Posts</div>
+      <div id="recent-posts">
+        <div class="empty-state">
+          <div class="icon">✍️</div>
+          Loading…
+        </div>
+      </div>
+    </div>
+  </div>
+</main>
+
+<script>
+  async function loadStats() {
+    try {
+      const [photosRes, portfoliosRes, postsRes, printsRes] = await Promise.all([
+        fetch('/api/photos'),
+        fetch('/api/portfolios'),
+        fetch('/api/posts'),
+        fetch('/api/prints')
+      ]);
+
+      const photos = await photosRes.json();
+      const portfolios = await portfoliosRes.json();
+      const posts = await postsRes.json();
+      const prints = await printsRes.json();
+
+      document.getElementById('stat-photos').textContent = (photos.photos || []).length;
+      document.getElementById('stat-portfolios').textContent = (portfolios.portfolios || []).length;
+      document.getElementById('stat-posts').textContent = (posts.posts || []).length;
+      document.getElementById('stat-prints').textContent = (prints.prints || []).length;
+
+      // Recent photos (last 6)
+      renderRecentPhotos(photos.photos || []);
+
+      // Recent posts (last 5)
+      renderRecentPosts(posts.posts || []);
+    } catch (e) {
+      console.error('Failed to load stats:', e);
+    }
+  }
+
+  function renderRecentPhotos(photos) {
+    const container = document.getElementById('recent-photos');
+    const recent = photos.slice(-6).reverse();
+
+    if (recent.length === 0) {
+      container.innerHTML = '<div class="empty-state" style="grid-column:1/-1"><div class="icon">📷</div>No photos yet. <a href="upload.html" style="color:var(--accent)">Upload some!</a></div>';
+      return;
+    }
+
+    container.innerHTML = recent.map(p => `
+      <div class="photo-thumb">
+        <img src="/content/photos/${p.filename}" alt="${p.alt || p.filename}" loading="lazy" onerror="this.style.display='none'" />
+        <div class="label">${p.filename}</div>
+      </div>
+    `).join('');
+  }
+
+  function renderRecentPosts(posts) {
+    const container = document.getElementById('recent-posts');
+    const recent = posts.slice(0, 5);
+
+    if (recent.length === 0) {
+      container.innerHTML = '<div class="empty-state"><div class="icon">✍️</div>No posts yet. <a href="journal.html" style="color:var(--accent)">Write one!</a></div>';
+      return;
+    }
+
+    container.innerHTML = recent.map(p => `
+      <div class="post-item">
+        <div>
+          <div class="post-title">${p.title}</div>
+          <div class="post-date">${p.date || 'No date'}</div>
+        </div>
+        <span class="badge badge-${p.status}">${p.status}</span>
+      </div>
+    `).join('');
+  }
+
+  async function loadGitStatus() {
+    try {
+      const res = await fetch('/api/git-status');
+      const data = await res.json();
+      const el = document.getElementById('git-status');
+      el.textContent = data.status || 'Working tree clean';
+    } catch (e) {
+      document.getElementById('git-status').textContent = 'Git status unavailable';
+    }
+  }
+
+  async function publishSite() {
+    const btn = document.getElementById('push-btn');
+    const terminal = document.getElementById('terminal');
+
+    btn.disabled = true;
+    btn.textContent = '⏳ Publishing…';
+    terminal.textContent = '';
+    terminal.classList.add('visible');
+
+    try {
+      const res = await fetch('/api/publish', { method: 'POST' });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        terminal.textContent += decoder.decode(value);
+        terminal.scrollTop = terminal.scrollHeight;
+      }
+
+      // Store last push time
+      const now = new Date().toLocaleString();
+      localStorage.setItem('lastPush', now);
+      document.getElementById('last-push-time').textContent = `Last push: ${now}`;
+
+      loadGitStatus();
+    } catch (e) {
+      terminal.textContent += `\nError: ${e.message}`;
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '🚀 Push to Site';
+    }
+  }
+
+  // Load last push time from localStorage
+  const lastPush = localStorage.getItem('lastPush');
+  if (lastPush) {
+    document.getElementById('last-push-time').textContent = `Last push: ${lastPush}`;
+  }
+
+  loadStats();
+  loadGitStatus();
+</script>
+</body>
+</html>

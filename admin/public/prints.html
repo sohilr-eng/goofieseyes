@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Prints — GoofiesEyes Admin</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-sidebar: #0f0f13;
+      --bg-main: #16161e;
+      --bg-card: rgba(255,255,255,0.04);
+      --border-card: rgba(255,255,255,0.08);
+      --accent: #7c5cbf;
+      --accent-hover: #9370db;
+      --text: #e8e8ed;
+      --text-muted: #888899;
+      --success: #4caf7d;
+      --warning: #e6a817;
+      --danger: #e05c5c;
+      --sidebar-width: 220px;
+    }
+
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg-main); color: var(--text); display: flex; min-height: 100vh; }
+
+    .sidebar { width: var(--sidebar-width); background: var(--bg-sidebar); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 100; border-right: 1px solid var(--border-card); }
+    .sidebar-logo { padding: 24px 20px 20px; border-bottom: 1px solid var(--border-card); }
+    .sidebar-logo h1 { font-size: 16px; font-weight: 700; color: var(--text); }
+    .sidebar-logo span { font-size: 11px; color: var(--text-muted); display: block; margin-top: 2px; }
+    .sidebar-nav { flex: 1; padding: 12px 0; }
+    .nav-item { display: flex; align-items: center; gap: 10px; padding: 10px 20px; color: var(--text-muted); text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; border-left: 3px solid transparent; }
+    .nav-item:hover { color: var(--text); background: rgba(255,255,255,0.04); }
+    .nav-item.active { color: var(--accent); border-left-color: var(--accent); background: rgba(124,92,191,0.08); }
+    .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+    .sidebar-footer { padding: 16px 20px; border-top: 1px solid var(--border-card); font-size: 11px; color: var(--text-muted); }
+
+    .main { margin-left: var(--sidebar-width); flex: 1; padding: 32px 36px; }
+
+    .page-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      margin-bottom: 28px;
+    }
+
+    .page-header h2 { font-size: 24px; font-weight: 700; }
+    .page-header p { font-size: 14px; color: var(--text-muted); margin-top: 4px; }
+
+    .header-actions { display: flex; gap: 10px; align-items: center; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      transition: all 0.15s;
+    }
+    .btn-primary { background: var(--accent); color: #fff; }
+    .btn-primary:hover { background: var(--accent-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary { background: rgba(255,255,255,0.08); color: var(--text); border: 1px solid var(--border-card); }
+    .btn-secondary:hover { background: rgba(255,255,255,0.12); }
+
+    /* Filter bar */
+    .filter-bar {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+    }
+
+    .filter-bar label { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
+
+    .filter-bar select {
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      color: var(--text);
+      font-size: 13px;
+      padding: 7px 10px;
+      outline: none;
+    }
+    .filter-bar select option { background: #1e1e28; }
+
+    .stats-pills {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+
+    .pill {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      padding: 12px 18px;
+      text-align: center;
+    }
+
+    .pill .value { font-size: 28px; font-weight: 700; line-height: 1; }
+    .pill .label { font-size: 11px; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-top: 4px; }
+
+    /* Photo cards grid */
+    .prints-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 16px;
+    }
+
+    .print-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border-card);
+      border-radius: 10px;
+      overflow: hidden;
+      transition: border-color 0.15s;
+    }
+
+    .print-card.is-print { border-color: rgba(124,92,191,0.4); }
+    .print-card:hover { border-color: rgba(124,92,191,0.3); }
+
+    .print-card-img {
+      position: relative;
+    }
+
+    .print-card-img img {
+      width: 100%;
+      aspect-ratio: 4/3;
+      object-fit: cover;
+      display: block;
+    }
+
+    .print-card-img .print-active-badge {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 10px;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .print-card-body { padding: 12px 14px; }
+
+    .print-card-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      margin-bottom: 10px;
+    }
+
+    .print-card-port {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    /* Toggle switch */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .toggle-label { font-size: 12px; color: var(--text-muted); }
+
+    .toggle {
+      position: relative;
+      width: 38px;
+      height: 22px;
+      flex-shrink: 0;
+    }
+
+    .toggle input { opacity: 0; width: 0; height: 0; }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: rgba(255,255,255,0.12);
+      border-radius: 22px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: '';
+      position: absolute;
+      width: 16px;
+      height: 16px;
+      left: 3px;
+      top: 3px;
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.2s;
+    }
+
+    .toggle input:checked + .toggle-slider { background: var(--accent); }
+    .toggle input:checked + .toggle-slider::before { transform: translateX(16px); }
+
+    /* Price input */
+    .price-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .price-row label { font-size: 12px; color: var(--text-muted); }
+
+    .price-input-wrap {
+      display: flex;
+      align-items: center;
+      background: rgba(255,255,255,0.06);
+      border: 1px solid var(--border-card);
+      border-radius: 6px;
+      overflow: hidden;
+      flex: 1;
+      transition: border-color 0.15s;
+    }
+    .price-input-wrap:focus-within { border-color: var(--accent); }
+
+    .price-symbol {
+      padding: 6px 8px;
+      font-size: 12px;
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.04);
+      border-right: 1px solid var(--border-card);
+    }
+
+    .price-input {
+      background: none;
+      border: none;
+      color: var(--text);
+      font-size: 13px;
+      padding: 6px 8px;
+      outline: none;
+      width: 100%;
+      font-family: inherit;
+    }
+
+    .sizes-row { margin-top: 10px; }
+    .sizes-label { font-size: 11px; color: var(--text-muted); margin-bottom: 6px; }
+
+    .sizes-checkboxes { display: flex; flex-wrap: wrap; gap: 6px; }
+
+    .size-chip {
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      cursor: pointer;
+      border: 1px solid var(--border-card);
+      color: var(--text-muted);
+      background: rgba(255,255,255,0.03);
+      transition: all 0.15s;
+      user-select: none;
+    }
+
+    .size-chip.selected {
+      background: rgba(124,92,191,0.2);
+      border-color: rgba(124,92,191,0.5);
+      color: var(--accent);
+    }
+
+    /* Disabled overlay when not a print */
+    .print-fields { margin-top: 10px; }
+    .print-fields.disabled { opacity: 0.35; pointer-events: none; }
+
+    /* Empty state */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+    .empty-state .big-icon { font-size: 48px; margin-bottom: 12px; }
+    .empty-state p { font-size: 13px; margin-top: 6px; }
+    .empty-state a { color: var(--accent); }
+
+    /* Toast */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #2a2a3a;
+      border: 1px solid var(--border-card);
+      color: var(--text);
+      padding: 12px 18px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.25s;
+      z-index: 300;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+    .toast.success { border-color: rgba(76,175,125,0.4); color: var(--success); }
+    .toast.error { border-color: rgba(224,92,92,0.4); color: var(--danger); }
+
+    /* Sticky save bar */
+    .save-bar {
+      position: fixed;
+      bottom: 0;
+      left: var(--sidebar-width);
+      right: 0;
+      background: rgba(22,22,30,0.95);
+      backdrop-filter: blur(8px);
+      border-top: 1px solid var(--border-card);
+      padding: 14px 36px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      z-index: 50;
+      transform: translateY(100%);
+      transition: transform 0.25s;
+    }
+    .save-bar.visible { transform: translateY(0); }
+    .save-bar p { font-size: 13px; color: var(--text-muted); }
+    .save-bar strong { color: var(--warning); }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>GoofiesEyes</h1>
+    <span>Admin Portal</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="index.html" class="nav-item"><span class="icon">🏠</span> Dashboard</a>
+    <a href="upload.html" class="nav-item"><span class="icon">📷</span> Upload Photos</a>
+    <a href="portfolio.html" class="nav-item"><span class="icon">🖼️</span> Portfolios</a>
+    <a href="journal.html" class="nav-item"><span class="icon">✍️</span> Journal</a>
+    <a href="prints.html" class="nav-item active"><span class="icon">🖨️</span> Prints</a>
+  </nav>
+  <div class="sidebar-footer">localhost:3000</div>
+</aside>
+
+<main class="main">
+  <div class="page-header">
+    <div>
+      <h2>Prints</h2>
+      <p>Toggle which photos are available for purchase and set prices</p>
+    </div>
+    <div class="header-actions">
+      <button class="btn btn-primary" onclick="saveAll()" id="save-btn">Save Changes</button>
+    </div>
+  </div>
+
+  <!-- Stats pills -->
+  <div class="stats-pills">
+    <div class="pill">
+      <div class="value" id="stat-total">—</div>
+      <div class="label">Total Photos</div>
+    </div>
+    <div class="pill">
+      <div class="value" id="stat-prints">—</div>
+      <div class="label">Available as Prints</div>
+    </div>
+    <div class="pill">
+      <div class="value" id="stat-avg">—</div>
+      <div class="label">Avg. Price</div>
+    </div>
+  </div>
+
+  <!-- Filter -->
+  <div class="filter-bar">
+    <label>Show:</label>
+    <select id="filter-select" onchange="applyFilter()">
+      <option value="all">All Photos</option>
+      <option value="prints">Prints Only</option>
+      <option value="not-prints">Not for Sale</option>
+    </select>
+    <label style="margin-left:8px">Portfolio:</label>
+    <select id="portfolio-filter" onchange="applyFilter()">
+      <option value="">All Portfolios</option>
+    </select>
+  </div>
+
+  <!-- Grid -->
+  <div class="prints-grid" id="prints-grid">
+    <div class="empty-state" style="grid-column:1/-1">
+      <div class="big-icon">⏳</div>
+      <p>Loading photos…</p>
+    </div>
+  </div>
+
+  <!-- Bottom padding for save bar -->
+  <div style="height:80px"></div>
+</main>
+
+<!-- Sticky save bar -->
+<div class="save-bar" id="save-bar">
+  <p><strong>Unsaved changes</strong> — remember to save before publishing</p>
+  <button class="btn btn-primary" onclick="saveAll()">Save Changes</button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const PRINT_SIZES = ['4×6', '5×7', '8×10', '11×14', '16×20', '20×30'];
+
+  let allPhotos = [];
+  let printsMap = {};   // filename → { price, sizes }
+  let dirty = false;
+
+  function showToast(msg, type = '') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = 'toast show ' + type;
+    clearTimeout(t._timer);
+    t._timer = setTimeout(() => { t.className = 'toast'; }, 3000);
+  }
+
+  function markDirty() {
+    dirty = true;
+    document.getElementById('save-bar').classList.add('visible');
+  }
+
+  async function loadData() {
+    try {
+      const [photosRes, printsRes] = await Promise.all([
+        fetch('/api/photos'),
+        fetch('/api/prints')
+      ]);
+      const photosData = await photosRes.json();
+      const printsData = await printsRes.json();
+
+      allPhotos = photosData.photos || [];
+
+      // Build printsMap from loaded data
+      for (const p of (printsData.prints || [])) {
+        printsMap[p.filename] = { price: p.price || 0, sizes: p.sizes || [] };
+      }
+
+      // Populate portfolio filter
+      const portfolios = [...new Set(allPhotos.map(p => p.portfolioName).filter(Boolean))];
+      const portFilter = document.getElementById('portfolio-filter');
+      for (const name of portfolios) {
+        const opt = document.createElement('option');
+        opt.value = name;
+        opt.textContent = name;
+        portFilter.appendChild(opt);
+      }
+
+      updateStats();
+      renderGrid();
+    } catch (e) {
+      showToast('Failed to load data', 'error');
+      console.error(e);
+    }
+  }
+
+  function updateStats() {
+    const printCount = Object.keys(printsMap).length;
+    const prices = Object.values(printsMap).map(p => p.price).filter(p => p > 0);
+    const avg = prices.length ? (prices.reduce((a,b) => a+b, 0) / prices.length).toFixed(0) : '—';
+
+    document.getElementById('stat-total').textContent = allPhotos.length;
+    document.getElementById('stat-prints').textContent = printCount;
+    document.getElementById('stat-avg').textContent = prices.length ? `$${avg}` : '—';
+  }
+
+  function applyFilter() {
+    renderGrid();
+  }
+
+  function renderGrid() {
+    const grid = document.getElementById('prints-grid');
+    const filterVal = document.getElementById('filter-select').value;
+    const portFilter = document.getElementById('portfolio-filter').value;
+
+    let photos = allPhotos;
+
+    if (portFilter) {
+      photos = photos.filter(p => p.portfolioName === portFilter);
+    }
+
+    if (filterVal === 'prints') {
+      photos = photos.filter(p => printsMap[p.filename]);
+    } else if (filterVal === 'not-prints') {
+      photos = photos.filter(p => !printsMap[p.filename]);
+    }
+
+    if (photos.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state" style="grid-column:1/-1">
+          <div class="big-icon">📷</div>
+          <p>No photos found. <a href="upload.html">Upload some first.</a></p>
+        </div>
+      `;
+      return;
+    }
+
+    grid.innerHTML = photos.map(photo => {
+      const isPrint = !!printsMap[photo.filename];
+      const printData = printsMap[photo.filename] || { price: 0, sizes: [] };
+
+      const sizesHtml = PRINT_SIZES.map(size => `
+        <span class="size-chip ${printData.sizes.includes(size) ? 'selected' : ''}"
+              onclick="toggleSize('${photo.filename}', '${size}', this)">${size}</span>
+      `).join('');
+
+      return `
+        <div class="print-card ${isPrint ? 'is-print' : ''}" id="card-${CSS.escape(photo.filename)}">
+          <div class="print-card-img">
+            <img src="/content/photos/${photo.filename}" alt="${photo.alt || photo.filename}" loading="lazy"
+                 onerror="this.style.background='rgba(255,255,255,0.05)';this.style.minHeight='120px'" />
+            ${isPrint ? '<div class="print-active-badge">For Sale</div>' : ''}
+          </div>
+          <div class="print-card-body">
+            <div class="print-card-title">${photo.title || photo.filename}</div>
+            ${photo.portfolioName ? `<div class="print-card-port">${photo.portfolioName}</div>` : ''}
+
+            <div class="toggle-row">
+              <span class="toggle-label">Available as print</span>
+              <label class="toggle">
+                <input type="checkbox" ${isPrint ? 'checked' : ''}
+                       onchange="togglePrint('${photo.filename}', this.checked)" />
+                <span class="toggle-slider"></span>
+              </label>
+            </div>
+
+            <div class="print-fields ${isPrint ? '' : 'disabled'}" id="fields-${CSS.escape(photo.filename)}">
+              <div class="price-row">
+                <label>Price</label>
+                <div class="price-input-wrap">
+                  <span class="price-symbol">$</span>
+                  <input type="number" class="price-input" value="${printData.price || ''}"
+                         placeholder="120" min="0" step="1"
+                         onchange="updatePrice('${photo.filename}', this.value)" />
+                </div>
+              </div>
+              <div class="sizes-row">
+                <div class="sizes-label">Available sizes</div>
+                <div class="sizes-checkboxes">${sizesHtml}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  function togglePrint(filename, enabled) {
+    const card = document.querySelector(`[id="card-${CSS.escape(filename)}"]`);
+    const fields = document.querySelector(`[id="fields-${CSS.escape(filename)}"]`);
+
+    if (enabled) {
+      printsMap[filename] = printsMap[filename] || { price: 0, sizes: [] };
+      card.classList.add('is-print');
+      fields.classList.remove('disabled');
+      // Add badge
+      const imgWrap = card.querySelector('.print-card-img');
+      if (!imgWrap.querySelector('.print-active-badge')) {
+        const badge = document.createElement('div');
+        badge.className = 'print-active-badge';
+        badge.textContent = 'For Sale';
+        imgWrap.appendChild(badge);
+      }
+    } else {
+      delete printsMap[filename];
+      card.classList.remove('is-print');
+      fields.classList.add('disabled');
+      const badge = card.querySelector('.print-active-badge');
+      if (badge) badge.remove();
+    }
+
+    updateStats();
+    markDirty();
+  }
+
+  function updatePrice(filename, value) {
+    if (printsMap[filename]) {
+      printsMap[filename].price = parseFloat(value) || 0;
+      markDirty();
+      updateStats();
+    }
+  }
+
+  function toggleSize(filename, size, el) {
+    if (!printsMap[filename]) return;
+    const sizes = printsMap[filename].sizes;
+    const idx = sizes.indexOf(size);
+    if (idx === -1) {
+      sizes.push(size);
+      el.classList.add('selected');
+    } else {
+      sizes.splice(idx, 1);
+      el.classList.remove('selected');
+    }
+    markDirty();
+  }
+
+  async function saveAll() {
+    const btn = document.getElementById('save-btn');
+    btn.disabled = true;
+    btn.textContent = 'Saving…';
+
+    // Build prints array from allPhotos to preserve photo metadata
+    const prints = allPhotos
+      .filter(p => printsMap[p.filename])
+      .map(p => ({
+        filename: p.filename,
+        title: p.title || p.filename,
+        alt: p.alt || p.title || p.filename,
+        portfolioId: p.portfolioId || null,
+        portfolioName: p.portfolioName || null,
+        price: printsMap[p.filename].price || 0,
+        sizes: printsMap[p.filename].sizes || []
+      }));
+
+    try {
+      const res = await fetch('/api/prints', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prints })
+      });
+      const data = await res.json();
+      if (!data.success) throw new Error(data.error || 'Save failed');
+
+      dirty = false;
+      document.getElementById('save-bar').classList.remove('visible');
+      showToast(`Saved ${prints.length} print${prints.length !== 1 ? 's' : ''}`, 'success');
+    } catch (e) {
+      showToast(e.message || 'Save failed', 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Save Changes';
+    }
+  }
+
+  // Warn before leaving with unsaved changes
+  window.addEventListener('beforeunload', (e) => {
+    if (dirty) { e.preventDefault(); e.returnValue = ''; }
+  });
+
+  loadData();
+</script>
+</body>
+</html>
