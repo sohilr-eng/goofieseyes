@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio | GoofiesEyes</title>
+  <meta name="robots" content="index, follow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    :root {
+      --accent: #C9927A; --accent-light: #E0B89A; --accent-rgb: 201, 146, 122;
+      --bg: #0D0B09; --bg-2: #141210;
+      --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
+      --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+      --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    ::selection { background: var(--accent); color: #fff; }
+    h1, h2, h3, h4 { font-family: var(--font-display); }
+
+    /* ─── NAVBAR ─── */
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 8px; }
+    .nav-inner {
+      max-width: 840px; margin: 10px auto 0;
+      background: rgba(13,11,9,0.75); border: 1px solid var(--card-border);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-radius: 100px; padding: 10px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text); }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-cta { color: var(--accent) !important; border: 1px solid rgba(var(--accent-rgb),0.35); padding: 7px 18px; border-radius: 100px; transition: all 0.25s ease !important; }
+    .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
+    @media (max-width: 768px) { .nav-links { display: none; } }
+
+    /* ─── HEADER ─── */
+    .page-header { padding: 140px 32px 56px; position: relative; max-width: 1200px; margin: 0 auto; }
+    .back-link {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text-muted); text-decoration: none;
+      font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
+      letter-spacing: 0.15em; margin-bottom: 32px; transition: color 0.25s;
+    }
+    .back-link:hover { color: var(--accent); }
+    .portfolio-header-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
+    .portfolio-title { font-size: clamp(2rem, 5vw, 3.8rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; }
+    .portfolio-title em { font-style: italic; color: var(--accent); }
+    .portfolio-desc-text { font-size: 1rem; color: var(--text-secondary); font-weight: 300; margin-top: 16px; max-width: 500px; line-height: 1.65; }
+    .portfolio-meta { text-align: right; flex-shrink: 0; }
+    .portfolio-count-label { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
+    .portfolio-count-sub { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-top: 4px; }
+
+    /* ─── PHOTO GRID ─── */
+    .photo-grid-container { max-width: 1200px; margin: 0 auto; padding: 0 32px 120px; }
+    .photo-grid {
+      columns: 3;
+      column-gap: 12px;
+    }
+    .photo-item {
+      break-inside: avoid;
+      margin-bottom: 12px;
+      cursor: pointer;
+      overflow: hidden;
+      border-radius: 8px;
+      background: var(--bg-2);
+      position: relative;
+    }
+    .photo-item img {
+      width: 100%; height: auto; display: block;
+      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
+      filter: grayscale(15%);
+    }
+    .photo-item:hover img { transform: scale(1.03); filter: grayscale(0%); }
+
+    @media (max-width: 900px) { .photo-grid { columns: 2; } }
+    @media (max-width: 500px) { .photo-grid { columns: 1; } .page-header { padding: 120px 20px 40px; } .photo-grid-container { padding: 0 20px 80px; } }
+
+    /* ─── LOADING / ERROR ─── */
+    .state-message {
+      text-align: center; padding: 80px 32px;
+      font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);
+    }
+
+    /* ─── LIGHTBOX ─── */
+    #lightbox {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(0,0,0,0.94);
+      display: none; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #lightbox.open { display: flex; }
+    #lightbox-img {
+      max-width: 100%; max-height: 90vh;
+      object-fit: contain; border-radius: 4px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.8);
+      user-select: none;
+    }
+    #lightbox-close {
+      position: fixed; top: 20px; right: 24px;
+      width: 40px; height: 40px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text); font-size: 1.2rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s;
+    }
+    #lightbox-close:hover { background: rgba(255,255,255,0.15); }
+    #lightbox-prev, #lightbox-next {
+      position: fixed; top: 50%; transform: translateY(-50%);
+      width: 44px; height: 44px; border-radius: 50%;
+      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
+      color: var(--text); font-size: 1.1rem; cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: background 0.2s; user-select: none;
+    }
+    #lightbox-prev { left: 16px; }
+    #lightbox-next { right: 16px; }
+    #lightbox-prev:hover, #lightbox-next:hover { background: rgba(255,255,255,0.18); }
+    #lightbox-counter {
+      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
+      font-family: var(--font-mono); font-size: 0.75rem; color: rgba(255,255,255,0.4);
+      letter-spacing: 0.1em;
+    }
+
+    /* ─── FOOTER ─── */
+    footer { border-top: 1px solid var(--card-border); padding: 64px 32px 40px; text-align: center; }
+    .footer-logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .footer-logo .logo-name { font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
+    .footer-links { display: flex; justify-content: center; gap: 28px; margin-bottom: 24px; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono); }
+  </style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <svg viewBox="0 0 52 26" width="40" height="20" fill="none">
+        <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
+        <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
+        <circle cx="26" cy="13" r="3" fill="#C9927A"/>
+      </svg>
+      <span class="logo-name">GoofiesEyes</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="portfolios.html" class="active">Portfolios</a>
+      <a href="prints.html">Prints</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#specs">About</a>
+      <a href="index.html#cta" class="nav-cta">Book a Session</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Header injected by JS -->
+<div id="page-header" class="page-header" style="display:none;">
+  <a href="portfolios.html" class="back-link">← All Portfolios</a>
+  <div class="portfolio-header-inner">
+    <div>
+      <h1 id="portfolio-title" class="portfolio-title"></h1>
+      <p id="portfolio-desc" class="portfolio-desc-text"></p>
+    </div>
+    <div class="portfolio-meta">
+      <div id="portfolio-count" class="portfolio-count-label"></div>
+      <div class="portfolio-count-sub">photographs</div>
+    </div>
+  </div>
+</div>
+
+<div id="state-message" class="state-message">Loading…</div>
+
+<div id="photo-grid-container" class="photo-grid-container" style="display:none;">
+  <div id="photo-grid" class="photo-grid"></div>
+</div>
+
+<!-- Lightbox -->
+<div id="lightbox">
+  <button id="lightbox-close" aria-label="Close">✕</button>
+  <button id="lightbox-prev" aria-label="Previous">‹</button>
+  <img id="lightbox-img" src="" alt="">
+  <button id="lightbox-next" aria-label="Next">›</button>
+  <div id="lightbox-counter"></div>
+</div>
+
+<footer>
+  <div class="footer-logo">
+    <svg viewBox="0 0 52 26" width="36" height="18" fill="none">
+      <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
+      <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
+      <circle cx="26" cy="13" r="3" fill="#C9927A"/>
+    </svg>
+    <span class="logo-name">GoofiesEyes</span>
+  </div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">Portfolios</a>
+    <a href="prints.html">Prints</a>
+    <a href="journal.html">Journal</a>
+  </div>
+  <p class="footer-copy">&copy; 2026 GoofiesEyes. All rights reserved.</p>
+</footer>
+
+<script>
+  const params   = new URLSearchParams(window.location.search);
+  const slug     = params.get('slug');
+  const stateEl  = document.getElementById('state-message');
+
+  let photos = [];
+  let lightboxIndex = 0;
+
+  // ── Lightbox ──────────────────────────────────────────────────────────────
+  const lb      = document.getElementById('lightbox');
+  const lbImg   = document.getElementById('lightbox-img');
+  const lbCount = document.getElementById('lightbox-counter');
+
+  function openLightbox(index) {
+    lightboxIndex = index;
+    showLightboxImage();
+    lb.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeLightbox() {
+    lb.classList.remove('open');
+    document.body.style.overflow = '';
+  }
+
+  function showLightboxImage() {
+    const photo = photos[lightboxIndex];
+    lbImg.src = `/content/photos/${photo.filename}`;
+    lbImg.alt = photo.alt || photo.title || '';
+    lbCount.textContent = `${lightboxIndex + 1} / ${photos.length}`;
+  }
+
+  function prevPhoto() { lightboxIndex = (lightboxIndex - 1 + photos.length) % photos.length; showLightboxImage(); }
+  function nextPhoto() { lightboxIndex = (lightboxIndex + 1) % photos.length; showLightboxImage(); }
+
+  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
+  document.getElementById('lightbox-prev').addEventListener('click', prevPhoto);
+  document.getElementById('lightbox-next').addEventListener('click', nextPhoto);
+  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+
+  document.addEventListener('keydown', e => {
+    if (!lb.classList.contains('open')) return;
+    if (e.key === 'Escape')      closeLightbox();
+    if (e.key === 'ArrowLeft')   prevPhoto();
+    if (e.key === 'ArrowRight')  nextPhoto();
+  });
+
+  // ── Load portfolio ────────────────────────────────────────────────────────
+  async function loadPortfolio() {
+    if (!slug) {
+      stateEl.textContent = 'No portfolio specified.';
+      return;
+    }
+
+    try {
+      const res = await fetch('/content/data/portfolios.json');
+      if (!res.ok) throw new Error('Could not load portfolio data');
+      const { portfolios } = await res.json();
+
+      const portfolio = portfolios.find(p => p.slug === slug);
+      if (!portfolio) {
+        stateEl.textContent = 'Portfolio not found.';
+        return;
+      }
+
+      // Update page title
+      document.title = `${portfolio.name} | GoofiesEyes`;
+
+      // Populate header
+      document.getElementById('portfolio-title').innerHTML =
+        portfolio.name.replace(/(\S+)\s*$/, '<em>$1</em>');
+      document.getElementById('portfolio-desc').textContent = portfolio.description || '';
+      document.getElementById('portfolio-count').textContent = portfolio.photos ? portfolio.photos.length : 0;
+      document.getElementById('page-header').style.display = 'block';
+
+      photos = (portfolio.photos || []).slice().sort((a, b) => a.order - b.order);
+
+      if (photos.length === 0) {
+        stateEl.textContent = 'No photos in this portfolio yet.';
+        return;
+      }
+
+      // Build grid
+      const grid = document.getElementById('photo-grid');
+      grid.innerHTML = photos.map((photo, i) => `
+        <div class="photo-item" data-index="${i}" role="button" tabindex="0" aria-label="View ${photo.alt || photo.title}">
+          <img
+            src="/content/photos/${photo.filename}"
+            alt="${photo.alt || photo.title || ''}"
+            loading="lazy"
+          >
+        </div>
+      `).join('');
+
+      // Attach click handlers
+      grid.querySelectorAll('.photo-item').forEach(item => {
+        item.addEventListener('click', () => openLightbox(Number(item.dataset.index)));
+        item.addEventListener('keydown', e => {
+          if (e.key === 'Enter' || e.key === ' ') openLightbox(Number(item.dataset.index));
+        });
+      });
+
+      stateEl.style.display = 'none';
+      document.getElementById('photo-grid-container').style.display = 'block';
+
+    } catch (err) {
+      stateEl.textContent = 'Failed to load portfolio: ' + err.message;
+      console.error(err);
+    }
+  }
+
+  loadPortfolio();
+</script>
+
+</body>
+</html>

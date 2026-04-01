@@ -147,50 +147,69 @@
 </header>
 
 <section class="portfolios-container">
-  <div class="portfolios-grid">
-    <!-- Tobago -->
-    <a href="portfolio-tobago.html" class="portfolio-card">
-      <div class="portfolio-img-wrapper">
-        <div class="portfolio-overlay"></div>
-        <!-- Placeholder for Tobago cover image -->
-        <img src="https://source.unsplash.com/random/800x1000/?tobago,ocean,beach" alt="Tobago Portfolio Cover" class="portfolio-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'1000\'><rect width=\'800\' height=\'1000\' fill=\'%231a1816\'/></svg>'">
-      </div>
-      <div class="portfolio-info">
-        <span class="portfolio-count">Collection 01</span>
-        <h2 class="portfolio-title">Tobago</h2>
-        <p class="portfolio-desc">Where the Caribbean Sea meets untouched shores. A study in coastal tranquility and vibrant island life.</p>
-      </div>
-    </a>
-
-    <!-- Trinidad's Northern Range -->
-    <a href="portfolio-trinidad.html" class="portfolio-card">
-      <div class="portfolio-img-wrapper">
-        <div class="portfolio-overlay"></div>
-        <!-- Placeholder for Trinidad cover image -->
-        <img src="https://source.unsplash.com/random/800x1000/?trinidad,mountain,forest" alt="Trinidad's Northern Range Portfolio Cover" class="portfolio-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'1000\'><rect width=\'800\' height=\'1000\' fill=\'%231a1816\'/></svg>'">
-      </div>
-      <div class="portfolio-info">
-        <span class="portfolio-count">Collection 02</span>
-        <h2 class="portfolio-title">Trinidad's Northern Range</h2>
-        <p class="portfolio-desc">Deep into the dense, majestic green of the Northern Range mountains. An exploration of texture, rain, and raw wilderness.</p>
-      </div>
-    </a>
-
-    <!-- NYC Street Life -->
-    <a href="portfolio-nyc.html" class="portfolio-card">
-      <div class="portfolio-img-wrapper">
-        <div class="portfolio-overlay"></div>
-        <!-- Placeholder for NYC cover image -->
-        <img src="https://source.unsplash.com/random/800x1000/?nyc,street,city" alt="NYC Street Life Portfolio Cover" class="portfolio-img" onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'800\' height=\'1000\'><rect width=\'800\' height=\'1000\' fill=\'%231a1816\'/></svg>'">
-      </div>
-      <div class="portfolio-info">
-        <span class="portfolio-count">Collection 03</span>
-        <h2 class="portfolio-title">NYC Street Life</h2>
-        <p class="portfolio-desc">Concrete grit, relentless energy, and the unscripted theater of New York City avenues.</p>
-      </div>
-    </a>
+  <div id="portfolios-grid" class="portfolios-grid">
+    <!-- rendered by JS -->
   </div>
+  <p id="portfolios-empty" style="display:none; text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:0.85rem; padding: 80px 0;">
+    No portfolios yet. Add one in the admin portal.
+  </p>
 </section>
+
+<script>
+  async function loadPortfolios() {
+    const grid = document.getElementById('portfolios-grid');
+    const empty = document.getElementById('portfolios-empty');
+
+    try {
+      const res = await fetch('/content/data/portfolios.json');
+      if (!res.ok) throw new Error('Failed to load portfolios');
+      const { portfolios } = await res.json();
+
+      const visible = portfolios.filter(p => p.photos && p.photos.length > 0 || p.cover);
+
+      if (visible.length === 0) {
+        grid.style.display = 'none';
+        empty.style.display = 'block';
+        return;
+      }
+
+      grid.innerHTML = visible.map((portfolio, i) => {
+        const coverFile = portfolio.cover
+          ? portfolio.cover
+          : (portfolio.photos && portfolio.photos.length > 0 ? portfolio.photos[0].filename : null);
+
+        const imgHTML = coverFile
+          ? `<img src="/content/photos/${coverFile}" alt="${portfolio.name}" class="portfolio-img" loading="lazy">`
+          : `<div style="width:100%;height:100%;background:#1a1816;"></div>`;
+
+        const count = portfolio.photos ? portfolio.photos.length : 0;
+        const countLabel = count === 1 ? '1 photo' : `${count} photos`;
+        const num = String(i + 1).padStart(2, '0');
+
+        return `
+          <a href="portfolio.html?slug=${encodeURIComponent(portfolio.slug)}" class="portfolio-card">
+            <div class="portfolio-img-wrapper">
+              <div class="portfolio-overlay"></div>
+              ${imgHTML}
+            </div>
+            <div class="portfolio-info">
+              <span class="portfolio-count">Collection ${num} · ${countLabel}</span>
+              <h2 class="portfolio-title">${portfolio.name}</h2>
+              <p class="portfolio-desc">${portfolio.description || ''}</p>
+            </div>
+          </a>`;
+      }).join('');
+
+    } catch (err) {
+      grid.style.display = 'none';
+      empty.textContent = 'Could not load portfolios.';
+      empty.style.display = 'block';
+      console.error(err);
+    }
+  }
+
+  loadPortfolios();
+</script>
 
 <!-- Footer -->
 <footer>
