@@ -227,94 +227,95 @@
 </footer>
 
 <script>
-  const PRODUCTS = {
-    'morning-mist':    { name: 'The Morning Mist',  img: 'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400', prices: { '8x10': 120, '11x14': 145, '16x20': 180 }, digitalPrice: 35 },
-    'northern-washout':{ name: 'Northern Washout',  img: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?w=400', prices: { '8x10': 120, '11x14': 145, '16x20': 180 }, digitalPrice: 35 },
-    'yellow-flash':    { name: 'Yellow Flash',      img: 'https://images.unsplash.com/photo-1534430480872-3498386e7856?w=400', prices: { '8x10': 145, '11x14': 170, '16x20': 210 }, digitalPrice: 45 },
-    'silent-sentinel': { name: 'Silent Sentinel',   img: 'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400', prices: { '8x10':  90, '11x14': 110, '16x20': 145 }, digitalPrice: 25 },
-    'urban-shadows':   { name: 'Urban Shadows',     img: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?w=400', prices: { '8x10': 110, '11x14': 135, '16x20': 170 }, digitalPrice: 30 },
-    'hidden-falls':    { name: 'The Hidden Falls',  img: 'https://images.unsplash.com/photo-1433086966358-54859d0ed716?w=400', prices: { '8x10': 150, '11x14': 180, '16x20': 220 }, digitalPrice: 40 }
-  };
-
-  const SIZE_LABELS = { '8x10': '8" × 10"', '11x14': '11" × 14"', '16x20': '16" × 20"' };
-
   const urlParams = new URLSearchParams(window.location.search);
-  const productId = urlParams.get('product') || 'morning-mist';
+  const productId = urlParams.get('product'); // filename e.g. "img-2428.webp"
   const type      = urlParams.get('type') === 'digital' ? 'digital' : 'physical';
-  const product   = PRODUCTS[productId] || PRODUCTS['morning-mist'];
-  let selectedSize = '11x14';
-
   const isDigital = type === 'digital';
 
-  // ── Apply digital mode ──────────────────────────────────────────────────
-  if (isDigital) {
-    // Badge
-    document.getElementById('type-badge').innerHTML =
-      '<span class="type-badge digital">Digital Download</span>';
+  let product     = null;
+  let selectedSize = null;
 
-    // Title & subtitle
+  function fmt(n) { return '$' + Number(n).toFixed(2); }
+
+  // ── Apply digital vs physical mode UI ───────────────────────────────────
+  if (isDigital) {
+    document.getElementById('type-badge').innerHTML = '<span class="type-badge digital">Digital Download</span>';
     document.getElementById('checkout-title').textContent = 'Get your digital file.';
     document.getElementById('details-subtitle').textContent = 'Delivery Details';
-
-    // Hide size section
     document.getElementById('size-section').style.display = 'none';
-
-    // Swap shipping row for delivery row
     document.getElementById('shipping-row').style.display = 'none';
     document.getElementById('delivery-row').style.display = 'flex';
-
-    // Email notes
     document.getElementById('email-note').style.display = 'none';
     document.getElementById('digital-email-note').style.display = 'flex';
-
-    // Button colour
     document.getElementById('btn-checkout').classList.add('digital-btn');
     document.getElementById('btn-checkout').textContent = 'Purchase & Get File';
-
-    // Summary image — no white frame for digital
     document.getElementById('summary-img').classList.remove('physical-img');
     document.getElementById('summary-price-inline').style.color = 'var(--digital-light)';
   } else {
-    document.getElementById('type-badge').innerHTML =
-      '<span class="type-badge physical">Physical Print</span>';
+    document.getElementById('type-badge').innerHTML = '<span class="type-badge physical">Physical Print</span>';
   }
 
-  // ── Populate summary ─────────────────────────────────────────────────────
-  document.getElementById('summary-img').src = product.img;
-  document.getElementById('summary-img').alt = product.name;
-  document.getElementById('summary-name').textContent = product.name;
+  // ── Load product from prints.json ────────────────────────────────────────
+  async function initCheckout() {
+    if (!productId) { window.location.href = 'prints.html'; return; }
 
-  function fmt(n) { return '$' + n.toFixed(2); }
+    try {
+      const res = await fetch('/content/data/prints.json');
+      if (!res.ok) throw new Error('Could not load product data');
+      const { prints } = await res.json();
+      product = prints.find(p => p.filename === productId);
+      if (!product) { window.location.href = 'prints.html'; return; }
+    } catch (e) {
+      alert('Could not load product. Please go back and try again.');
+      return;
+    }
+
+    // Populate summary image & name
+    document.getElementById('summary-img').src = '/content/photos/' + product.filename;
+    document.getElementById('summary-img').alt = product.title;
+    document.getElementById('summary-name').textContent = product.title;
+
+    // Build size buttons for physical
+    if (!isDigital && product.sizes && product.sizes.length > 0) {
+      const sizeSelector = document.querySelector('.size-selector');
+      sizeSelector.innerHTML = product.sizes.map((size, i) => `
+        <div class="size-btn ${i === 0 ? 'active' : ''}" data-size="${size}">${size}"</div>
+      `).join('');
+      selectedSize = product.sizes[0];
+
+      sizeSelector.querySelectorAll('.size-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          sizeSelector.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          selectedSize = btn.dataset.size;
+          updateSummary();
+        });
+      });
+    } else if (!isDigital) {
+      // No sizes configured — hide size section
+      document.getElementById('size-section').style.display = 'none';
+    }
+
+    updateSummary();
+  }
 
   function updateSummary() {
+    if (!product) return;
+    const price = product.price;
     if (isDigital) {
-      const price = product.digitalPrice;
       document.getElementById('summary-meta').textContent = 'Digital Download · Full Resolution';
-      document.getElementById('summary-price-inline').textContent = fmt(price);
-      document.getElementById('summary-subtotal').textContent = fmt(price);
-      document.getElementById('summary-total').textContent = fmt(price);
     } else {
-      const price = product.prices[selectedSize];
-      document.getElementById('summary-meta').textContent = 'Limited Edition · ' + SIZE_LABELS[selectedSize];
-      document.getElementById('summary-price-inline').textContent = fmt(price);
-      document.getElementById('summary-subtotal').textContent = fmt(price);
-      document.getElementById('summary-total').textContent = fmt(price);
+      document.getElementById('summary-meta').textContent = 'Limited Edition' + (selectedSize ? ' · ' + selectedSize : '');
     }
+    document.getElementById('summary-price-inline').textContent = fmt(price);
+    document.getElementById('summary-subtotal').textContent = fmt(price);
+    document.getElementById('summary-total').textContent = fmt(price);
   }
-  updateSummary();
-
-  // ── Size buttons (physical only) ──────────────────────────────────────────
-  document.querySelectorAll('.size-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      selectedSize = btn.dataset.size;
-      updateSummary();
-    });
-  });
 
   // ── Checkout button ───────────────────────────────────────────────────────
   document.getElementById('btn-checkout').addEventListener('click', async () => {
+    if (!product) return;
+
     const firstName = document.getElementById('first-name').value.trim();
     const lastName  = document.getElementById('last-name').value.trim();
     const email     = document.getElementById('email').value.trim();
@@ -360,6 +361,8 @@
       console.error(err);
     }
   });
+
+  initCheckout();
 </script>
 
 </body>
