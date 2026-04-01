@@ -4,39 +4,17 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Fine Art Prints | GoofiesEyes — Photography Shop</title>
-  <meta name="description" content="Shop gallery-quality archival fine art prints by GoofiesEyes. Hand-selected, signed, and numbered." />
-  
+  <meta name="description" content="Shop gallery-quality archival fine art prints and digital downloads by GoofiesEyes. Physical prints hand-signed and numbered. Digital files delivered instantly." />
+
   <meta property="og:title" content="Fine Art Prints | GoofiesEyes" />
-  <meta property="og:description" content="Shop gallery-quality archival fine art prints by GoofiesEyes." />
+  <meta property="og:description" content="Shop gallery-quality archival fine art prints and digital downloads by GoofiesEyes." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://www.goofieseyes.com/prints.html" />
   <link rel="canonical" href="https://www.goofieseyes.com/prints.html" />
-  
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "GoofiesEyes Fine Art Prints",
-    "description": "Gallery-quality archival prints available for purchase.",
-    "url": "https://www.goofieseyes.com/prints.html",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "item": {
-          "@type": "Product",
-          "name": "The Morning Mist - Tobago",
-          "description": "Limited edition print of Tobago's morning mist.",
-          "offers": { "@type": "Offer", "priceCurrency": "USD", "price": "120.00", "availability": "https://schema.org/InStock" }
-        }
-      }
-    ]
-  }
-  </script>
 
   <style>
     :root {
@@ -45,6 +23,7 @@
       --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
       --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
       --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
+      --digital-accent: #7A9EC9; --digital-accent-rgb: 122, 158, 201;
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
@@ -52,7 +31,7 @@
     h1, h2, h3, h4 { font-family: var(--font-display); }
 
     /* ─── NAVBAR ─── */
-    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 8px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 8px; }
     .nav-inner {
       max-width: 840px; margin: 10px auto 0;
       background: rgba(13,11,9,0.75); border: 1px solid var(--card-border);
@@ -73,45 +52,82 @@
     .page-header { padding: 160px 32px 80px; text-align: center; position: relative; }
     .hero-orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: -1; }
     .hero-orb-1 { width: 300px; height: 300px; background: var(--accent); top: -50px; left: 50%; transform: translateX(-50%); opacity: 0.1; }
-    .page-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; letter-spacing: -0.04em; margin-bottom: 20px; color: var(--text); }
+    .page-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; letter-spacing: -0.04em; margin-bottom: 20px; }
     .page-title em { font-style: italic; color: var(--accent); }
     .page-sub { font-size: 1.1rem; color: var(--text-secondary); font-weight: 300; max-width: 500px; margin: 0 auto; line-height: 1.6; }
 
-    /* ─── PRINTS SHOP GRID ─── */
+    /* ─── SECTION HEADERS ─── */
     .shop-container { max-width: 1200px; margin: 0 auto; padding: 0 32px 120px; }
+
+    .section-block { margin-bottom: 80px; }
+    .section-block + .section-block { margin-top: 80px; }
+
+    .section-divider {
+      display: flex; align-items: center; gap: 20px; margin-bottom: 48px;
+    }
+    .section-label-tag {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em;
+      padding: 6px 14px; border-radius: 100px;
+    }
+    .section-label-tag.physical {
+      color: var(--accent); background: rgba(var(--accent-rgb), 0.08); border: 1px solid rgba(var(--accent-rgb), 0.25);
+    }
+    .section-label-tag.digital {
+      color: var(--digital-accent); background: rgba(var(--digital-accent-rgb), 0.08); border: 1px solid rgba(var(--digital-accent-rgb), 0.25);
+    }
+    .section-divider-line { flex: 1; height: 1px; background: var(--card-border); }
+    .section-heading { font-size: 1.6rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+    .section-desc { font-size: 0.9rem; color: var(--text-secondary); font-weight: 300; margin-top: 8px; max-width: 520px; line-height: 1.6; }
+
+    /* ─── GRID ─── */
     .shop-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 40px; }
-    
+
+    /* ─── PHYSICAL CARDS ─── */
     .product-card { background: transparent; border-radius: var(--radius); text-decoration: none; display: block; }
-    .product-img-wrapper { 
-      background: var(--card-bg); border: 1px solid var(--card-border); 
-      border-radius: var(--radius); aspect-ratio: 4/5; overflow: hidden; 
+    .product-img-wrapper {
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: var(--radius); aspect-ratio: 4/5; overflow: hidden;
       margin-bottom: 20px; position: relative; padding: 24px;
       display: flex; align-items: center; justify-content: center;
       transition: border-color 0.4s ease;
     }
-    /* Mimic a nice print with white border inner shadow inside the frame */
     .product-img { width: 90%; height: auto; box-shadow: 0 20px 40px rgba(0,0,0,0.6); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1); border: 12px solid #fff; }
-    
     .product-card:hover .product-img-wrapper { border-color: rgba(var(--accent-rgb), 0.3); }
     .product-card:hover .product-img { transform: scale(1.03); }
-    
+
+    /* ─── DIGITAL CARDS ─── */
+    .product-card.digital .product-img-wrapper { padding: 16px; }
+    .product-card.digital .product-img { border: none; box-shadow: 0 12px 32px rgba(0,0,0,0.5); }
+    .product-card.digital:hover .product-img-wrapper { border-color: rgba(var(--digital-accent-rgb), 0.35); }
+
     .product-info { padding: 0 8px; }
     .product-title { font-family: var(--font-display); font-size: 1.3rem; font-weight: 600; color: var(--text); margin-bottom: 8px; letter-spacing: -0.02em; }
     .product-desc { font-size: 0.85rem; color: var(--text-secondary); margin-bottom: 16px; font-weight: 300; line-height: 1.5; }
     .product-bottom { display: flex; align-items: center; justify-content: space-between; margin-top: 16px; }
     .product-price { font-family: var(--font-mono); font-size: 0.95rem; color: var(--accent-light); font-weight: 600; }
-    
-    .btn-buy { 
+    .product-price.digital-price { color: #A3C4E8; }
+
+    .btn-buy {
       display: inline-flex; align-items: center; justify-content: center;
       background: var(--card-bg); color: var(--text); padding: 8px 16px; border-radius: 8px;
       font-size: 0.85rem; font-weight: 500; font-family: var(--font-body);
       border: 1px solid var(--card-border); cursor: pointer; transition: all 0.3s ease;
     }
     .product-card:hover .btn-buy { background: var(--accent); color: #fff; border-color: var(--accent); }
+    .product-card.digital:hover .btn-buy { background: var(--digital-accent); border-color: var(--digital-accent); }
+
+    /* Digital badge on image */
+    .digital-badge {
+      position: absolute; top: 12px; right: 12px; z-index: 2;
+      background: rgba(var(--digital-accent-rgb), 0.15); border: 1px solid rgba(var(--digital-accent-rgb), 0.4);
+      color: var(--digital-accent); font-family: var(--font-mono); font-size: 0.65rem;
+      text-transform: uppercase; letter-spacing: 0.12em; padding: 4px 10px; border-radius: 100px;
+    }
 
     @media (max-width: 992px) { .shop-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; } }
-    @media (max-width: 600px) { .shop-grid { grid-template-columns: 1fr; } }
-    
+    @media (max-width: 600px) { .shop-grid { grid-template-columns: 1fr; } .section-heading { font-size: 1.3rem; } }
+
     /* ─── FOOTER ─── */
     footer { border-top: 1px solid var(--card-border); padding: 64px 32px 40px; text-align: center; }
     .footer-logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px; }
@@ -127,7 +143,7 @@
 <nav id="navbar">
   <div class="nav-inner">
     <a href="index.html" class="nav-logo">
-      <svg class="logo-mark" viewBox="0 0 52 26" width="40" height="20" fill="none">
+      <svg viewBox="0 0 52 26" width="40" height="20" fill="none">
         <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
         <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
         <circle cx="26" cy="13" r="3" fill="#C9927A"/>
@@ -148,103 +164,214 @@
 <header class="page-header">
   <div class="hero-orb hero-orb-1"></div>
   <h1 class="page-title">Selected <em>Prints.</em></h1>
-  <p class="page-sub">Gallery-quality archival prints for collectors and discerning walls. Hand-signed and numbered.</p>
+  <p class="page-sub">Two ways to own the work — framed on your wall or living in your files.</p>
 </header>
 
-<section class="shop-container">
-  <div class="shop-grid">
-    <!-- Product 1 -->
-    <a href="print-checkout.html?product=morning-mist" class="product-card">
-      <div class="product-img-wrapper">
-        <img src="https://source.unsplash.com/random/400x500/?ocean,mist" alt="The Morning Mist" class="product-img">
-      </div>
-      <div class="product-info">
-        <h2 class="product-title">The Morning Mist</h2>
-        <p class="product-desc">Tobago collection. Printed on Hahnemühle Photo Rag Baryta 315gsm.</p>
-        <div class="product-bottom">
-          <span class="product-price">From $120</span>
-          <span class="btn-buy">Select Size →</span>
-        </div>
-      </div>
-    </a>
+<main class="shop-container">
 
-    <!-- Product 2 -->
-    <a href="print-checkout.html?product=northern-washout" class="product-card">
-      <div class="product-img-wrapper">
-        <img src="https://source.unsplash.com/random/400x500/?mountain,rain" alt="Northern Washout" class="product-img">
-      </div>
-      <div class="product-info">
-        <h2 class="product-title">Northern Washout</h2>
-        <p class="product-desc">Trinidad's Northern Range. Deep shadows and rich greens.</p>
-        <div class="product-bottom">
-          <span class="product-price">From $120</span>
-          <span class="btn-buy">Select Size →</span>
-        </div>
-      </div>
-    </a>
+  <!-- ═══ PHYSICAL PRINTS ═══ -->
+  <div class="section-block">
+    <div class="section-divider">
+      <span class="section-label-tag physical">Physical Prints</span>
+      <div class="section-divider-line"></div>
+    </div>
+    <h2 class="section-heading">Archival prints, shipped to you.</h2>
+    <p class="section-desc">Printed on Hahnemühle Photo Rag Baryta 315gsm. Hand-signed and individually numbered. Ships in a rigid tube with certificate of authenticity.</p>
 
-    <!-- Product 3 -->
-    <a href="print-checkout.html?product=yellow-flash" class="product-card">
-      <div class="product-img-wrapper">
-        <img src="https://source.unsplash.com/random/500x400/?nyc,street,taxi" alt="Yellow Flash" class="product-img">
-      </div>
-      <div class="product-info">
-        <h2 class="product-title">Yellow Flash</h2>
-        <p class="product-desc">NYC Street Life. Cinematic capture of a rushing cab in rain.</p>
-        <div class="product-bottom">
-          <span class="product-price">From $145</span>
-          <span class="btn-buy">Select Size →</span>
+    <div class="shop-grid" style="margin-top: 36px;">
+
+      <a href="print-checkout.html?product=morning-mist&type=physical" class="product-card">
+        <div class="product-img-wrapper">
+          <img src="https://source.unsplash.com/random/400x500/?ocean,mist" alt="The Morning Mist" class="product-img">
         </div>
-      </div>
-    </a>
-    
-    <!-- Product 4 -->
-    <a href="print-checkout.html?product=silent-sentinel" class="product-card">
-      <div class="product-img-wrapper">
-        <img src="https://source.unsplash.com/random/400x500/?landscape,tree" alt="Silent Sentinel" class="product-img">
-      </div>
-      <div class="product-info">
-        <h2 class="product-title">Silent Sentinel</h2>
-        <p class="product-desc">A lone tree against the Caribbean twilight. High contrast.</p>
-        <div class="product-bottom">
-          <span class="product-price">From $90</span>
-          <span class="btn-buy">Select Size →</span>
+        <div class="product-info">
+          <h3 class="product-title">The Morning Mist</h3>
+          <p class="product-desc">Tobago collection. Sea mist over still water at dawn.</p>
+          <div class="product-bottom">
+            <span class="product-price">From $120</span>
+            <span class="btn-buy">Select Size →</span>
+          </div>
         </div>
-      </div>
-    </a>
-    
-    <!-- Product 5 -->
-    <a href="print-checkout.html?product=urban-shadows" class="product-card">
-      <div class="product-img-wrapper">
-        <img src="https://source.unsplash.com/random/400x600/?people,silhouette" alt="Urban Shadows" class="product-img">
-      </div>
-      <div class="product-info">
-        <h2 class="product-title">Urban Shadows</h2>
-        <p class="product-desc">Black and white street photograph. Brooklyn, NYC.</p>
-        <div class="product-bottom">
-          <span class="product-price">From $110</span>
-          <span class="btn-buy">Select Size →</span>
+      </a>
+
+      <a href="print-checkout.html?product=northern-washout&type=physical" class="product-card">
+        <div class="product-img-wrapper">
+          <img src="https://source.unsplash.com/random/400x500/?mountain,rain" alt="Northern Washout" class="product-img">
         </div>
-      </div>
-    </a>
-    
-    <!-- Product 6 -->
-    <a href="print-checkout.html?product=hidden-falls" class="product-card">
-      <div class="product-img-wrapper">
-        <img src="https://source.unsplash.com/random/500x500/?waterfall" alt="The Hidden Falls" class="product-img">
-      </div>
-      <div class="product-info">
-        <h2 class="product-title">The Hidden Falls</h2>
-        <p class="product-desc">Long-exposure shot deep within the Northern Range.</p>
-        <div class="product-bottom">
-          <span class="product-price">From $150</span>
-          <span class="btn-buy">Select Size →</span>
+        <div class="product-info">
+          <h3 class="product-title">Northern Washout</h3>
+          <p class="product-desc">Trinidad's Northern Range. Deep shadows and rich greens.</p>
+          <div class="product-bottom">
+            <span class="product-price">From $120</span>
+            <span class="btn-buy">Select Size →</span>
+          </div>
         </div>
-      </div>
-    </a>
-    
+      </a>
+
+      <a href="print-checkout.html?product=yellow-flash&type=physical" class="product-card">
+        <div class="product-img-wrapper">
+          <img src="https://source.unsplash.com/random/500x400/?nyc,street,taxi" alt="Yellow Flash" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Yellow Flash</h3>
+          <p class="product-desc">NYC Street Life. Cinematic capture of a rushing cab in rain.</p>
+          <div class="product-bottom">
+            <span class="product-price">From $145</span>
+            <span class="btn-buy">Select Size →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=silent-sentinel&type=physical" class="product-card">
+        <div class="product-img-wrapper">
+          <img src="https://source.unsplash.com/random/400x500/?landscape,tree" alt="Silent Sentinel" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Silent Sentinel</h3>
+          <p class="product-desc">A lone tree against the Caribbean twilight. High contrast.</p>
+          <div class="product-bottom">
+            <span class="product-price">From $90</span>
+            <span class="btn-buy">Select Size →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=urban-shadows&type=physical" class="product-card">
+        <div class="product-img-wrapper">
+          <img src="https://source.unsplash.com/random/400x600/?people,silhouette" alt="Urban Shadows" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Urban Shadows</h3>
+          <p class="product-desc">Black and white street photograph. Brooklyn, NYC.</p>
+          <div class="product-bottom">
+            <span class="product-price">From $110</span>
+            <span class="btn-buy">Select Size →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=hidden-falls&type=physical" class="product-card">
+        <div class="product-img-wrapper">
+          <img src="https://source.unsplash.com/random/500x500/?waterfall" alt="The Hidden Falls" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">The Hidden Falls</h3>
+          <p class="product-desc">Long-exposure shot deep within the Northern Range.</p>
+          <div class="product-bottom">
+            <span class="product-price">From $150</span>
+            <span class="btn-buy">Select Size →</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
   </div>
-</section>
+
+  <!-- ═══ DIGITAL PRINTS ═══ -->
+  <div class="section-block">
+    <div class="section-divider">
+      <span class="section-label-tag digital">Digital Downloads</span>
+      <div class="section-divider-line"></div>
+    </div>
+    <h2 class="section-heading">Full-resolution files. Yours instantly.</h2>
+    <p class="section-desc">High-resolution TIFF/JPEG files delivered to your inbox immediately after purchase. Print locally, use digitally, or keep in your collection.</p>
+
+    <div class="shop-grid" style="margin-top: 36px;">
+
+      <a href="print-checkout.html?product=morning-mist&type=digital" class="product-card digital">
+        <div class="product-img-wrapper">
+          <span class="digital-badge">Digital</span>
+          <img src="https://source.unsplash.com/random/400x500/?ocean,mist" alt="The Morning Mist" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">The Morning Mist</h3>
+          <p class="product-desc">Full-res file · Tobago collection · Instant delivery to email.</p>
+          <div class="product-bottom">
+            <span class="product-price digital-price">$35</span>
+            <span class="btn-buy">Get File →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=northern-washout&type=digital" class="product-card digital">
+        <div class="product-img-wrapper">
+          <span class="digital-badge">Digital</span>
+          <img src="https://source.unsplash.com/random/400x500/?mountain,rain" alt="Northern Washout" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Northern Washout</h3>
+          <p class="product-desc">Full-res file · Northern Range · Instant delivery to email.</p>
+          <div class="product-bottom">
+            <span class="product-price digital-price">$35</span>
+            <span class="btn-buy">Get File →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=yellow-flash&type=digital" class="product-card digital">
+        <div class="product-img-wrapper">
+          <span class="digital-badge">Digital</span>
+          <img src="https://source.unsplash.com/random/500x400/?nyc,street,taxi" alt="Yellow Flash" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Yellow Flash</h3>
+          <p class="product-desc">Full-res file · NYC Street · Instant delivery to email.</p>
+          <div class="product-bottom">
+            <span class="product-price digital-price">$45</span>
+            <span class="btn-buy">Get File →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=silent-sentinel&type=digital" class="product-card digital">
+        <div class="product-img-wrapper">
+          <span class="digital-badge">Digital</span>
+          <img src="https://source.unsplash.com/random/400x500/?landscape,tree" alt="Silent Sentinel" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Silent Sentinel</h3>
+          <p class="product-desc">Full-res file · Caribbean Twilight · Instant delivery to email.</p>
+          <div class="product-bottom">
+            <span class="product-price digital-price">$25</span>
+            <span class="btn-buy">Get File →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=urban-shadows&type=digital" class="product-card digital">
+        <div class="product-img-wrapper">
+          <span class="digital-badge">Digital</span>
+          <img src="https://source.unsplash.com/random/400x600/?people,silhouette" alt="Urban Shadows" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">Urban Shadows</h3>
+          <p class="product-desc">Full-res file · Brooklyn, NYC · Instant delivery to email.</p>
+          <div class="product-bottom">
+            <span class="product-price digital-price">$30</span>
+            <span class="btn-buy">Get File →</span>
+          </div>
+        </div>
+      </a>
+
+      <a href="print-checkout.html?product=hidden-falls&type=digital" class="product-card digital">
+        <div class="product-img-wrapper">
+          <span class="digital-badge">Digital</span>
+          <img src="https://source.unsplash.com/random/500x500/?waterfall" alt="The Hidden Falls" class="product-img">
+        </div>
+        <div class="product-info">
+          <h3 class="product-title">The Hidden Falls</h3>
+          <p class="product-desc">Full-res file · Northern Range · Instant delivery to email.</p>
+          <div class="product-bottom">
+            <span class="product-price digital-price">$40</span>
+            <span class="btn-buy">Get File →</span>
+          </div>
+        </div>
+      </a>
+
+    </div>
+  </div>
+
+</main>
 
 <footer>
   <div class="footer-logo"><span class="logo-name">GoofiesEyes</span></div>

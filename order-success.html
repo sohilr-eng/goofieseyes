@@ -13,46 +13,75 @@
   <style>
     :root {
       --accent: #C9927A; --accent-light: #E0B89A; --accent-rgb: 201, 146, 122;
+      --digital: #7A9EC9; --digital-light: #A3C4E8; --digital-rgb: 122, 158, 201;
       --bg: #0D0B09; --bg-2: #141210;
       --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
       --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
       --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
     }
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px; }
+    body {
+      background: var(--bg); color: var(--text); font-family: var(--font-body);
+      -webkit-font-smoothing: antialiased; min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;
+    }
     ::selection { background: var(--accent); color: #fff; }
     h1, h2, h3 { font-family: var(--font-display); }
 
     .success-card {
-      max-width: 520px; width: 100%; text-align: center;
+      max-width: 540px; width: 100%; text-align: center;
       background: var(--card-bg); border: 1px solid var(--card-border);
       border-radius: 20px; padding: 56px 48px; backdrop-filter: blur(12px);
     }
 
-    .check-circle {
+    /* ── Physical card ── */
+    .icon-circle {
       width: 72px; height: 72px; border-radius: 50%;
-      background: rgba(var(--accent-rgb), 0.12); border: 1.5px solid rgba(var(--accent-rgb), 0.35);
       display: flex; align-items: center; justify-content: center;
       margin: 0 auto 32px;
     }
+    .icon-circle.physical {
+      background: rgba(var(--accent-rgb), 0.12); border: 1.5px solid rgba(var(--accent-rgb), 0.35);
+    }
+    .icon-circle.digital {
+      background: rgba(var(--digital-rgb), 0.12); border: 1.5px solid rgba(var(--digital-rgb), 0.35);
+    }
+
+    .type-tag {
+      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px;
+      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
+      letter-spacing: 0.12em; padding: 5px 12px; border-radius: 100px;
+    }
+    .type-tag.physical { color: var(--accent); background: rgba(var(--accent-rgb),0.08); border: 1px solid rgba(var(--accent-rgb),0.25); }
+    .type-tag.digital  { color: var(--digital); background: rgba(var(--digital-rgb),0.08); border: 1px solid rgba(var(--digital-rgb),0.25); }
 
     .success-title {
       font-size: 2.2rem; font-weight: 700; letter-spacing: -0.04em;
       margin-bottom: 16px; color: var(--text);
     }
-    .success-title em { font-style: italic; color: var(--accent); }
+    .success-title em { font-style: italic; }
+    .success-title em.physical { color: var(--accent); }
+    .success-title em.digital  { color: var(--digital-light); }
 
     .success-body {
       font-size: 1rem; color: var(--text-secondary); line-height: 1.7;
-      font-weight: 300; margin-bottom: 40px;
+      font-weight: 300; margin-bottom: 32px;
     }
 
     .order-ref {
       font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
       background: var(--bg-2); border: 1px solid var(--card-border);
-      border-radius: 8px; padding: 12px 20px; margin-bottom: 40px;
+      border-radius: 8px; padding: 12px 20px; margin-bottom: 36px;
       letter-spacing: 0.05em;
     }
+
+    /* Digital info box */
+    .digital-info {
+      background: rgba(var(--digital-rgb), 0.06); border: 1px solid rgba(var(--digital-rgb), 0.2);
+      border-radius: 10px; padding: 16px 20px; margin-bottom: 36px; text-align: left;
+    }
+    .digital-info p { font-size: 0.88rem; color: var(--digital-light); line-height: 1.6; }
+    .digital-info p + p { margin-top: 8px; }
 
     .btn-primary {
       display: inline-block; background: var(--accent); color: #fff;
@@ -62,10 +91,17 @@
     }
     .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(var(--accent-rgb), 0.4); }
 
+    .btn-digital {
+      display: inline-block; background: var(--digital); color: #fff;
+      padding: 14px 32px; border-radius: 8px; text-decoration: none;
+      font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease;
+      box-shadow: 0 4px 20px rgba(var(--digital-rgb), 0.25);
+    }
+    .btn-digital:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(var(--digital-rgb), 0.4); }
+
     .btn-secondary {
       display: inline-block; color: var(--text-secondary); padding: 14px 24px;
       text-decoration: none; font-size: 0.9rem; transition: color 0.2s;
-      font-weight: 400;
     }
     .btn-secondary:hover { color: var(--accent); }
 
@@ -76,6 +112,8 @@
       display: flex; align-items: center; gap: 10px; text-decoration: none;
     }
     .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text-secondary); }
+
+    @media (max-width: 600px) { .success-card { padding: 40px 28px; } .success-title { font-size: 1.8rem; } }
   </style>
 </head>
 <body>
@@ -89,35 +127,63 @@
   <span class="logo-name">GoofiesEyes</span>
 </a>
 
-<div class="success-card">
-  <div class="check-circle">
+<!-- Physical success -->
+<div id="card-physical" class="success-card" style="display:none;">
+  <div class="icon-circle physical">
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9927A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
       <polyline points="20 6 9 17 4 12"/>
     </svg>
   </div>
-
-  <h1 class="success-title">Order <em>confirmed.</em></h1>
-
+  <span class="type-tag physical">Physical Print</span>
+  <h1 class="success-title">Order <em class="physical">confirmed.</em></h1>
   <p class="success-body">
-    Thank you for your purchase. Your fine art print is now being prepared for production.
-    You'll receive a confirmation email shortly with tracking details once it ships.
+    Your fine art print is now being prepared for production.
+    You'll receive a confirmation email with shipping and tracking details once it's on its way.
   </p>
-
-  <div id="order-ref" class="order-ref">Processing your order…</div>
-
+  <div id="ref-physical" class="order-ref">Processing…</div>
   <div class="actions">
     <a href="prints.html" class="btn-primary">Shop More Prints</a>
     <a href="index.html" class="btn-secondary">Back to Home</a>
   </div>
 </div>
 
-<script>
-  const params = new URLSearchParams(window.location.search);
-  const sessionId = params.get('session_id');
-  const refEl = document.getElementById('order-ref');
+<!-- Digital success -->
+<div id="card-digital" class="success-card" style="display:none;">
+  <div class="icon-circle digital">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7A9EC9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+      <polyline points="7 10 12 15 17 10"/>
+      <line x1="12" y1="15" x2="12" y2="3"/>
+    </svg>
+  </div>
+  <span class="type-tag digital">Digital Download</span>
+  <h1 class="success-title">File <em class="digital">incoming.</em></h1>
+  <p class="success-body">
+    Payment confirmed. Your high-resolution file is on its way to your inbox right now.
+  </p>
+  <div class="digital-info">
+    <p>Check your email — the download link will arrive within a few minutes. If you don't see it, check your spam folder.</p>
+    <p>The file is a full-resolution TIFF/JPEG suitable for professional printing at any size.</p>
+  </div>
+  <div id="ref-digital" class="order-ref">Processing…</div>
+  <div class="actions">
+    <a href="prints.html" class="btn-digital">Browse More</a>
+    <a href="index.html" class="btn-secondary">Back to Home</a>
+  </div>
+</div>
 
+<script>
+  const params    = new URLSearchParams(window.location.search);
+  const sessionId = params.get('session_id');
+  const type      = params.get('type') === 'digital' ? 'digital' : 'physical';
+
+  // Show correct card
+  document.getElementById('card-' + type).style.display = 'block';
+
+  // Order ref
+  const refEl = document.getElementById('ref-' + type);
   if (sessionId) {
-    const short = sessionId.replace('cs_', '').substring(0, 16).toUpperCase();
+    const short = sessionId.replace(/^cs_(live|test)_/, '').substring(0, 16).toUpperCase();
     refEl.textContent = 'Order ref: ' + short;
   } else {
     refEl.textContent = 'Your order has been received.';
