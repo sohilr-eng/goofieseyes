@@ -483,11 +483,12 @@ app.post('/api/publish', (req, res) => {
         send('\n[publish] Nothing new to commit.');
       }
 
-      await runStep('push', ['push']);
-      send('\n[publish] SUCCESS — site published!');
+      await runStep('push', ['push', 'origin', 'master']);
+      send('\n✅ SUCCESS — site published and live!');
       res.end();
     } catch (err) {
-      send(`\n[publish] FAILED: ${err.message}`);
+      send(`\n❌ FAILED: ${err.message}`);
+      send('\nCheck the output above for the specific git error.');
       res.end();
     }
   })();

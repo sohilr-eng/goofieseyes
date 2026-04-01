@@ -542,24 +542,38 @@
       const reader = res.body.getReader();
       const decoder = new TextDecoder();
 
+      let fullOutput = '';
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-        terminal.textContent += decoder.decode(value);
+        const chunk = decoder.decode(value);
+        fullOutput += chunk;
+        terminal.textContent += chunk;
         terminal.scrollTop = terminal.scrollHeight;
       }
 
-      // Store last push time
-      const now = new Date().toLocaleString();
-      localStorage.setItem('lastPush', now);
-      document.getElementById('last-push-time').textContent = `Last push: ${now}`;
+      const succeeded = fullOutput.includes('✅ SUCCESS');
+      const failed = fullOutput.includes('❌ FAILED');
+
+      terminal.style.borderColor = succeeded ? 'var(--success)' : failed ? 'var(--danger)' : '';
+
+      if (succeeded) {
+        const now = new Date().toLocaleString();
+        localStorage.setItem('lastPush', now);
+        document.getElementById('last-push-time').textContent = `Last push: ${now}`;
+        btn.innerHTML = '✅ Published!';
+        setTimeout(() => { btn.innerHTML = '🚀 Push to Site'; }, 3000);
+      } else if (failed) {
+        btn.innerHTML = '❌ Push failed — see terminal';
+        setTimeout(() => { btn.innerHTML = '🚀 Push to Site'; }, 5000);
+      }
 
       loadGitStatus();
     } catch (e) {
-      terminal.textContent += `\nError: ${e.message}`;
+      terminal.textContent += `\n❌ Error: ${e.message}`;
+      terminal.style.borderColor = 'var(--danger)';
     } finally {
       btn.disabled = false;
-      btn.innerHTML = '🚀 Push to Site';
     }
   }
 
