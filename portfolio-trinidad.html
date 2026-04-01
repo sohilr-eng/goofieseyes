@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Trinidad's Northern Range | GoofiesEyes — Portfolios</title>
+  <meta name="description" content="View the Trinidad's Northern Range fine art photography collection by GoofiesEyes." />
+  
+  <meta property="og:title" content="Trinidad's Northern Range | GoofiesEyes" />
+  <meta property="og:description" content="An exploration of texture, rain, and raw wilderness in Trinidad's Northern Range." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://www.goofieseyes.com/portfolio-trinidad.html" />
+  <link rel="canonical" href="https://www.goofieseyes.com/portfolio-trinidad.html" />
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ImageGallery",
+    "name": "Trinidad's Northern Range",
+    "description": "Fine art photography collection of Trinidad's Northern Range by GoofiesEyes.",
+    "url": "https://www.goofieseyes.com/portfolio-trinidad.html"
+  }
+  </script>
+
+  <style>
+    :root {
+      --accent: #C9927A; --accent-light: #E0B89A; --accent-rgb: 201, 146, 122;
+      --bg: #0D0B09; --bg-2: #141210;
+      --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
+      --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
+      --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
+    }
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+    body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+    ::selection { background: var(--accent); color: #fff; }
+    h1, h2, h3, h4 { font-family: var(--font-display); }
+
+    /* ─── NAVBAR ─── */
+    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 8px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .nav-inner {
+      max-width: 840px; margin: 10px auto 0;
+      background: rgba(13,11,9,0.75); border: 1px solid var(--card-border);
+      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+      border-radius: 100px; padding: 10px 28px;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
+    .nav-logo .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text); }
+    .nav-links { display: flex; align-items: center; gap: 28px; }
+    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
+    .nav-links a:hover, .nav-links a.active { color: var(--text); }
+    .nav-cta { color: var(--accent) !important; border: 1px solid rgba(var(--accent-rgb),0.35); padding: 7px 18px; border-radius: 100px; transition: all 0.25s ease !important; }
+    .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
+    @media (max-width: 768px) { .nav-links { display: none; } }
+
+    /* ─── HEADER ─── */
+    .page-header { padding: 160px 32px 80px; text-align: center; position: relative; }
+    .hero-orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: -1; }
+    .hero-orb-1 { width: 300px; height: 300px; background: #68805f; top: -50px; left: 50%; transform: translateX(-50%); opacity: 0.08; } /* Specific tint for this page */
+    .back-link { display: inline-flex; align-items: center; gap: 8px; color: var(--text-muted); text-decoration: none; font-family: var(--font-mono); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.15em; margin-bottom: 24px; transition: color 0.3s; }
+    .back-link:hover { color: var(--accent); }
+    .page-title { font-size: clamp(2rem, 5vw, 4rem); font-weight: 700; letter-spacing: -0.04em; margin-bottom: 20px; color: var(--text); }
+    .page-sub { font-size: 1.1rem; color: var(--text-secondary); font-weight: 300; max-width: 600px; margin: 0 auto; line-height: 1.6; }
+
+    /* ─── MASONRY GRID ─── */
+    .masonry-grid { column-count: 3; column-gap: 20px; max-width: 1400px; margin: 0 auto; padding: 0 32px 120px; }
+    .masonry-item { break-inside: avoid; margin-bottom: 20px; border-radius: var(--radius); overflow: hidden; background: #1a1816; position: relative; cursor: pointer; }
+    .masonry-item img { width: 100%; display: block; filter: grayscale(15%) contrast(1.1); transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), filter 0.6s ease; }
+    .masonry-item:hover img { transform: scale(1.05); filter: grayscale(0%) contrast(1.1); }
+    .item-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(13,11,9,0.9), transparent 50%); opacity: 0; transition: opacity 0.4s ease; display: flex; align-items: flex-end; padding: 24px; }
+    .masonry-item:hover .item-overlay { opacity: 1; }
+    .item-caption { color: var(--text); font-family: var(--font-display); font-size: 1.1rem; font-weight: 500; }
+    
+    @media (max-width: 1024px) { .masonry-grid { column-count: 2; } }
+    @media (max-width: 600px) { .masonry-grid { column-count: 1; } }
+
+    /* ─── FOOTER ─── */
+    footer { border-top: 1px solid var(--card-border); padding: 64px 32px 40px; text-align: center; }
+    .footer-logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px; }
+    .footer-logo .logo-name { font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
+    .footer-links { display: flex; justify-content: center; gap: 28px; margin-bottom: 24px; flex-wrap: wrap; }
+    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
+    .footer-links a:hover { color: var(--accent); }
+    .footer-copy { color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono); }
+  </style>
+</head>
+<body>
+
+<nav id="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo">
+      <svg class="logo-mark" viewBox="0 0 52 26" width="40" height="20" fill="none">
+        <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
+        <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
+        <circle cx="26" cy="13" r="3" fill="#C9927A"/>
+      </svg>
+      <span class="logo-name">GoofiesEyes</span>
+    </a>
+    <div class="nav-links">
+      <a href="index.html">Home</a>
+      <a href="portfolios.html" class="active">Portfolios</a>
+      <a href="prints.html">Prints</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#specs">About</a>
+      <a href="index.html#cta" class="nav-cta">Book a Session</a>
+    </div>
+  </div>
+</nav>
+
+<header class="page-header">
+  <div class="hero-orb hero-orb-1"></div>
+  <a href="portfolios.html" class="back-link">← Back to Portfolios</a>
+  <h1 class="page-title">Northern Range</h1>
+  <p class="page-sub">Deep into the dense, majestic green of the Northern Range mountains. An exploration of texture, rain, and raw wilderness.</p>
+</header>
+
+<section class="masonry-grid">
+  <div class="masonry-item"><img src="https://source.unsplash.com/random/800x1200/?trinidad,mountain,1" alt="Northern Range"><div class="item-overlay"><span class="item-caption">Mist and Peaks</span></div></div>
+  <div class="masonry-item"><img src="https://source.unsplash.com/random/800x800/?trinidad,forest,2" alt="Forest"><div class="item-overlay"><span class="item-caption">The Undergrowth</span></div></div>
+  <div class="masonry-item"><img src="https://source.unsplash.com/random/800x1000/?trinidad,jungle,3" alt="Jungle"><div class="item-overlay"><span class="item-caption">Canopy Filter</span></div></div>
+  <div class="masonry-item"><img src="https://source.unsplash.com/random/800x600/?trinidad,waterfall,4" alt="Waterfall"><div class="item-overlay"><span class="item-caption">Hidden Falls</span></div></div>
+  <div class="masonry-item"><img src="https://source.unsplash.com/random/800x1200/?trinidad,rain,5" alt="Rain"><div class="item-overlay"><span class="item-caption">Washout</span></div></div>
+</section>
+
+<footer>
+  <div class="footer-logo"><span class="logo-name">GoofiesEyes</span></div>
+  <div class="footer-links">
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">Portfolios</a>
+    <a href="prints.html">Prints</a>
+    <a href="journal.html">Journal</a>
+  </div>
+  <p class="footer-copy">&copy; 2026 GoofiesEyes. All rights reserved.</p>
+</footer>
+
+</body>
+</html>
