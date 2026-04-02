@@ -301,7 +301,9 @@
 
   function updateSummary() {
     if (!product) return;
-    const price = product.price;
+    const price = isDigital
+      ? (product.digitalPrice  ?? product.price ?? 0)
+      : (product.physicalPrice ?? product.price ?? 0);
     if (isDigital) {
       document.getElementById('summary-meta').textContent = 'Digital Download · Full Resolution';
     } else {

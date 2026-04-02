@@ -412,7 +412,7 @@
   const PRINT_SIZES = ['4×6', '5×7', '8×10', '11×14', '16×20', '20×30'];
 
   let allPhotos = [];
-  let printsMap = {};   // filename → { price, sizes }
+  let printsMap = {};   // filename → { digitalPrice, physicalPrice, sizes }
   let dirty = false;
 
   function showToast(msg, type = '') {
@@ -439,9 +439,13 @@
 
       allPhotos = photosData.photos || [];
 
-      // Build printsMap from loaded data
+      // Build printsMap from loaded data (fall back to legacy `price` field)
       for (const p of (printsData.prints || [])) {
-        printsMap[p.filename] = { price: p.price || 0, sizes: p.sizes || [] };
+        printsMap[p.filename] = {
+          digitalPrice:  p.digitalPrice  ?? p.price ?? 0,
+          physicalPrice: p.physicalPrice ?? p.price ?? 0,
+          sizes: p.sizes || []
+        };
       }
 
       // Populate portfolio filter
@@ -464,12 +468,14 @@
 
   function updateStats() {
     const printCount = Object.keys(printsMap).length;
-    const prices = Object.values(printsMap).map(p => p.price).filter(p => p > 0);
-    const avg = prices.length ? (prices.reduce((a,b) => a+b, 0) / prices.length).toFixed(0) : '—';
+    const digitalPrices = Object.values(printsMap).map(p => p.digitalPrice).filter(p => p > 0);
+    const avg = digitalPrices.length
+      ? (digitalPrices.reduce((a, b) => a + b, 0) / digitalPrices.length).toFixed(0)
+      : '—';
 
     document.getElementById('stat-total').textContent = allPhotos.length;
     document.getElementById('stat-prints').textContent = printCount;
-    document.getElementById('stat-avg').textContent = prices.length ? `$${avg}` : '—';
+    document.getElementById('stat-avg').textContent = digitalPrices.length ? `$${avg}` : '—';
   }
 
   function applyFilter() {
@@ -505,7 +511,7 @@
 
     grid.innerHTML = photos.map(photo => {
       const isPrint = !!printsMap[photo.filename];
-      const printData = printsMap[photo.filename] || { price: 0, sizes: [] };
+      const printData = printsMap[photo.filename] || { digitalPrice: 0, physicalPrice: 0, sizes: [] };
 
       const sizesHtml = PRINT_SIZES.map(size => `
         <span class="size-chip ${printData.sizes.includes(size) ? 'selected' : ''}"
@@ -534,12 +540,21 @@
 
             <div class="print-fields ${isPrint ? '' : 'disabled'}" id="fields-${CSS.escape(photo.filename)}">
               <div class="price-row">
-                <label>Price</label>
+                <label>Digital</label>
                 <div class="price-input-wrap">
                   <span class="price-symbol">$</span>
-                  <input type="number" class="price-input" value="${printData.price || ''}"
+                  <input type="number" class="price-input" value="${printData.digitalPrice || ''}"
+                         placeholder="25" min="0" step="1"
+                         oninput="updateDigitalPrice('${photo.filename}', this.value)" />
+                </div>
+              </div>
+              <div class="price-row" style="margin-top:6px">
+                <label>Physical</label>
+                <div class="price-input-wrap">
+                  <span class="price-symbol">$</span>
+                  <input type="number" class="price-input" value="${printData.physicalPrice || ''}"
                          placeholder="120" min="0" step="1"
-                         oninput="updatePrice('${photo.filename}', this.value)" />
+                         oninput="updatePhysicalPrice('${photo.filename}', this.value)" />
                 </div>
               </div>
               <div class="sizes-row">
@@ -558,7 +573,7 @@
     const fields = document.querySelector(`[id="fields-${CSS.escape(filename)}"]`);
 
     if (enabled) {
-      printsMap[filename] = printsMap[filename] || { price: 0, sizes: [] };
+      printsMap[filename] = printsMap[filename] || { digitalPrice: 0, physicalPrice: 0, sizes: [] };
       card.classList.add('is-print');
       fields.classList.remove('disabled');
       // Add badge
@@ -581,11 +596,18 @@
     markDirty();
   }
 
-  function updatePrice(filename, value) {
+  function updateDigitalPrice(filename, value) {
     if (printsMap[filename]) {
-      printsMap[filename].price = parseFloat(value) || 0;
+      printsMap[filename].digitalPrice = parseFloat(value) || 0;
       markDirty();
       updateStats();
+    }
+  }
+
+  function updatePhysicalPrice(filename, value) {
+    if (printsMap[filename]) {
+      printsMap[filename].physicalPrice = parseFloat(value) || 0;
+      markDirty();
     }
   }
 
@@ -617,7 +639,8 @@
         alt: p.alt || p.title || p.filename,
         portfolioId: p.portfolioId || null,
         portfolioName: p.portfolioName || null,
-        price: printsMap[p.filename].price || 0,
+        digitalPrice:  printsMap[p.filename].digitalPrice  || 0,
+        physicalPrice: printsMap[p.filename].physicalPrice || 0,
         sizes: printsMap[p.filename].sizes || []
       }));
 

@@ -226,7 +226,7 @@
               <h3 class="product-title">${p.title}</h3>
               <p class="product-desc">${p.portfolioName ? p.portfolioName + ' collection.' : ''}</p>
               <div class="product-bottom">
-                <span class="product-price">From $${p.price}</span>
+                <span class="product-price">From $${p.physicalPrice ?? p.price ?? 0}</span>
                 <span class="btn-buy">Select Size →</span>
               </div>
             </div>
@@ -243,7 +243,7 @@
             <h3 class="product-title">${p.title}</h3>
             <p class="product-desc">Full-res file${p.portfolioName ? ' · ' + p.portfolioName : ''} · Instant delivery to email.</p>
             <div class="product-bottom">
-              <span class="product-price digital-price">$${p.price}</span>
+              <span class="product-price digital-price">$${p.digitalPrice ?? p.price ?? 0}</span>
               <span class="btn-buy">Get File →</span>
             </div>
           </div>

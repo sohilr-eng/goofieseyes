@@ -39,8 +39,11 @@ module.exports = async function handler(req, res) {
   const host     = req.headers['x-forwarded-host'] || req.headers.host;
   const origin   = `${protocol}://${host}`;
 
-  // Price in cents
-  const unitAmount = Math.round(Number(print.price) * 100);
+  // Price in cents — use type-specific price, fall back to legacy `price` field
+  const rawPrice = isDigital
+    ? (print.digitalPrice ?? print.price ?? 0)
+    : (print.physicalPrice ?? print.price ?? 0);
+  const unitAmount = Math.round(Number(rawPrice) * 100);
   if (!unitAmount || unitAmount <= 0) {
     return res.status(400).json({ error: 'Invalid product price' });
   }
