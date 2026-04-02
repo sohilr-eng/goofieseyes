@@ -6,7 +6,8 @@
       "alt": "IMG_2678",
       "portfolioId": "tobago-1775076165587",
       "portfolioName": "Tobago",
-      "price": 50,
+      "digitalPrice": 35,
+      "physicalPrice": 150,
       "sizes": [
         "8×10",
         "11×14",
@@ -19,7 +20,8 @@
       "alt": "IMG_2704",
       "portfolioId": "tobago-1775076165587",
       "portfolioName": "Tobago",
-      "price": 50,
+      "digitalPrice": 35,
+      "physicalPrice": 150,
       "sizes": [
         "8×10",
         "11×14",
