@@ -161,8 +161,8 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
     }
 
     await sharp(tempPath)
-      .resize({ width: 2400, withoutEnlargement: true, fit: 'inside' })
-      .webp({ quality: 88 })
+      .resize({ width: 1200, withoutEnlargement: true, fit: 'inside' })
+      .webp({ quality: 70 })
       .toFile(finalPath);
 
     // Clean up temp file
