@@ -6,8 +6,12 @@
       "alt": "IMG_2678",
       "portfolioId": "tobago-1775076165587",
       "portfolioName": "Tobago",
-      "price": 0,
-      "sizes": []
+      "price": 50,
+      "sizes": [
+        "8×10",
+        "11×14",
+        "16×20"
+      ]
     },
     {
       "filename": "img-2704.webp",
@@ -15,8 +19,12 @@
       "alt": "IMG_2704",
       "portfolioId": "tobago-1775076165587",
       "portfolioName": "Tobago",
-      "price": 0,
-      "sizes": []
+      "price": 50,
+      "sizes": [
+        "8×10",
+        "11×14",
+        "16×20"
+      ]
     }
   ]
 }

@@ -9,7 +9,7 @@ const multer = require('multer');
 const cors = require('cors');
 const path = require('path');
 const fs = require('fs');
-const { spawn } = require('child_process');
+const { spawn, execSync } = require('child_process');
 const matter = require('gray-matter');
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
@@ -483,57 +483,62 @@ app.post('/api/publish', (req, res) => {
   res.setHeader('X-Content-Type-Options', 'nosniff');
 
   const timestamp = new Date().toISOString();
-  const commitMessage = `content update [${timestamp}]`;
+  const message = `content update ${timestamp}`;
   const send = (msg) => {
     console.log(msg);
     res.write(msg + '\n');
   };
 
-  send(`[publish] Starting at ${timestamp}`);
-
-  const runStep = (label, args) => {
-    return new Promise((resolve, reject) => {
-      send(`\n[publish] Running: git ${args.join(' ')}`);
-      const proc = spawn('git', args, { cwd: repoRoot, shell: true });
-
-      proc.stdout.on('data', (d) => { const t = d.toString(); send(t.trim()); });
-      proc.stderr.on('data', (d) => { const t = d.toString(); send(t.trim()); });
-
-      proc.on('close', (code) => {
-        if (code === 0 || (args[0] === 'commit' && code === 1)) {
-          // git commit exits 1 when nothing to commit — treat as ok
-          resolve(code);
-        } else {
-          reject(new Error(`git ${args[0]} failed with exit code ${code}`));
-        }
-      });
-
-      proc.on('error', (err) => reject(err));
-    });
+  const run = (cmd) => {
+    try {
+      const out = execSync(cmd, { cwd: repoRoot, shell: true, stdio: ['pipe', 'pipe', 'pipe'] });
+      return { output: out.toString().trim(), code: 0 };
+    } catch (err) {
+      return {
+        output: ((err.stdout || '') + (err.stderr || '')).toString().trim(),
+        code: err.status || 1,
+        err
+      };
+    }
   };
 
-  (async () => {
-    try {
-      await runStep('add', ['add', '.']);
-      const commitCode = await runStep('commit', ['commit', '-m', commitMessage]).catch((err) => {
-        // Check if it's "nothing to commit" — still ok
-        if (err.message.includes('exit code 1')) return 1;
-        throw err;
-      });
+  send(`[publish] Starting at ${timestamp}`);
 
-      if (commitCode === 1) {
-        send('\n[publish] Nothing new to commit.');
+  try {
+    // ── git add ──────────────────────────────────────────────────────────────
+    send('\n[publish] Running: git add .');
+    const addResult = run('git add .');
+    if (addResult.code !== 0) throw new Error(addResult.output || 'git add failed');
+    if (addResult.output) send(addResult.output);
+
+    // ── git commit ───────────────────────────────────────────────────────────
+    // The message is passed as a double-quoted string so the shell keeps it as
+    // one argument — fixing the "pathspec 'update'" error from spawn + shell.
+    send(`\n[publish] Running: git commit -m "${message}"`);
+    const commitResult = run(`git commit -m "${message}"`);
+    if (commitResult.output) send(commitResult.output);
+    if (commitResult.code !== 0) {
+      const out = commitResult.output.toLowerCase();
+      if (out.includes('nothing to commit') || out.includes('nothing added')) {
+        send('\n[publish] Nothing new to commit — pushing existing HEAD.');
+      } else {
+        throw new Error(commitResult.output || 'git commit failed');
       }
-
-      await runStep('push', ['push', 'origin', 'master']);
-      send('\n✅ SUCCESS — site published and live!');
-      res.end();
-    } catch (err) {
-      send(`\n❌ FAILED: ${err.message}`);
-      send('\nCheck the output above for the specific git error.');
-      res.end();
     }
-  })();
+
+    // ── git push ─────────────────────────────────────────────────────────────
+    send('\n[publish] Running: git push origin master');
+    const pushResult = run('git push origin master');
+    if (pushResult.output) send(pushResult.output);
+    if (pushResult.code !== 0) throw new Error(pushResult.output || 'git push failed');
+
+    send('\n✅ SUCCESS — site published and live!');
+    res.end();
+  } catch (err) {
+    send(`\n❌ FAILED: ${err.message}`);
+    send('\nCheck the output above for the specific git error.');
+    res.end();
+  }
 });
 
 // ─── Start server ─────────────────────────────────────────────────────────────

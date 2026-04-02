@@ -695,7 +695,28 @@
       "name": "Trinidad's Northern Range",
       "description": "Photos from inside the jungle of Trinidad's northern range, 2026",
       "cover": "",
-      "photos": []
+      "photos": [
+        {
+          "filename": "img-2990.webp",
+          "title": "IMG_2990",
+          "tags": [],
+          "alt": "IMG_2990",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 1,
+          "uploadedAt": "2026-04-02T03:15:00.762Z"
+        },
+        {
+          "filename": "img-3034.webp",
+          "title": "IMG_3034",
+          "tags": [],
+          "alt": "IMG_3034",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 2,
+          "uploadedAt": "2026-04-02T03:15:03.034Z"
+        }
+      ]
     }
   ]
 }
