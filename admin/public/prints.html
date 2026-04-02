@@ -539,7 +539,7 @@
                   <span class="price-symbol">$</span>
                   <input type="number" class="price-input" value="${printData.price || ''}"
                          placeholder="120" min="0" step="1"
-                         onchange="updatePrice('${photo.filename}', this.value)" />
+                         oninput="updatePrice('${photo.filename}', this.value)" />
                 </div>
               </div>
               <div class="sizes-row">
