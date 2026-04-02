@@ -123,6 +123,7 @@
 
     @media (max-width: 900px) { .checkout-container { grid-template-columns: 1fr; } .summary-panel { position: relative; top: 0; } }
     @media (max-width: 600px) { .checkout-title { font-size: 1.8rem; } .form-row { grid-template-columns: 1fr; } }
+    img { -webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; }
   </style>
 </head>
 <body>
@@ -365,6 +366,9 @@
   });
 
   initCheckout();
+
+  document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+  document.addEventListener('dragstart',   e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 </script>
 
 </body>

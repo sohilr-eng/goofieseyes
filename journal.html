@@ -91,6 +91,7 @@
     .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
     .footer-links a:hover { color: var(--accent); }
     .footer-copy { color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono); }
+    img { -webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; }
   </style>
 </head>
 <body>
@@ -205,6 +206,9 @@
   }
 
   loadJournal();
+
+  document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
+  document.addEventListener('dragstart',   e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 </script>
 
 </body>
