@@ -41,8 +41,12 @@ async function reprocess() {
       const statBefore = fs.statSync(filePath);
       const sizeBeforeBytes = statBefore.size;
 
+      // Read into a Node buffer first — avoids libvips opening the file
+      // directly on Windows, which causes UNKNOWN errors on some systems
+      const inputBuffer = fs.readFileSync(filePath);
+
       // Check dimensions before deciding whether to skip
-      const meta = await sharp(filePath).metadata();
+      const meta = await sharp(inputBuffer).metadata();
       const width = meta.width || 0;
 
       if (width <= MAX_WIDTH && sizeBeforeBytes < SKIP_SIZE_KB * 1024) {
@@ -51,25 +55,22 @@ async function reprocess() {
         continue;
       }
 
-      // Write to a temp file first so the original is safe if sharp throws
-      const tempPath = filePath + '.tmp';
-      await sharp(filePath)
+      // Process from the in-memory buffer
+      const outBuffer = await sharp(inputBuffer)
         .resize({ width: MAX_WIDTH, withoutEnlargement: true, fit: 'inside' })
         .webp({ quality: QUALITY })
-        .toFile(tempPath);
+        .toBuffer();
 
-      const statAfter = fs.statSync(tempPath);
-      const sizeAfterBytes = statAfter.size;
+      const sizeAfterBytes = outBuffer.length;
 
       // Only replace if the result is actually smaller (safety check)
       if (sizeAfterBytes >= sizeBeforeBytes) {
-        fs.unlinkSync(tempPath);
         console.log(`[reprocess] Skip: ${file} — reprocessed version was not smaller, keeping original`);
         skipped++;
         continue;
       }
 
-      fs.renameSync(tempPath, filePath);
+      fs.writeFileSync(filePath, outBuffer);
 
       const savedBytes = sizeBeforeBytes - sizeAfterBytes;
       totalSavedBytes += savedBytes;
@@ -80,11 +81,6 @@ async function reprocess() {
       console.log(`[reprocess] Done: ${file} (was ${wasMB} → now ${nowKB})`);
 
     } catch (err) {
-      // Clean up temp file if it was left behind
-      const tempPath = filePath + '.tmp';
-      if (fs.existsSync(tempPath)) {
-        try { fs.unlinkSync(tempPath); } catch (_) {}
-      }
       console.error(`[reprocess] Error: ${file} — ${err.message}`);
     }
   }
