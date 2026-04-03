@@ -39,7 +39,46 @@
     .nav-links a:hover, .nav-links a.active { color: var(--text); }
     .nav-cta { color: var(--accent) !important; border: 1px solid rgba(var(--accent-rgb),0.35); padding: 7px 18px; border-radius: 100px; transition: all 0.25s ease !important; }
     .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
-    @media (max-width: 768px) { .nav-links { display: none; } }
+        /* ─── MOBILE NAV ─── */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .nav-hamburger {
+        display: flex; flex-direction: column; justify-content: center; gap: 5px;
+        background: none; border: none; cursor: pointer; padding: 8px;
+        position: relative; z-index: 1002;
+      }
+      .nav-hamburger span {
+        display: block; width: 22px; height: 2px; background: var(--text);
+        border-radius: 2px; transition: all 0.3s ease; transform-origin: center;
+      }
+      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+      .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+      .nav-mobile-menu {
+        display: none; position: fixed; inset: 0; z-index: 1001;
+        background: rgba(13,11,9,0.97); backdrop-filter: blur(24px);
+        -webkit-backdrop-filter: blur(24px);
+        flex-direction: column; align-items: center; justify-content: center; gap: 32px;
+      }
+      .nav-mobile-menu.open { display: flex; }
+      .nav-mobile-menu a {
+        color: var(--text); text-decoration: none;
+        font-family: var(--font-display); font-size: 1.6rem; font-weight: 600;
+        letter-spacing: -0.02em; transition: color 0.2s;
+      }
+      .nav-mobile-menu a:hover, .nav-mobile-menu a.active { color: var(--accent); }
+      .nav-mobile-menu .nav-cta {
+        color: var(--accent) !important;
+        border: 1px solid rgba(var(--accent-rgb),0.4);
+        padding: 12px 32px; border-radius: 100px; font-size: 1rem !important;
+        font-weight: 500; margin-top: 8px;
+      }
+      .nav-mobile-menu .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
+    }
+    @media (min-width: 769px) {
+      .nav-hamburger { display: none; }
+      .nav-mobile-menu { display: none !important; }
+    }
 
     /* ─── HEADER ─── */
     .page-header { padding: 140px 32px 56px; position: relative; max-width: 1200px; margin: 0 auto; }
@@ -139,6 +178,7 @@
     .footer-copy { color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono); }
     img { -webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; }
   </style>
+<script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body>
 
@@ -160,7 +200,21 @@
       <a href="index.html#specs">About</a>
       <a href="index.html#cta" class="nav-cta">Book a Session</a>
     </div>
+    <button class="nav-hamburger" id="navHamburger" aria-label="Toggle navigation">
+      <span></span><span></span><span></span>
+    </button>
   </div>
+
+<div class="nav-mobile-menu" id="navMobileMenu">
+
+      <a href="index.html">Home</a>
+      <a href="portfolios.html" class="active">Portfolios</a>
+      <a href="prints.html">Prints</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#specs">About</a>
+      <a href="index.html#cta" class="nav-cta">Book a Session</a>
+    
+</div>
 </nav>
 
 <!-- Header injected by JS -->
@@ -328,5 +382,24 @@
   document.addEventListener('dragstart',   e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
 </script>
 
+<script>
+  // Mobile nav toggle
+  const navHamburger = document.getElementById('navHamburger');
+  const navMobileMenu = document.getElementById('navMobileMenu');
+  if (navHamburger && navMobileMenu) {
+    navHamburger.addEventListener('click', () => {
+      navHamburger.classList.toggle('open');
+      navMobileMenu.classList.toggle('open');
+      document.body.style.overflow = navMobileMenu.classList.contains('open') ? 'hidden' : '';
+    });
+    navMobileMenu.querySelectorAll('a').forEach(a => {
+      a.addEventListener('click', () => {
+        navHamburger.classList.remove('open');
+        navMobileMenu.classList.remove('open');
+        document.body.style.overflow = '';
+      });
+    });
+  }
+</script>
 </body>
 </html>
