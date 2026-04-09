@@ -984,7 +984,208 @@
       "name": "Caroni Swamp",
       "description": "a brief exploration of the Caroni Swamp, Trinidad and Tobago",
       "cover": "",
-      "photos": []
+      "photos": [
+        {
+          "filename": "img-3122.webp",
+          "title": "IMG_3122",
+          "tags": [],
+          "alt": "IMG_3122",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 1,
+          "uploadedAt": "2026-04-09T23:42:48.273Z"
+        },
+        {
+          "filename": "img-3128.webp",
+          "title": "IMG_3128",
+          "tags": [],
+          "alt": "IMG_3128",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 2,
+          "uploadedAt": "2026-04-09T23:42:49.127Z"
+        },
+        {
+          "filename": "img-3130.webp",
+          "title": "IMG_3130",
+          "tags": [],
+          "alt": "IMG_3130",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 3,
+          "uploadedAt": "2026-04-09T23:42:49.916Z"
+        },
+        {
+          "filename": "img-3133.webp",
+          "title": "IMG_3133",
+          "tags": [],
+          "alt": "IMG_3133",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 4,
+          "uploadedAt": "2026-04-09T23:42:50.419Z"
+        },
+        {
+          "filename": "img-3134.webp",
+          "title": "IMG_3134",
+          "tags": [],
+          "alt": "IMG_3134",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 5,
+          "uploadedAt": "2026-04-09T23:42:51.210Z"
+        },
+        {
+          "filename": "img-3137.webp",
+          "title": "IMG_3137",
+          "tags": [],
+          "alt": "IMG_3137",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 6,
+          "uploadedAt": "2026-04-09T23:42:51.892Z"
+        },
+        {
+          "filename": "img-3140.webp",
+          "title": "IMG_3140",
+          "tags": [],
+          "alt": "IMG_3140",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 7,
+          "uploadedAt": "2026-04-09T23:42:52.634Z"
+        },
+        {
+          "filename": "img-3150.webp",
+          "title": "IMG_3150",
+          "tags": [],
+          "alt": "IMG_3150",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 8,
+          "uploadedAt": "2026-04-09T23:42:53.060Z"
+        },
+        {
+          "filename": "img-3154.webp",
+          "title": "IMG_3154",
+          "tags": [],
+          "alt": "IMG_3154",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 9,
+          "uploadedAt": "2026-04-09T23:42:53.664Z"
+        },
+        {
+          "filename": "img-3158.webp",
+          "title": "IMG_3158",
+          "tags": [],
+          "alt": "IMG_3158",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 10,
+          "uploadedAt": "2026-04-09T23:42:54.569Z"
+        },
+        {
+          "filename": "img-3165.webp",
+          "title": "IMG_3165",
+          "tags": [],
+          "alt": "IMG_3165",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 11,
+          "uploadedAt": "2026-04-09T23:42:55.048Z"
+        },
+        {
+          "filename": "img-3173.webp",
+          "title": "IMG_3173",
+          "tags": [],
+          "alt": "IMG_3173",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 12,
+          "uploadedAt": "2026-04-09T23:42:55.724Z"
+        },
+        {
+          "filename": "img-3175.webp",
+          "title": "IMG_3175",
+          "tags": [],
+          "alt": "IMG_3175",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 13,
+          "uploadedAt": "2026-04-09T23:42:56.849Z"
+        },
+        {
+          "filename": "img-3192.webp",
+          "title": "IMG_3192",
+          "tags": [],
+          "alt": "IMG_3192",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 14,
+          "uploadedAt": "2026-04-09T23:42:57.369Z"
+        },
+        {
+          "filename": "img-3229.webp",
+          "title": "IMG_3229",
+          "tags": [],
+          "alt": "IMG_3229",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 15,
+          "uploadedAt": "2026-04-09T23:42:58.208Z"
+        },
+        {
+          "filename": "img-3230.webp",
+          "title": "IMG_3230",
+          "tags": [],
+          "alt": "IMG_3230",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 16,
+          "uploadedAt": "2026-04-09T23:42:58.839Z"
+        },
+        {
+          "filename": "img-3240.webp",
+          "title": "IMG_3240",
+          "tags": [],
+          "alt": "IMG_3240",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 17,
+          "uploadedAt": "2026-04-09T23:42:59.078Z"
+        },
+        {
+          "filename": "img-3272.webp",
+          "title": "IMG_3272",
+          "tags": [],
+          "alt": "IMG_3272",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 18,
+          "uploadedAt": "2026-04-09T23:42:59.660Z"
+        },
+        {
+          "filename": "img-3299.webp",
+          "title": "IMG_3299",
+          "tags": [],
+          "alt": "IMG_3299",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 19,
+          "uploadedAt": "2026-04-09T23:43:00.426Z"
+        },
+        {
+          "filename": "img-3300.webp",
+          "title": "IMG_3300",
+          "tags": [],
+          "alt": "IMG_3300",
+          "printAvailable": false,
+          "printPrice": 0,
+          "order": 20,
+          "uploadedAt": "2026-04-09T23:43:01.203Z"
+        }
+      ]
     }
   ]
 }
