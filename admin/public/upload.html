@@ -226,6 +226,15 @@
   </div>
   <input type="file" id="file-input" accept="image/*" multiple />
 
+  <!-- Bulk assign -->
+  <div id="bulk-assign" style="display:none; background:var(--bg-card); border:1px solid var(--border-card); border-radius:10px; padding:14px 18px; margin-bottom:16px; display:none; align-items:center; gap:12px; flex-wrap:wrap;">
+    <span style="font-size:13px; font-weight:600; color:var(--text-muted);">Assign all to portfolio:</span>
+    <select id="bulk-portfolio" style="background:rgba(255,255,255,0.06); border:1px solid var(--border-card); border-radius:6px; color:var(--text); font-size:13px; padding:8px 10px; outline:none; font-family:inherit; min-width:200px;">
+      <option value="">— No portfolio —</option>
+    </select>
+    <button class="btn btn-secondary" onclick="applyBulkPortfolio()" style="padding:8px 16px;">Apply to All</button>
+  </div>
+
   <!-- File list -->
   <div class="files-section" id="files-section" style="display:none">
     <h3>Selected Files</h3>
@@ -250,16 +259,30 @@
   let selectedFiles = [];
   let portfolios = [];
 
-  // Load portfolios for dropdown
   async function loadPortfolios() {
     try {
       const res = await fetch('/api/portfolios');
       const data = await res.json();
       portfolios = data.portfolios || [];
+      const bulkSel = document.getElementById('bulk-portfolio');
+      portfolios.forEach(p => {
+        const opt = document.createElement('option');
+        opt.value = p.id;
+        opt.textContent = p.name;
+        bulkSel.appendChild(opt);
+      });
     } catch(e) { portfolios = []; }
   }
 
   loadPortfolios();
+
+  function applyBulkPortfolio() {
+    const val = document.getElementById('bulk-portfolio').value;
+    selectedFiles.forEach((_, i) => {
+      const sel = document.getElementById(`portfolio-${i}`);
+      if (sel) sel.value = val;
+    });
+  }
 
   // Drop zone
   const dropZone = document.getElementById('drop-zone');
@@ -295,14 +318,17 @@
     const list = document.getElementById('file-list');
     const actions = document.getElementById('upload-actions');
 
+    const bulk = document.getElementById('bulk-assign');
     if (selectedFiles.length === 0) {
       section.style.display = 'none';
       actions.style.display = 'none';
+      bulk.style.display = 'none';
       return;
     }
 
     section.style.display = 'block';
     actions.style.display = 'flex';
+    bulk.style.display = 'flex';
 
     list.innerHTML = selectedFiles.map((file, i) => {
       const url = URL.createObjectURL(file);
