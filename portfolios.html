@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Portfolios | GoofiesEyes — Fine Art Photography</title>
-  <meta name="description" content="Explore distinct photography portfolios by GoofiesEyes, including Tobago, Trinidad's Northern Range, and NYC Street Life." />
+  <title>My Works | GoofiesEyes — Fine Art Photography</title>
+  <meta name="description" content="Explore distinct photography collections by GoofiesEyes, including Tobago, Trinidad's Northern Range, and NYC Street Life." />
   
   <meta property="og:title" content="Portfolios | GoofiesEyes" />
   <meta property="og:description" content="Explore distinct photography portfolios by GoofiesEyes, including Tobago, Trinidad's Northern Range, and NYC Street Life." />
@@ -172,7 +172,8 @@
     </a>
     <div class="nav-links">
       <a href="index.html">Home</a>
-      <a href="portfolios.html" class="active">Portfolios</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="portfolios.html" class="active">My Works</a>
       <a href="prints.html">Prints</a>
       <a href="journal.html">Journal</a>
       <a href="index.html#specs">About</a>
@@ -184,20 +185,19 @@
   </div>
 
 <div class="nav-mobile-menu" id="navMobileMenu">
-
       <a href="index.html">Home</a>
-      <a href="portfolios.html" class="active">Portfolios</a>
+      <a href="portfolio.html">Portfolio</a>
+      <a href="portfolios.html" class="active">My Works</a>
       <a href="prints.html">Prints</a>
       <a href="journal.html">Journal</a>
       <a href="index.html#specs">About</a>
       <a href="index.html#cta" class="nav-cta">Book a Session</a>
-    
 </div>
 </nav>
 
 <header class="page-header">
   <div class="hero-orb hero-orb-1"></div>
-  <h1 class="page-title">Curated <em>Collections.</em></h1>
+  <h1 class="page-title">My <em>Works.</em></h1>
   <p class="page-sub">Explore the thematic journeys through environments, people, and light.</p>
 </header>
 
@@ -242,7 +242,7 @@
         const num = String(i + 1).padStart(2, '0');
 
         return `
-          <a href="portfolio.html?slug=${encodeURIComponent(portfolio.slug)}" class="portfolio-card">
+          <a href="collection.html?slug=${encodeURIComponent(portfolio.slug)}" class="portfolio-card">
             <div class="portfolio-img-wrapper">
               <div class="portfolio-overlay"></div>
               ${imgHTML}
@@ -278,7 +278,8 @@
   </div>
   <div class="footer-links">
     <a href="index.html">Home</a>
-    <a href="portfolios.html">Portfolios</a>
+    <a href="portfolio.html">Portfolio</a>
+    <a href="portfolios.html">My Works</a>
     <a href="prints.html">Prints</a>
     <a href="journal.html">Journal</a>
     <a href="index.html#specs">About</a>
