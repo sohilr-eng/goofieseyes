@@ -2121,7 +2121,7 @@
       "slug": "my-model",
       "name": "My Model",
       "description": "Portraits of my amazing girlfriend",
-      "cover": "",
+      "cover": "img-3973-3.webp",
       "photos": [
         {
           "filename": "img-3951.webp",
@@ -2232,36 +2232,6 @@
           "printPrice": 0,
           "order": 11,
           "uploadedAt": "2026-05-13T15:46:21.282Z"
-        },
-        {
-          "filename": "img-3969.webp",
-          "title": "IMG_3969",
-          "tags": [],
-          "alt": "IMG_3969",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 12,
-          "uploadedAt": "2026-05-13T15:46:21.616Z"
-        },
-        {
-          "filename": "img-3971.webp",
-          "title": "IMG_3971",
-          "tags": [],
-          "alt": "IMG_3971",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 13,
-          "uploadedAt": "2026-05-13T15:46:22.208Z"
-        },
-        {
-          "filename": "img-3971-2.webp",
-          "title": "IMG_3971-2",
-          "tags": [],
-          "alt": "IMG_3971-2",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 14,
-          "uploadedAt": "2026-05-13T15:46:22.839Z"
         },
         {
           "filename": "img-3973.webp",
@@ -2420,18 +2390,8 @@
       "slug": "smoky-mountains",
       "name": "Smoky mountains",
       "description": "",
-      "cover": "",
+      "cover": "img-5055.webp",
       "photos": [
-        {
-          "filename": "img-4628.webp",
-          "title": "IMG_4628",
-          "tags": [],
-          "alt": "IMG_4628",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 1,
-          "uploadedAt": "2026-05-13T15:49:31.946Z"
-        },
         {
           "filename": "img-4642.webp",
           "title": "IMG_4642",
@@ -2441,16 +2401,6 @@
           "printPrice": 0,
           "order": 2,
           "uploadedAt": "2026-05-13T15:49:32.384Z"
-        },
-        {
-          "filename": "img-4647.webp",
-          "title": "IMG_4647",
-          "tags": [],
-          "alt": "IMG_4647",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 3,
-          "uploadedAt": "2026-05-13T15:49:32.866Z"
         },
         {
           "filename": "img-4651.webp",
@@ -3279,7 +3229,7 @@
       "slug": "new-york-city",
       "name": "New York City",
       "description": "",
-      "cover": "",
+      "cover": "img-4287-1778687843535.webp",
       "photos": [
         {
           "filename": "img-4218.webp",
@@ -3502,36 +3452,6 @@
           "uploadedAt": "2026-05-13T15:57:25.421Z"
         },
         {
-          "filename": "img-4295.webp",
-          "title": "IMG_4295",
-          "tags": [],
-          "alt": "IMG_4295",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 23,
-          "uploadedAt": "2026-05-13T15:57:25.957Z"
-        },
-        {
-          "filename": "img-4299.webp",
-          "title": "IMG_4299",
-          "tags": [],
-          "alt": "IMG_4299",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 24,
-          "uploadedAt": "2026-05-13T15:57:26.544Z"
-        },
-        {
-          "filename": "img-4301.webp",
-          "title": "IMG_4301",
-          "tags": [],
-          "alt": "IMG_4301",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 25,
-          "uploadedAt": "2026-05-13T15:57:27.114Z"
-        },
-        {
           "filename": "img-4304.webp",
           "title": "IMG_4304",
           "tags": [],
@@ -3540,16 +3460,6 @@
           "printPrice": 0,
           "order": 26,
           "uploadedAt": "2026-05-13T15:57:27.656Z"
-        },
-        {
-          "filename": "img-4307.webp",
-          "title": "IMG_4307",
-          "tags": [],
-          "alt": "IMG_4307",
-          "printAvailable": false,
-          "printPrice": 0,
-          "order": 27,
-          "uploadedAt": "2026-05-13T15:57:28.198Z"
         },
         {
           "filename": "img-4313-1778687848239.webp",
