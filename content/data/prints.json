@@ -69,6 +69,76 @@
         "11×14",
         "16×20"
       ]
+    },
+    {
+      "filename": "img-4221.webp",
+      "title": "IMG_4221",
+      "alt": "IMG_4221",
+      "portfolioId": "new-york-city-1778687802417",
+      "portfolioName": "New York City",
+      "digitalPrice": 25,
+      "physicalPrice": 75,
+      "sizes": [
+        "8×10",
+        "11×14",
+        "16×20"
+      ]
+    },
+    {
+      "filename": "img-4244.webp",
+      "title": "IMG_4244",
+      "alt": "IMG_4244",
+      "portfolioId": "new-york-city-1778687802417",
+      "portfolioName": "New York City",
+      "digitalPrice": 25,
+      "physicalPrice": 75,
+      "sizes": [
+        "8×10",
+        "16×20",
+        "11×14"
+      ]
+    },
+    {
+      "filename": "img-4287-1778687843535.webp",
+      "title": "IMG_4287",
+      "alt": "IMG_4287",
+      "portfolioId": "new-york-city-1778687802417",
+      "portfolioName": "New York City",
+      "digitalPrice": 25,
+      "physicalPrice": 65,
+      "sizes": [
+        "8×10",
+        "11×14",
+        "16×20"
+      ]
+    },
+    {
+      "filename": "img-4313-1778687848239.webp",
+      "title": "IMG_4313",
+      "alt": "IMG_4313",
+      "portfolioId": "new-york-city-1778687802417",
+      "portfolioName": "New York City",
+      "digitalPrice": 25,
+      "physicalPrice": 65,
+      "sizes": [
+        "8×10",
+        "16×20",
+        "11×14"
+      ]
+    },
+    {
+      "filename": "img-4318.webp",
+      "title": "IMG_4318",
+      "alt": "IMG_4318",
+      "portfolioId": "new-york-city-1778687802417",
+      "portfolioName": "New York City",
+      "digitalPrice": 25,
+      "physicalPrice": 65,
+      "sizes": [
+        "8×10",
+        "16×20",
+        "11×14"
+      ]
     }
   ]
 }
