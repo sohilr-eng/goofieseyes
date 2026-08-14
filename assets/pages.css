@@ -1,0 +1,489 @@
+/* goofieseyes — interior page layouts.
+ *
+ * Loaded by every page except the landing page, which needs none of this.
+ * Same namespace contract as site.css: .gf-* selectors only, never bare
+ * elements, so this file cannot affect a page that has not opted in.
+ */
+
+.gf-page {
+  background: var(--gf-paper);
+  min-height: 100vh;
+  padding: clamp(6rem, 11vw, 8.5rem) clamp(1rem, 4vw, 2.6rem) clamp(4rem, 8vw, 6rem);
+}
+
+.gf-page--alt {
+  background: var(--gf-paper-2);
+}
+
+.gf-page-inner {
+  max-width: 1240px;
+  margin: 0 auto;
+}
+
+.gf-page-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding-bottom: clamp(2rem, 4vw, 3.4rem);
+  margin-bottom: clamp(2rem, 4vw, 3.4rem);
+  border-bottom: 1px solid var(--gf-line);
+}
+
+.gf-page-head h1 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.6rem, 7vw, 5.4rem);
+  line-height: 0.92;
+  max-width: 16ch;
+  margin: 0.6rem 0 0;
+}
+
+.gf-page-head p {
+  margin: 0;
+}
+
+.gf-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-family: var(--gf-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gf-ink-soft);
+  text-decoration: none;
+  margin-bottom: 1.6rem;
+}
+
+.gf-back:hover {
+  color: var(--gf-coral);
+}
+
+.gf-state {
+  padding: clamp(3rem, 8vw, 6rem) 0;
+  text-align: center;
+  font-family: var(--gf-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gf-ink-soft);
+}
+
+.gf-count {
+  font-family: var(--gf-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gf-ink-soft);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.gf-count b {
+  display: block;
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2rem, 4vw, 3rem);
+  letter-spacing: 0;
+  color: var(--gf-ink);
+  line-height: 1;
+}
+
+/* ---------- the crate as a full-page grid ---------- */
+.gf-crate-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: clamp(2.4rem, 4vw, 3.6rem) clamp(1.6rem, 3vw, 2.6rem);
+}
+
+.gf-crate-grid .gf-record {
+  width: 100%;
+}
+
+/* ---------- collection: photo grid + lightbox ---------- */
+.gf-photo-grid {
+  columns: 3;
+  column-gap: clamp(0.7rem, 1.4vw, 1.1rem);
+}
+
+@media (max-width: 900px) {
+  .gf-photo-grid { columns: 2; }
+}
+
+@media (max-width: 540px) {
+  .gf-photo-grid { columns: 1; }
+}
+
+.gf-photo {
+  break-inside: avoid;
+  margin: 0 0 clamp(0.7rem, 1.4vw, 1.1rem);
+  cursor: zoom-in;
+  overflow: hidden;
+  background: var(--gf-paper-2);
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+}
+
+.gf-photo img {
+  width: 100%;
+  height: auto;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gf-photo:hover img {
+  transform: scale(1.03);
+}
+
+.gf-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(18, 17, 15, 0.96);
+  padding: clamp(1rem, 4vw, 3rem);
+}
+
+.gf-lightbox.is-open {
+  display: flex;
+}
+
+.gf-lightbox img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+.gf-lightbox button {
+  position: absolute;
+  background: none;
+  border: 0;
+  color: var(--gf-paper);
+  font-family: var(--gf-mono);
+  font-size: 1.5rem;
+  cursor: pointer;
+  min-width: 2.75rem;
+  min-height: 2.75rem;
+}
+
+.gf-lightbox button:hover {
+  color: var(--gf-coral);
+}
+
+.gf-lb-close { top: 1rem; right: 1rem; }
+.gf-lb-prev { left: 0.5rem; top: 50%; transform: translateY(-50%); }
+.gf-lb-next { right: 0.5rem; top: 50%; transform: translateY(-50%); }
+
+.gf-lb-count {
+  position: absolute;
+  bottom: 1.2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--gf-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.18em;
+  color: rgba(247, 244, 238, 0.7);
+}
+
+/* ---------- prints ---------- */
+.gf-shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: clamp(2rem, 4vw, 3rem);
+}
+
+.gf-print {
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-print-img {
+  position: relative;
+  overflow: hidden;
+  background: var(--gf-paper-2);
+  aspect-ratio: 4 / 5;
+}
+
+.gf-print-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.6s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gf-print:hover .gf-print-img img {
+  transform: scale(1.04);
+}
+
+.gf-print-body {
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--gf-line);
+  margin-top: 0.9rem;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.gf-print-body h3 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: 1.4rem;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.gf-print-price {
+  font-family: var(--gf-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+  color: var(--gf-ink-soft);
+  margin: 0.4rem 0 1.1rem;
+}
+
+.gf-print-buy {
+  margin-top: auto;
+}
+
+.gf-section-label {
+  font-family: var(--gf-mono);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gf-ink-soft);
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--gf-line);
+  margin: clamp(3rem, 6vw, 5rem) 0 clamp(1.6rem, 3vw, 2.4rem);
+}
+
+.gf-section-label:first-of-type {
+  margin-top: 0;
+}
+
+/* ---------- checkout ---------- */
+.gf-checkout {
+  display: grid;
+  gap: clamp(2rem, 5vw, 4rem);
+  grid-template-columns: 1fr;
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .gf-checkout {
+    grid-template-columns: 1.1fr 0.9fr;
+  }
+}
+
+.gf-summary {
+  border: 1px dashed var(--gf-ink);
+  background: var(--gf-paper);
+  padding: clamp(1.4rem, 3vw, 2rem);
+}
+
+@media (min-width: 900px) {
+  .gf-summary {
+    position: sticky;
+    top: 6rem;
+  }
+}
+
+.gf-summary img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin-bottom: 1.2rem;
+}
+
+.gf-summary-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid var(--gf-line);
+  font-family: var(--gf-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.gf-summary-row:last-child {
+  border-bottom: 0;
+  font-size: 0.85rem;
+  color: var(--gf-ink);
+}
+
+.gf-sizes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.gf-size {
+  padding: 0.7rem 1.1rem;
+  border: 1px solid var(--gf-line);
+  background: transparent;
+  font-family: var(--gf-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  color: var(--gf-ink);
+  min-height: 2.75rem;
+}
+
+.gf-size[aria-pressed="true"] {
+  border-color: var(--gf-ink);
+  background: var(--gf-ink);
+  color: var(--gf-paper);
+}
+
+.gf-row {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 520px) {
+  .gf-row { grid-template-columns: 1fr; }
+}
+
+.gf-note-box {
+  border-left: 2px solid var(--gf-coral);
+  padding: 0.9rem 1.1rem;
+  margin-top: 1.4rem;
+  background: var(--gf-paper-2);
+  font-size: 0.92rem;
+  line-height: 1.55;
+}
+
+.gf-error {
+  color: var(--gf-coral);
+  font-family: var(--gf-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  margin-top: 1rem;
+}
+
+/* ---------- journal ---------- */
+.gf-journal-card {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  padding: clamp(1.8rem, 3.5vw, 2.6rem) 0;
+  border-bottom: 1px solid var(--gf-line);
+  text-decoration: none;
+  color: inherit;
+}
+
+@media (min-width: 760px) {
+  .gf-journal-card {
+    grid-template-columns: 11rem 1fr;
+    gap: 2.5rem;
+    align-items: start;
+  }
+}
+
+.gf-journal-card:first-child {
+  border-top: 1px solid var(--gf-line);
+}
+
+.gf-journal-card h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3.2vw, 2.5rem);
+  line-height: 1.05;
+  margin: 0 0 0.7rem;
+  transition: color 0.3s ease;
+}
+
+.gf-journal-card:hover h2 {
+  color: var(--gf-coral);
+}
+
+.gf-journal-card p {
+  margin: 0;
+  color: var(--gf-ink-soft);
+  line-height: 1.6;
+  max-width: 62ch;
+}
+
+/* ---------- journal post ---------- */
+.gf-post {
+  max-width: 68ch;
+  margin: 0 auto;
+}
+
+.gf-post h1 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.4rem, 6vw, 4.2rem);
+  line-height: 0.98;
+  margin: 1rem 0 1.6rem;
+}
+
+.gf-post-body p {
+  font-size: clamp(1.05rem, 1.6vw, 1.2rem);
+  line-height: 1.72;
+  margin: 0 0 1.4rem;
+}
+
+.gf-post-body blockquote {
+  margin: 2rem 0;
+  padding-left: 1.4rem;
+  border-left: 2px solid var(--gf-coral);
+  font-family: var(--gf-serif);
+  font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+  line-height: 1.3;
+}
+
+.gf-post-body img {
+  width: 100%;
+  height: auto;
+  display: block;
+  margin: 2rem 0;
+}
+
+/* ---------- order success ---------- */
+.gf-success {
+  max-width: 640px;
+  margin: 0 auto;
+  border: 1px dashed var(--gf-ink);
+  background: var(--gf-paper);
+  padding: clamp(2rem, 5vw, 3.4rem);
+  text-align: center;
+}
+
+.gf-success h1 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5vw, 3.4rem);
+  line-height: 1;
+  margin: 1rem 0;
+}
+
+.gf-success-ref {
+  font-family: var(--gf-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--gf-ink-soft);
+  padding: 1rem 0;
+  margin: 1.4rem 0;
+  border-top: 1px solid var(--gf-line);
+  border-bottom: 1px solid var(--gf-line);
+  word-break: break-all;
+}
+
+/* ---------- next pressing ---------- */
+.gf-pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: space-between;
+  margin-top: clamp(3rem, 6vw, 4.5rem);
+  padding-top: clamp(1.6rem, 3vw, 2.4rem);
+  border-top: 1px solid var(--gf-line);
+}

@@ -2171,7 +2171,8 @@
           "printAvailable": false,
           "printPrice": 0,
           "order": 5,
-          "uploadedAt": "2026-05-13T15:46:17.711Z"
+          "uploadedAt": "2026-05-13T15:46:17.711Z",
+          "selected": true
         },
         {
           "filename": "img-3960.webp",
@@ -2191,7 +2192,8 @@
           "printAvailable": false,
           "printPrice": 0,
           "order": 7,
-          "uploadedAt": "2026-05-13T15:46:19.231Z"
+          "uploadedAt": "2026-05-13T15:46:19.231Z",
+          "selected": true
         },
         {
           "filename": "img-3965-2.webp",
@@ -2271,7 +2273,8 @@
           "printAvailable": false,
           "printPrice": 0,
           "order": 18,
-          "uploadedAt": "2026-05-13T15:47:00.186Z"
+          "uploadedAt": "2026-05-13T15:47:00.186Z",
+          "selected": true
         },
         {
           "filename": "img-4192.webp",
@@ -3409,7 +3412,8 @@
           "printAvailable": false,
           "printPrice": 0,
           "order": 18,
-          "uploadedAt": "2026-05-13T15:57:24.024Z"
+          "uploadedAt": "2026-05-13T15:57:24.024Z",
+          "selected": true
         },
         {
           "filename": "img-4288.webp",
@@ -3469,7 +3473,8 @@
           "printAvailable": false,
           "printPrice": 0,
           "order": 28,
-          "uploadedAt": "2026-05-13T15:57:28.630Z"
+          "uploadedAt": "2026-05-13T15:57:28.630Z",
+          "selected": true
         },
         {
           "filename": "img-4318.webp",

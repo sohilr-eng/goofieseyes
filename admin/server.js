@@ -176,6 +176,8 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
       alt: alt || title || baseName,
       printAvailable: printAvailable === 'true' || printAvailable === true,
       printPrice: printPrice ? parseFloat(printPrice) : 0,
+      // Starred in the admin photo grid; surfaced on the public Selects page.
+      selected: false,
       order: 999,
       uploadedAt: new Date().toISOString()
     };

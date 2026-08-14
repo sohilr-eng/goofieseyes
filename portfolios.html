@@ -1,327 +1,155 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-gf-spin="label">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>My Works | GoofiesEyes — Fine Art Photography</title>
-  <meta name="description" content="Explore distinct photography collections by GoofiesEyes, including Tobago, Trinidad's Northern Range, and NYC Street Life." />
-  
-  <meta property="og:title" content="Portfolios | GoofiesEyes" />
-  <meta property="og:description" content="Explore distinct photography portfolios by GoofiesEyes, including Tobago, Trinidad's Northern Range, and NYC Street Life." />
+  <title>The crate | GoofiesEyes</title>
+  <meta name="description" content="Every body of work by GoofiesEyes, filed like a record crate — wildlife, landscape, portrait and travel collections from Trinidad and Tobago, the Smoky Mountains and New York City." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://goofieseyes.live/portfolios.html" />
+
+  <meta property="og:title" content="The crate | GoofiesEyes" />
+  <meta property="og:description" content="Every body of work, filed like a record crate." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://goofieseyes.live/portfolios.html" />
-  
-  <link rel="canonical" href="https://goofieseyes.live/portfolios.html" />
-  
+  <meta property="og:site_name" content="GoofiesEyes" />
+  <meta property="og:image" content="https://goofieseyes.live/assets/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A shelf of records, each one a GoofiesEyes photography collection" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://goofieseyes.live/assets/og-image.jpg" />
+
+  <script type="application/ld+json" id="crate-ld">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "The crate — GoofiesEyes",
+    "description": "Every body of work by GoofiesEyes, filed like a record crate.",
+    "url": "https://goofieseyes.live/portfolios.html",
+    "hasPart": []
+  }
+  </script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Record-crate rebrand: shared token layer, type and behaviour.
-       Namespaced .gf-* throughout, so it is inert until a page opts in. -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/pages.css">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <script defer src="/assets/site.js"></script>
-  
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "CollectionPage",
-    "name": "GoofiesEyes Portfolios",
-    "description": "Explore distinct photography portfolios by GoofiesEyes.",
-    "url": "https://goofieseyes.live/portfolios.html",
-    "hasPart": [
-      { "@type": "ImageGallery", "name": "Tobago", "url": "https://goofieseyes.live/collection.html?slug=tobago" },
-      { "@type": "ImageGallery", "name": "Trinidad's Northern Range", "url": "https://goofieseyes.live/collection.html?slug=trinidad-s-northern-range" },
-      { "@type": "ImageGallery", "name": "Caroni Swamp", "url": "https://goofieseyes.live/collection.html?slug=caroni-swamp" },
-      { "@type": "ImageGallery", "name": "Macaws", "url": "https://goofieseyes.live/collection.html?slug=macaws" },
-      { "@type": "ImageGallery", "name": "My Model", "url": "https://goofieseyes.live/collection.html?slug=my-model" },
-      { "@type": "ImageGallery", "name": "Smoky Mountains", "url": "https://goofieseyes.live/collection.html?slug=smoky-mountains" },
-      { "@type": "ImageGallery", "name": "New York City", "url": "https://goofieseyes.live/collection.html?slug=new-york-city" }
-    ]
-  }
-  </script>
-
-  <style>
-    :root {
-      --accent: #C9927A;
-      --accent-light: #E0B89A;
-      --accent-rgb: 201, 146, 122;
-      --bg: #0D0B09;
-      --bg-2: #141210;
-      --text: #F0EBE5;
-      --text-muted: #6B6056;
-      --text-secondary: #9A8E85;
-      --font-display: 'Space Grotesk', sans-serif;
-      --font-body: 'Archivo', sans-serif;
-      --font-mono: 'JetBrains Mono', monospace;
-      --card-bg: rgba(255,255,255,0.025);
-      --card-border: rgba(255,255,255,0.055);
-      --radius: 20px;
-    }
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-    ::selection { background: var(--accent); color: #fff; }
-    h1, h2, h3, h4 { font-family: var(--font-display); }
-
-    /* ─── NAVBAR ─── */
-    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 8px; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
-    .nav-inner {
-      max-width: 840px; margin: 10px auto 0;
-      background: rgba(13,11,9,0.75); border: 1px solid var(--card-border);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-radius: 100px; padding: 10px 28px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-logo .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; letter-spacing: -0.03em; color: var(--text); }
-    .nav-links { display: flex; align-items: center; gap: 28px; }
-    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--text); }
-    .nav-cta { color: var(--accent) !important; border: 1px solid rgba(var(--accent-rgb),0.35); padding: 7px 18px; border-radius: 100px; transition: all 0.25s ease !important; }
-    .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
-        /* ─── MOBILE NAV ─── */
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .nav-hamburger {
-        display: flex; flex-direction: column; justify-content: center; gap: 5px;
-        background: none; border: none; cursor: pointer; padding: 8px;
-        position: relative; z-index: 1002;
-      }
-      .nav-hamburger span {
-        display: block; width: 22px; height: 2px; background: var(--text);
-        border-radius: 2px; transition: all 0.3s ease; transform-origin: center;
-      }
-      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-      .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-      .nav-mobile-menu {
-        display: none; position: fixed; inset: 0; z-index: 1001;
-        background: rgba(13,11,9,0.97); backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        flex-direction: column; align-items: center; justify-content: center; gap: 32px;
-      }
-      .nav-mobile-menu.open { display: flex; }
-      .nav-mobile-menu a {
-        color: var(--text); text-decoration: none;
-        font-family: var(--font-display); font-size: 1.6rem; font-weight: 600;
-        letter-spacing: -0.02em; transition: color 0.2s;
-      }
-      .nav-mobile-menu a:hover, .nav-mobile-menu a.active { color: var(--accent); }
-      .nav-mobile-menu .nav-cta {
-        color: var(--accent) !important;
-        border: 1px solid rgba(var(--accent-rgb),0.4);
-        padding: 12px 32px; border-radius: 100px; font-size: 1rem !important;
-        font-weight: 500; margin-top: 8px;
-      }
-      .nav-mobile-menu .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
-    }
-    @media (min-width: 769px) {
-      .nav-hamburger { display: none; }
-      .nav-mobile-menu { display: none !important; }
-    }
-
-    /* ─── HERO & LAYOUT ─── */
-    .page-header { padding: 160px 32px 80px; text-align: center; position: relative; }
-    .hero-orb { position: absolute; border-radius: 50%; filter: blur(100px); pointer-events: none; z-index: -1; }
-    .hero-orb-1 { width: 400px; height: 400px; background: var(--accent); top: -100px; left: 50%; transform: translateX(-50%); opacity: 0.08; }
-    .page-title { font-size: clamp(2.5rem, 6vw, 4.5rem); font-weight: 700; letter-spacing: -0.04em; margin-bottom: 20px; color: var(--text); }
-    .page-title em { color: var(--accent); font-style: italic; }
-    .page-sub { font-size: 1.1rem; color: var(--text-secondary); font-weight: 300; max-width: 500px; margin: 0 auto; }
-
-    /* ─── PORTFOLIOS GRID ─── */
-    .portfolios-container { max-width: 1200px; margin: 0 auto; padding: 0 32px 120px; }
-    .portfolios-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 32px; }
-    
-    .portfolio-card {
-      display: block; text-decoration: none; border-radius: var(--radius);
-      overflow: hidden; background: var(--card-bg); border: 1px solid var(--card-border);
-      transition: all 0.4s ease; position: relative;
-    }
-    .portfolio-card:hover { transform: translateY(-8px); border-color: rgba(var(--accent-rgb),0.3); box-shadow: 0 16px 48px rgba(0,0,0,0.4); }
-    
-    .portfolio-img-wrapper { width: 100%; aspect-ratio: 4/5; overflow: hidden; position: relative; background: #1a1816; }
-    .portfolio-img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1); filter: grayscale(20%) contrast(1.1); }
-    .portfolio-card:hover .portfolio-img { transform: scale(1.05); filter: grayscale(0%) contrast(1.1); }
-    
-    .portfolio-overlay { position: absolute; inset: 0; background: linear-gradient(to top, var(--bg) 0%, transparent 60%); opacity: 0.8; }
-    
-    .portfolio-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 32px; z-index: 2; }
-    .portfolio-count { font-family: var(--font-mono); font-size: 0.7rem; letter-spacing: 0.2em; text-transform: uppercase; color: var(--accent); margin-bottom: 12px; display: block; }
-    .portfolio-title { font-size: 1.8rem; font-weight: 600; color: var(--text); margin-bottom: 8px; font-family: var(--font-display); letter-spacing: -0.02em; }
-    .portfolio-desc { font-size: 0.9rem; color: var(--text-secondary); font-weight: 300; line-height: 1.5; opacity: 0; transform: translateY(10px); transition: all 0.4s ease; }
-    .portfolio-card:hover .portfolio-desc { opacity: 1; transform: translateY(0); }
-
-    @media (max-width: 992px) { .portfolios-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 768px) { .portfolios-grid { grid-template-columns: 1fr; } .portfolio-desc { opacity: 1; transform: translateY(0); } }
-
-    /* ─── FOOTER ─── */
-    footer { position: relative; z-index: 1; border-top: 1px solid var(--card-border); padding: 64px 32px 40px; text-align: center; margin-top: auto; }
-    .footer-logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-    .footer-logo .logo-name { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; letter-spacing: -0.03em; color: var(--text-secondary); }
-    .footer-links { display: flex; justify-content: center; gap: 28px; margin-bottom: 24px; flex-wrap: wrap; }
-    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--accent); }
-    .footer-copy { color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono); }
-    img { -webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; }
-  </style>
-<script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
-<body>
+<body class="gf-body">
 
-<!-- Navbar -->
-<nav id="navbar">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">
-      <svg class="logo-mark" viewBox="0 0 52 26" width="40" height="20" fill="none">
-        <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
-        <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
-        <circle cx="26" cy="13" r="3" fill="#C9927A"/>
-      </svg>
-      <span class="logo-name">GoofiesEyes</span>
-    </a>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="portfolio.html">Portfolio</a>
-      <a href="portfolios.html" class="active">My Works</a>
+<main class="gf" id="top">
+
+  <nav class="gf-nav">
+    <a class="gf-wordmark" href="index.html">goofieseyes</a>
+    <div class="gf-nav-links gf-meta">
+      <a href="portfolios.html" aria-current="page">The crate</a>
       <a href="prints.html">Prints</a>
       <a href="journal.html">Journal</a>
-      <a href="index.html#specs">About</a>
-      <a href="index.html#cta" class="nav-cta">Book a Session</a>
+      <a href="index.html#liner-notes">Liner notes</a>
+      <a href="index.html#pressing">Contact</a>
     </div>
-    <button class="nav-hamburger" id="navHamburger" aria-label="Toggle navigation">
+    <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
       <span></span><span></span><span></span>
     </button>
-  </div>
+  </nav>
 
-<div class="nav-mobile-menu" id="navMobileMenu">
-      <a href="index.html">Home</a>
-      <a href="portfolio.html">Portfolio</a>
-      <a href="portfolios.html" class="active">My Works</a>
-      <a href="prints.html">Prints</a>
-      <a href="journal.html">Journal</a>
-      <a href="index.html#specs">About</a>
-      <a href="index.html#cta" class="nav-cta">Book a Session</a>
-</div>
-</nav>
-
-<header class="page-header">
-  <div class="hero-orb hero-orb-1"></div>
-  <h1 class="page-title">My <em>Works.</em></h1>
-  <p class="page-sub">Explore the thematic journeys through environments, people, and light.</p>
-</header>
-
-<section class="portfolios-container">
-  <div id="portfolios-grid" class="portfolios-grid">
-    <!-- rendered by JS -->
-  </div>
-  <p id="portfolios-empty" style="display:none; text-align:center; color:var(--text-muted); font-family:var(--font-mono); font-size:0.85rem; padding: 80px 0;">
-    No portfolios yet. Add one in the admin portal.
-  </p>
-</section>
-
-<script>
-  async function loadPortfolios() {
-    const grid = document.getElementById('portfolios-grid');
-    const empty = document.getElementById('portfolios-empty');
-
-    try {
-      const res = await fetch('/content/data/portfolios.json');
-      if (!res.ok) throw new Error('Failed to load portfolios');
-      const { portfolios } = await res.json();
-
-      const visible = portfolios.filter(p => p.photos && p.photos.length > 0 || p.cover);
-
-      if (visible.length === 0) {
-        grid.style.display = 'none';
-        empty.style.display = 'block';
-        return;
-      }
-
-      grid.innerHTML = visible.map((portfolio, i) => {
-        const coverFile = portfolio.cover
-          ? portfolio.cover
-          : (portfolio.photos && portfolio.photos.length > 0 ? portfolio.photos[0].filename : null);
-
-        const imgHTML = coverFile
-          ? `<img src="/content/photos/${coverFile}" alt="${portfolio.name}" class="portfolio-img" loading="lazy">`
-          : `<div style="width:100%;height:100%;background:#1a1816;"></div>`;
-
-        const count = portfolio.photos ? portfolio.photos.length : 0;
-        const countLabel = count === 1 ? '1 photo' : `${count} photos`;
-        const num = String(i + 1).padStart(2, '0');
-
-        return `
-          <a href="collection.html?slug=${encodeURIComponent(portfolio.slug)}" class="portfolio-card">
-            <div class="portfolio-img-wrapper">
-              <div class="portfolio-overlay"></div>
-              ${imgHTML}
-            </div>
-            <div class="portfolio-info">
-              <span class="portfolio-count">Collection ${num} · ${countLabel}</span>
-              <h2 class="portfolio-title">${portfolio.name}</h2>
-              <p class="portfolio-desc">${portfolio.description || ''}</p>
-            </div>
-          </a>`;
-      }).join('');
-
-    } catch (err) {
-      grid.style.display = 'none';
-      empty.textContent = 'Could not load portfolios.';
-      empty.style.display = 'block';
-      console.error(err);
-    }
-  }
-
-  loadPortfolios();
-</script>
-
-<!-- Footer -->
-<footer>
-  <div class="footer-logo">
-    <svg viewBox="0 0 52 26" width="36" height="18" fill="none">
-      <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none" stroke-linecap="round"/>
-      <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
-      <circle cx="26" cy="13" r="3" fill="#C9927A"/>
-    </svg>
-    <span class="logo-name">GoofiesEyes</span>
-  </div>
-  <div class="footer-links">
+  <div class="gf-mobile-menu" id="gf-mobile-menu">
     <a href="index.html">Home</a>
-    <a href="portfolio.html">Portfolio</a>
-    <a href="portfolios.html">My Works</a>
+    <a href="portfolios.html">The crate</a>
     <a href="prints.html">Prints</a>
     <a href="journal.html">Journal</a>
-    <a href="index.html#specs">About</a>
-    <a href="index.html#cta">Contact</a>
+    <a href="index.html#liner-notes">Liner notes</a>
+    <a href="index.html#pressing">Contact</a>
   </div>
-  <p class="footer-copy">&copy; 2026 GoofiesEyes. All rights reserved. Made with light &amp; obsession.</p>
-</footer>
+
+  <section class="gf-page">
+    <div class="gf-page-inner">
+      <div class="gf-page-head">
+        <div>
+          <p class="gf-meta">The collection</p>
+          <h1>The crate</h1>
+        </div>
+        <p class="gf-count">
+          <b id="crate-total">—</b>
+          pressings
+        </p>
+      </div>
+
+      <div class="gf-crate-grid" id="crate-grid"></div>
+      <p class="gf-state" id="crate-state">Pulling the crate…</p>
+    </div>
+  </section>
+
+  <footer class="gf-foot">
+    <div class="gf-foot-mark">goofieseyes</div>
+    <div class="gf-meta" style="text-align: right">
+      <div class="gf-foot-links">
+        <a href="index.html">Home</a>
+        <a href="prints.html">Prints</a>
+        <a href="journal.html">Journal</a>
+        <a href="mailto:goofiesfotos@gmail.com">Email</a>
+      </div>
+      <div>Photography and motion</div>
+      <div>All frames the photographer's own</div>
+    </div>
+  </footer>
+
+</main>
 
 <script>
-  document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-  document.addEventListener('dragstart',   e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-</script>
-<script>
-  // Mobile nav toggle
-  const navHamburger = document.getElementById('navHamburger');
-  const navMobileMenu = document.getElementById('navMobileMenu');
-  if (navHamburger && navMobileMenu) {
-    navHamburger.addEventListener('click', () => {
-      navHamburger.classList.toggle('open');
-      navMobileMenu.classList.toggle('open');
-      document.body.style.overflow = navMobileMenu.classList.contains('open') ? 'hidden' : '';
-    });
-    navMobileMenu.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        navHamburger.classList.remove('open');
-        navMobileMenu.classList.remove('open');
-        document.body.style.overflow = '';
+(function () {
+  'use strict';
+
+  function boot() {
+    var grid = document.getElementById('crate-grid');
+    var state = document.getElementById('crate-state');
+
+    window.gf.loadAlbums()
+      .then(function (albums) {
+        if (!albums.length) {
+          state.textContent = 'No collections yet.';
+          return;
+        }
+        grid.innerHTML = albums.map(window.gf.recordHTML).join('');
+        document.getElementById('crate-total').textContent = albums.length;
+        state.hidden = true;
+
+        /* Keep the structured data in step with what is actually on the page,
+           rather than a hand-maintained list that goes stale — which is exactly
+           what happened to the previous version of this file. */
+        var ld = document.getElementById('crate-ld');
+        try {
+          var data = JSON.parse(ld.textContent);
+          data.hasPart = albums.map(function (a) {
+            return {
+              '@type': 'ImageGallery',
+              name: a.title,
+              url: 'https://goofieseyes.live/' + a.href
+            };
+          });
+          ld.textContent = JSON.stringify(data, null, 2);
+        } catch (e) { /* structured data is a nicety, never a blocker */ }
+      })
+      .catch(function (err) {
+        state.textContent = 'The collections could not be loaded.';
+        console.error(err);
       });
-    });
   }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
 </script>
+
 </body>
 </html>

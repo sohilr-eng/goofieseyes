@@ -1,202 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-gf-spin="label">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Order Confirmed | GoofiesEyes</title>
+  <title>Order confirmed | GoofiesEyes</title>
   <meta name="robots" content="noindex, nofollow" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Record-crate rebrand: shared token layer, type and behaviour.
-       Namespaced .gf-* throughout, so it is inert until a page opts in. -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/pages.css">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <script defer src="/assets/site.js"></script>
-
-  <style>
-    :root {
-      --accent: #C9927A; --accent-light: #E0B89A; --accent-rgb: 201, 146, 122;
-      --digital: #7A9EC9; --digital-light: #A3C4E8; --digital-rgb: 122, 158, 201;
-      --bg: #0D0B09; --bg-2: #141210;
-      --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
-      --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
-      --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
-    }
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body {
-      background: var(--bg); color: var(--text); font-family: var(--font-body);
-      -webkit-font-smoothing: antialiased; min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px;
-    }
-    ::selection { background: var(--accent); color: #fff; }
-    h1, h2, h3 { font-family: var(--font-display); }
-
-    .success-card {
-      max-width: 540px; width: 100%; text-align: center;
-      background: var(--card-bg); border: 1px solid var(--card-border);
-      border-radius: 20px; padding: 56px 48px; backdrop-filter: blur(12px);
-    }
-
-    /* ── Physical card ── */
-    .icon-circle {
-      width: 72px; height: 72px; border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 32px;
-    }
-    .icon-circle.physical {
-      background: rgba(var(--accent-rgb), 0.12); border: 1.5px solid rgba(var(--accent-rgb), 0.35);
-    }
-    .icon-circle.digital {
-      background: rgba(var(--digital-rgb), 0.12); border: 1.5px solid rgba(var(--digital-rgb), 0.35);
-    }
-
-    .type-tag {
-      display: inline-flex; align-items: center; gap: 6px; margin-bottom: 20px;
-      font-family: var(--font-mono); font-size: 0.7rem; text-transform: uppercase;
-      letter-spacing: 0.12em; padding: 5px 12px; border-radius: 100px;
-    }
-    .type-tag.physical { color: var(--accent); background: rgba(var(--accent-rgb),0.08); border: 1px solid rgba(var(--accent-rgb),0.25); }
-    .type-tag.digital  { color: var(--digital); background: rgba(var(--digital-rgb),0.08); border: 1px solid rgba(var(--digital-rgb),0.25); }
-
-    .success-title {
-      font-size: 2.2rem; font-weight: 700; letter-spacing: -0.04em;
-      margin-bottom: 16px; color: var(--text);
-    }
-    .success-title em { font-style: italic; }
-    .success-title em.physical { color: var(--accent); }
-    .success-title em.digital  { color: var(--digital-light); }
-
-    .success-body {
-      font-size: 1rem; color: var(--text-secondary); line-height: 1.7;
-      font-weight: 300; margin-bottom: 32px;
-    }
-
-    .order-ref {
-      font-family: var(--font-mono); font-size: 0.75rem; color: var(--text-muted);
-      background: var(--bg-2); border: 1px solid var(--card-border);
-      border-radius: 8px; padding: 12px 20px; margin-bottom: 36px;
-      letter-spacing: 0.05em;
-    }
-
-    /* Digital info box */
-    .digital-info {
-      background: rgba(var(--digital-rgb), 0.06); border: 1px solid rgba(var(--digital-rgb), 0.2);
-      border-radius: 10px; padding: 16px 20px; margin-bottom: 36px; text-align: left;
-    }
-    .digital-info p { font-size: 0.88rem; color: var(--digital-light); line-height: 1.6; }
-    .digital-info p + p { margin-top: 8px; }
-
-    .btn-primary {
-      display: inline-block; background: var(--accent); color: #fff;
-      padding: 14px 32px; border-radius: 8px; text-decoration: none;
-      font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(var(--accent-rgb), 0.25);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(var(--accent-rgb), 0.4); }
-
-    .btn-digital {
-      display: inline-block; background: var(--digital); color: #fff;
-      padding: 14px 32px; border-radius: 8px; text-decoration: none;
-      font-weight: 600; font-size: 0.95rem; transition: all 0.3s ease;
-      box-shadow: 0 4px 20px rgba(var(--digital-rgb), 0.25);
-    }
-    .btn-digital:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(var(--digital-rgb), 0.4); }
-
-    .btn-secondary {
-      display: inline-block; color: var(--text-secondary); padding: 14px 24px;
-      text-decoration: none; font-size: 0.9rem; transition: color 0.2s;
-    }
-    .btn-secondary:hover { color: var(--accent); }
-
-    .actions { display: flex; gap: 8px; align-items: center; justify-content: center; flex-wrap: wrap; }
-
-    .logo-link {
-      position: fixed; top: 28px; left: 50%; transform: translateX(-50%);
-      display: flex; align-items: center; gap: 10px; text-decoration: none;
-    }
-    .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text-secondary); }
-
-    @media (max-width: 600px) { .success-card { padding: 40px 28px; } .success-title { font-size: 1.8rem; } }
-  </style>
-<script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
-<body>
+<body class="gf-body">
 
-<a href="index.html" class="logo-link">
-  <svg viewBox="0 0 52 26" width="40" height="20" fill="none">
-    <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
-    <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
-    <circle cx="26" cy="13" r="3" fill="#C9927A"/>
-  </svg>
-  <span class="logo-name">GoofiesEyes</span>
-</a>
+<main class="gf" id="top">
 
-<!-- Physical success -->
-<div id="card-physical" class="success-card" style="display:none;">
-  <div class="icon-circle physical">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#C9927A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <polyline points="20 6 9 17 4 12"/>
-    </svg>
-  </div>
-  <span class="type-tag physical">Physical Print</span>
-  <h1 class="success-title">Order <em class="physical">confirmed.</em></h1>
-  <p class="success-body">
-    Your fine art print is now being prepared for production.
-    You'll receive a confirmation email with shipping and tracking details once it's on its way.
-  </p>
-  <div id="ref-physical" class="order-ref">Processing…</div>
-  <div class="actions">
-    <a href="prints.html" class="btn-primary">Shop More Prints</a>
-    <a href="index.html" class="btn-secondary">Back to Home</a>
-  </div>
-</div>
+  <nav class="gf-nav">
+    <a class="gf-wordmark" href="index.html">goofieseyes</a>
+    <div class="gf-nav-links gf-meta">
+      <a href="portfolios.html">The crate</a>
+      <a href="prints.html">Prints</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#pressing">Contact</a>
+    </div>
+    <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
 
-<!-- Digital success -->
-<div id="card-digital" class="success-card" style="display:none;">
-  <div class="icon-circle digital">
-    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7A9EC9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-      <polyline points="7 10 12 15 17 10"/>
-      <line x1="12" y1="15" x2="12" y2="3"/>
-    </svg>
+  <div class="gf-mobile-menu" id="gf-mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">The crate</a>
+    <a href="prints.html">Prints</a>
+    <a href="journal.html">Journal</a>
+    <a href="index.html#pressing">Contact</a>
   </div>
-  <span class="type-tag digital">Digital Download</span>
-  <h1 class="success-title">File <em class="digital">incoming.</em></h1>
-  <p class="success-body">
-    Payment confirmed. Your high-resolution file is on its way to your inbox right now.
-  </p>
-  <div class="digital-info">
-    <p>Check your email — the download link will arrive within a few minutes. If you don't see it, check your spam folder.</p>
-    <p>The file is a full-resolution TIFF/JPEG suitable for professional printing at any size.</p>
-  </div>
-  <div id="ref-digital" class="order-ref">Processing…</div>
-  <div class="actions">
-    <a href="prints.html" class="btn-digital">Browse More</a>
-    <a href="index.html" class="btn-secondary">Back to Home</a>
-  </div>
-</div>
+
+  <section class="gf-page gf-page--alt">
+    <div class="gf-success">
+      <p class="gf-meta" id="order-kind">Order confirmed</p>
+      <h1 id="order-title">Pressed.</h1>
+      <p class="gf-lede" id="order-body" style="margin: 0 auto; max-width: 44ch"></p>
+
+      <div class="gf-success-ref" id="order-ref">Processing…</div>
+
+      <a class="gf-cta-tab" href="prints.html">
+        Back to prints
+        <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
+          <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
+        </svg>
+      </a>
+    </div>
+  </section>
+
+  <footer class="gf-foot">
+    <div class="gf-foot-mark">goofieseyes</div>
+    <div class="gf-meta" style="text-align: right">
+      <div>Photography and motion</div>
+      <div>All frames the photographer's own</div>
+    </div>
+  </footer>
+
+</main>
 
 <script>
-  const params    = new URLSearchParams(window.location.search);
-  const sessionId = params.get('session_id');
-  const type      = params.get('type') === 'digital' ? 'digital' : 'physical';
+(function () {
+  'use strict';
 
-  // Show correct card
-  document.getElementById('card-' + type).style.display = 'block';
+  function boot() {
+    var params = new URLSearchParams(window.location.search);
+    var sessionId = params.get('session_id');
+    var isDigital = params.get('type') === 'digital';
 
-  // Order ref
-  const refEl = document.getElementById('ref-' + type);
-  if (sessionId) {
-    const short = sessionId.replace(/^cs_(live|test)_/, '').substring(0, 16).toUpperCase();
-    refEl.textContent = 'Order ref: ' + short;
-  } else {
-    refEl.textContent = 'Your order has been received.';
+    document.getElementById('order-kind').textContent =
+      isDigital ? 'Digital download' : 'Fine art print';
+
+    document.getElementById('order-body').textContent = isDigital
+      ? 'Your full-resolution file is on its way to the email address you gave at checkout. If it has not arrived within a few minutes, check your spam folder.'
+      : 'Thank you. Your print will be made and shipped, and you will get a confirmation email with tracking as soon as it is on its way.';
+
+    var ref = document.getElementById('order-ref');
+    if (sessionId) {
+      /* Stripe session ids are long; a short uppercase stub is enough to quote
+         back in an email. */
+      ref.textContent = 'Order ref: ' +
+        sessionId.replace(/^cs_(live|test)_/, '').substring(0, 16).toUpperCase();
+    } else {
+      ref.textContent = 'Your order has been received.';
+    }
   }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
 </script>
 
 </body>

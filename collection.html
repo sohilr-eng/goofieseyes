@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-gf-spin="label">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,406 +8,244 @@
   <!-- Query-driven page: href is set to the resolved ?slug= URL once the collection loads. -->
   <link rel="canonical" id="canonical" href="https://goofieseyes.live/portfolios.html" />
 
+  <meta property="og:title" content="A collection | GoofiesEyes" />
+  <meta property="og:description" content="One pressing from the crate." />
+  <meta property="og:type" content="article" />
+  <meta property="og:site_name" content="GoofiesEyes" />
+  <meta property="og:image" content="https://goofieseyes.live/assets/og-image.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:alt" content="A shelf of records, each one a GoofiesEyes photography collection" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://goofieseyes.live/assets/og-image.jpg" />
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,300;1,400&family=Space+Grotesk:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-  <!-- Record-crate rebrand: shared token layer, type and behaviour.
-       Namespaced .gf-* throughout, so it is inert until a page opts in. -->
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/pages.css">
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <script defer src="/assets/site.js"></script>
-
-  <style>
-    :root {
-      --accent: #C9927A; --accent-light: #E0B89A; --accent-rgb: 201, 146, 122;
-      --bg: #0D0B09; --bg-2: #141210;
-      --text: #F0EBE5; --text-muted: #6B6056; --text-secondary: #9A8E85;
-      --font-display: 'Space Grotesk', sans-serif; --font-body: 'Archivo', sans-serif; --font-mono: 'JetBrains Mono', monospace;
-      --card-bg: rgba(255,255,255,0.025); --card-border: rgba(255,255,255,0.055); --radius: 12px;
-    }
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    body { background: var(--bg); color: var(--text); font-family: var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
-    ::selection { background: var(--accent); color: #fff; }
-    h1, h2, h3, h4 { font-family: var(--font-display); }
-
-    /* ─── NAVBAR ─── */
-    #navbar { position: fixed; top: 0; left: 0; right: 0; z-index: 1000; padding: 0 8px; }
-    .nav-inner {
-      max-width: 840px; margin: 10px auto 0;
-      background: rgba(13,11,9,0.75); border: 1px solid var(--card-border);
-      backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
-      border-radius: 100px; padding: 10px 28px;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .nav-logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
-    .nav-logo .logo-name { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text); }
-    .nav-links { display: flex; align-items: center; gap: 28px; }
-    .nav-links a { color: var(--text-secondary); text-decoration: none; font-size: 0.88rem; font-weight: 500; transition: color 0.2s; }
-    .nav-links a:hover, .nav-links a.active { color: var(--text); }
-    .nav-cta { color: var(--accent) !important; border: 1px solid rgba(var(--accent-rgb),0.35); padding: 7px 18px; border-radius: 100px; transition: all 0.25s ease !important; }
-    .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
-        /* ─── MOBILE NAV ─── */
-    @media (max-width: 768px) {
-      .nav-links { display: none; }
-      .nav-hamburger {
-        display: flex; flex-direction: column; justify-content: center; gap: 5px;
-        background: none; border: none; cursor: pointer; padding: 8px;
-        position: relative; z-index: 1002;
-      }
-      .nav-hamburger span {
-        display: block; width: 22px; height: 2px; background: var(--text);
-        border-radius: 2px; transition: all 0.3s ease; transform-origin: center;
-      }
-      .nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-      .nav-hamburger.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-      .nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
-      .nav-mobile-menu {
-        display: none; position: fixed; inset: 0; z-index: 1001;
-        background: rgba(13,11,9,0.97); backdrop-filter: blur(24px);
-        -webkit-backdrop-filter: blur(24px);
-        flex-direction: column; align-items: center; justify-content: center; gap: 32px;
-      }
-      .nav-mobile-menu.open { display: flex; }
-      .nav-mobile-menu a {
-        color: var(--text); text-decoration: none;
-        font-family: var(--font-display); font-size: 1.6rem; font-weight: 600;
-        letter-spacing: -0.02em; transition: color 0.2s;
-      }
-      .nav-mobile-menu a:hover, .nav-mobile-menu a.active { color: var(--accent); }
-      .nav-mobile-menu .nav-cta {
-        color: var(--accent) !important;
-        border: 1px solid rgba(var(--accent-rgb),0.4);
-        padding: 12px 32px; border-radius: 100px; font-size: 1rem !important;
-        font-weight: 500; margin-top: 8px;
-      }
-      .nav-mobile-menu .nav-cta:hover { background: var(--accent) !important; color: #fff !important; }
-    }
-    @media (min-width: 769px) {
-      .nav-hamburger { display: none; }
-      .nav-mobile-menu { display: none !important; }
-    }
-
-    /* ─── HEADER ─── */
-    .page-header { padding: 140px 32px 56px; position: relative; max-width: 1200px; margin: 0 auto; }
-    .back-link {
-      display: inline-flex; align-items: center; gap: 8px;
-      color: var(--text-muted); text-decoration: none;
-      font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase;
-      letter-spacing: 0.15em; margin-bottom: 32px; transition: color 0.25s;
-    }
-    .back-link:hover { color: var(--accent); }
-    .portfolio-header-inner { display: flex; align-items: flex-end; justify-content: space-between; gap: 32px; flex-wrap: wrap; }
-    .portfolio-title { font-size: clamp(2rem, 5vw, 3.8rem); font-weight: 700; letter-spacing: -0.04em; line-height: 1.05; }
-    .portfolio-title em { font-style: italic; color: var(--accent); }
-    .portfolio-desc-text { font-size: 1rem; color: var(--text-secondary); font-weight: 300; margin-top: 16px; max-width: 500px; line-height: 1.65; }
-    .portfolio-meta { text-align: right; flex-shrink: 0; }
-    .portfolio-count-label { font-family: var(--font-mono); font-size: 2.5rem; font-weight: 700; color: var(--accent); line-height: 1; }
-    .portfolio-count-sub { font-family: var(--font-mono); font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.15em; color: var(--text-muted); margin-top: 4px; }
-
-    /* ─── PHOTO GRID ─── */
-    .photo-grid-container { max-width: 1200px; margin: 0 auto; padding: 0 32px 120px; }
-    .photo-grid {
-      columns: 3;
-      column-gap: 12px;
-    }
-    .photo-item {
-      break-inside: avoid;
-      margin-bottom: 12px;
-      cursor: pointer;
-      overflow: hidden;
-      border-radius: 8px;
-      background: var(--bg-2);
-      position: relative;
-    }
-    .photo-item img {
-      width: 100%; height: auto; display: block;
-      transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), filter 0.4s ease;
-      filter: grayscale(15%);
-    }
-    .photo-item:hover img { transform: scale(1.03); filter: grayscale(0%); }
-
-    @media (max-width: 900px) { .photo-grid { columns: 2; } }
-    @media (max-width: 500px) { .photo-grid { columns: 1; } .page-header { padding: 120px 20px 40px; } .photo-grid-container { padding: 0 20px 80px; } }
-
-    /* ─── LOADING / ERROR ─── */
-    .state-message {
-      text-align: center; padding: 80px 32px;
-      font-family: var(--font-mono); font-size: 0.85rem; color: var(--text-muted);
-    }
-
-    /* ─── LIGHTBOX ─── */
-    #lightbox {
-      position: fixed; inset: 0; z-index: 9000;
-      background: rgba(0,0,0,0.94);
-      display: none; align-items: center; justify-content: center;
-      padding: 20px;
-    }
-    #lightbox.open { display: flex; }
-    #lightbox-img {
-      max-width: 100%; max-height: 90vh;
-      object-fit: contain; border-radius: 4px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.8);
-      user-select: none;
-    }
-    #lightbox-close {
-      position: fixed; top: 20px; right: 24px;
-      width: 40px; height: 40px; border-radius: 50%;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      color: var(--text); font-size: 1.2rem; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s;
-    }
-    #lightbox-close:hover { background: rgba(255,255,255,0.15); }
-    #lightbox-prev, #lightbox-next {
-      position: fixed; top: 50%; transform: translateY(-50%);
-      width: 44px; height: 44px; border-radius: 50%;
-      background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15);
-      color: var(--text); font-size: 1.1rem; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      transition: background 0.2s; user-select: none;
-    }
-    #lightbox-prev { left: 16px; }
-    #lightbox-next { right: 16px; }
-    #lightbox-prev:hover, #lightbox-next:hover { background: rgba(255,255,255,0.18); }
-    #lightbox-counter {
-      position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%);
-      font-family: var(--font-mono); font-size: 0.75rem; color: rgba(255,255,255,0.4);
-      letter-spacing: 0.1em;
-    }
-
-    /* ─── FOOTER ─── */
-    footer { border-top: 1px solid var(--card-border); padding: 64px 32px 40px; text-align: center; }
-    .footer-logo { display: inline-flex; align-items: center; gap: 10px; margin-bottom: 28px; }
-    .footer-logo .logo-name { font-family: var(--font-display); font-weight: 700; color: var(--text-secondary); }
-    .footer-links { display: flex; justify-content: center; gap: 28px; margin-bottom: 24px; flex-wrap: wrap; }
-    .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 0.85rem; transition: color 0.2s; }
-    .footer-links a:hover { color: var(--accent); }
-    .footer-copy { color: var(--text-muted); font-size: 0.78rem; font-family: var(--font-mono); }
-    img { -webkit-user-drag: none; user-drag: none; -webkit-user-select: none; user-select: none; }
-  </style>
-<script defer src="/_vercel/insights/script.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
 </head>
-<body>
+<body class="gf-body">
 
-<nav id="navbar">
-  <div class="nav-inner">
-    <a href="index.html" class="nav-logo">
-      <svg viewBox="0 0 52 26" width="40" height="20" fill="none">
-        <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
-        <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
-        <circle cx="26" cy="13" r="3" fill="#C9927A"/>
-      </svg>
-      <span class="logo-name">GoofiesEyes</span>
-    </a>
-    <div class="nav-links">
-      <a href="index.html">Home</a>
-      <a href="portfolio.html">Portfolio</a>
-      <a href="portfolios.html" class="active">My Works</a>
+<main class="gf" id="top">
+
+  <nav class="gf-nav">
+    <a class="gf-wordmark" href="index.html">goofieseyes</a>
+    <div class="gf-nav-links gf-meta">
+      <a href="portfolios.html">The crate</a>
       <a href="prints.html">Prints</a>
       <a href="journal.html">Journal</a>
-      <a href="index.html#specs">About</a>
-      <a href="index.html#cta" class="nav-cta">Book a Session</a>
+      <a href="index.html#liner-notes">Liner notes</a>
+      <a href="index.html#pressing">Contact</a>
     </div>
-    <button class="nav-hamburger" id="navHamburger" aria-label="Toggle navigation">
+    <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
       <span></span><span></span><span></span>
     </button>
-  </div>
+  </nav>
 
-<div class="nav-mobile-menu" id="navMobileMenu">
-      <a href="index.html">Home</a>
-      <a href="portfolio.html">Portfolio</a>
-      <a href="portfolios.html" class="active">My Works</a>
-      <a href="prints.html">Prints</a>
-      <a href="journal.html">Journal</a>
-      <a href="index.html#specs">About</a>
-      <a href="index.html#cta" class="nav-cta">Book a Session</a>
-</div>
-</nav>
-
-<!-- Header injected by JS -->
-<div id="page-header" class="page-header" style="display:none;">
-  <a href="portfolios.html" class="back-link">← My Works</a>
-  <div class="portfolio-header-inner">
-    <div>
-      <h1 id="portfolio-title" class="portfolio-title"></h1>
-      <p id="portfolio-desc" class="portfolio-desc-text"></p>
-    </div>
-    <div class="portfolio-meta">
-      <div id="portfolio-count" class="portfolio-count-label"></div>
-      <div class="portfolio-count-sub">photographs</div>
-    </div>
-  </div>
-</div>
-
-<div id="state-message" class="state-message">Loading…</div>
-
-<div id="photo-grid-container" class="photo-grid-container" style="display:none;">
-  <div id="photo-grid" class="photo-grid"></div>
-</div>
-
-<!-- Lightbox -->
-<div id="lightbox">
-  <button id="lightbox-close" aria-label="Close">✕</button>
-  <button id="lightbox-prev" aria-label="Previous">‹</button>
-  <img id="lightbox-img" src="" alt="">
-  <button id="lightbox-next" aria-label="Next">›</button>
-  <div id="lightbox-counter"></div>
-</div>
-
-<footer>
-  <div class="footer-logo">
-    <svg viewBox="0 0 52 26" width="36" height="18" fill="none">
-      <path d="M3 13 C10 4.5 42 4.5 49 13 C42 21.5 10 21.5 3 13Z" stroke="#C9927A" stroke-width="1.5" fill="none"/>
-      <circle cx="26" cy="13" r="7" stroke="#C9927A" stroke-width="1.2" fill="none"/>
-      <circle cx="26" cy="13" r="3" fill="#C9927A"/>
-    </svg>
-    <span class="logo-name">GoofiesEyes</span>
-  </div>
-  <div class="footer-links">
+  <div class="gf-mobile-menu" id="gf-mobile-menu">
     <a href="index.html">Home</a>
-    <a href="portfolio.html">Portfolio</a>
-    <a href="portfolios.html">My Works</a>
+    <a href="portfolios.html">The crate</a>
     <a href="prints.html">Prints</a>
     <a href="journal.html">Journal</a>
+    <a href="index.html#liner-notes">Liner notes</a>
+    <a href="index.html#pressing">Contact</a>
   </div>
-  <p class="footer-copy">&copy; 2026 GoofiesEyes. All rights reserved.</p>
-</footer>
+
+  <section class="gf-page">
+    <div class="gf-page-inner">
+      <a class="gf-back" href="portfolios.html">
+        <svg aria-hidden="true" viewBox="0 0 24 12" width="20" height="10" fill="none">
+          <path d="M24 6H2M7 1L2 6l5 5" stroke="currentColor" stroke-width="1"/>
+        </svg>
+        Back to the crate
+      </a>
+
+      <div class="gf-page-head" id="page-header" hidden>
+        <div>
+          <p class="gf-meta" id="portfolio-cat"></p>
+          <h1 id="portfolio-title"></h1>
+          <p class="gf-lede" id="portfolio-desc" style="margin-top: 1.2rem; max-width: 46ch"></p>
+        </div>
+        <p class="gf-count">
+          <b id="portfolio-count">0</b>
+          frames
+        </p>
+      </div>
+
+      <p class="gf-state" id="state-message">Loading…</p>
+
+      <div class="gf-photo-grid" id="photo-grid" hidden></div>
+
+      <div class="gf-pager" id="pager" hidden>
+        <a class="gf-cta-tab" href="portfolios.html">Back to the crate</a>
+        <a class="gf-cta-tab" id="next-link" href="#">
+          <span id="next-label">Next pressing</span>
+          <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
+            <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="gf-foot">
+    <div class="gf-foot-mark">goofieseyes</div>
+    <div class="gf-meta" style="text-align: right">
+      <div class="gf-foot-links">
+        <a href="index.html">Home</a>
+        <a href="portfolios.html">The crate</a>
+        <a href="prints.html">Prints</a>
+        <a href="journal.html">Journal</a>
+        <a href="mailto:goofiesfotos@gmail.com">Email</a>
+      </div>
+      <div>Photography and motion</div>
+      <div>All frames the photographer's own</div>
+    </div>
+  </footer>
+
+</main>
+
+<div class="gf-lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photograph">
+  <button class="gf-lb-close" id="lb-close" type="button" aria-label="Close">&#10005;</button>
+  <button class="gf-lb-prev" id="lb-prev" type="button" aria-label="Previous">&#8249;</button>
+  <button class="gf-lb-next" id="lb-next" type="button" aria-label="Next">&#8250;</button>
+  <img id="lb-img" alt="">
+  <span class="gf-lb-count" id="lb-count"></span>
+</div>
 
 <script>
-  const params   = new URLSearchParams(window.location.search);
-  const slug     = params.get('slug');
-  const stateEl  = document.getElementById('state-message');
+(function () {
+  'use strict';
 
-  let photos = [];
-  let lightboxIndex = 0;
+  var slug = new URLSearchParams(window.location.search).get('slug');
+  var stateEl = document.getElementById('state-message');
+  var photos = [];
+  var index = 0;
 
-  // ── Lightbox ──────────────────────────────────────────────────────────────
-  const lb      = document.getElementById('lightbox');
-  const lbImg   = document.getElementById('lightbox-img');
-  const lbCount = document.getElementById('lightbox-counter');
+  /* ---------- lightbox ---------- */
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lb-img');
+  var lbCount = document.getElementById('lb-count');
+  var lastFocused = null;
 
-  function openLightbox(index) {
-    lightboxIndex = index;
-    showLightboxImage();
-    lb.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeLightbox() {
-    lb.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  function showLightboxImage() {
-    const photo = photos[lightboxIndex];
-    lbImg.src = `/content/photos/${photo.filename}`;
+  function show() {
+    var photo = photos[index];
+    lbImg.src = '/content/photos/' + photo.filename;
     lbImg.alt = photo.alt || photo.title || '';
-    lbCount.textContent = `${lightboxIndex + 1} / ${photos.length}`;
+    lbCount.textContent = (index + 1) + ' / ' + photos.length;
   }
 
-  function prevPhoto() { lightboxIndex = (lightboxIndex - 1 + photos.length) % photos.length; showLightboxImage(); }
-  function nextPhoto() { lightboxIndex = (lightboxIndex + 1) % photos.length; showLightboxImage(); }
+  function open(i) {
+    lastFocused = document.activeElement;
+    index = i;
+    show();
+    lb.classList.add('is-open');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('lb-close').focus();
+  }
 
-  document.getElementById('lightbox-close').addEventListener('click', closeLightbox);
-  document.getElementById('lightbox-prev').addEventListener('click', prevPhoto);
-  document.getElementById('lightbox-next').addEventListener('click', nextPhoto);
-  lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+  function close() {
+    lb.classList.remove('is-open');
+    document.body.style.overflow = '';
+    if (lastFocused) lastFocused.focus();
+  }
 
-  document.addEventListener('keydown', e => {
-    if (!lb.classList.contains('open')) return;
-    if (e.key === 'Escape')      closeLightbox();
-    if (e.key === 'ArrowLeft')   prevPhoto();
-    if (e.key === 'ArrowRight')  nextPhoto();
+  function step(delta) {
+    index = (index + delta + photos.length) % photos.length;
+    show();
+  }
+
+  document.getElementById('lb-close').addEventListener('click', close);
+  document.getElementById('lb-prev').addEventListener('click', function () { step(-1); });
+  document.getElementById('lb-next').addEventListener('click', function () { step(1); });
+  lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+
+  document.addEventListener('keydown', function (e) {
+    if (!lb.classList.contains('is-open')) return;
+    if (e.key === 'Escape') close();
+    if (e.key === 'ArrowLeft') step(-1);
+    if (e.key === 'ArrowRight') step(1);
   });
 
-  // ── Load portfolio ────────────────────────────────────────────────────────
-  async function loadPortfolio() {
+  /* ---------- load ---------- */
+  function boot() {
     if (!slug) {
       stateEl.textContent = 'No collection specified.';
       return;
     }
 
-    try {
-      const res = await fetch('/content/data/portfolios.json');
-      if (!res.ok) throw new Error('Could not load portfolio data');
-      const { portfolios } = await res.json();
+    window.gf.loadAlbums()
+      .then(function (albums) {
+        var i = albums.findIndex(function (a) { return a.slug === slug; });
+        if (i === -1) {
+          stateEl.textContent = 'Collection not found.';
+          return;
+        }
+        var album = albums[i];
+        var next = albums[(i + 1) % albums.length];
 
-      const portfolio = portfolios.find(p => p.slug === slug);
-      if (!portfolio) {
-        stateEl.textContent = 'Collection not found.';
-        return;
-      }
+        document.title = album.title + ' | GoofiesEyes';
+        document.getElementById('canonical').href =
+          'https://goofieseyes.live/collection.html?slug=' + encodeURIComponent(album.slug);
 
-      document.title = `${portfolio.name} | GoofiesEyes`;
-      document.getElementById('canonical').href =
-        `https://goofieseyes.live/collection.html?slug=${encodeURIComponent(portfolio.slug)}`;
+        document.getElementById('portfolio-cat').textContent = album.catalogue;
+        document.getElementById('portfolio-title').textContent = album.title;
+        document.getElementById('portfolio-count').textContent = album.frames;
 
-      document.getElementById('portfolio-title').innerHTML =
-        portfolio.name.replace(/(\S+)\s*$/, '<em>$1</em>');
-      document.getElementById('portfolio-desc').textContent = portfolio.description || '';
-      document.getElementById('portfolio-count').textContent = portfolio.photos ? portfolio.photos.length : 0;
-      document.getElementById('page-header').style.display = 'block';
+        var desc = document.getElementById('portfolio-desc');
+        if (album.note) desc.textContent = album.note;
+        else desc.hidden = true;
 
-      photos = (portfolio.photos || []).slice().sort((a, b) => a.order - b.order);
+        document.getElementById('page-header').hidden = false;
 
-      if (photos.length === 0) {
-        stateEl.textContent = 'No photos in this collection yet.';
-        return;
-      }
+        photos = album.photos;
+        if (!photos.length) {
+          stateEl.textContent = 'No photographs in this collection yet.';
+          return;
+        }
 
-      const grid = document.getElementById('photo-grid');
-      grid.innerHTML = photos.map((photo, i) => `
-        <div class="photo-item" data-index="${i}" role="button" tabindex="0" aria-label="View ${photo.alt || photo.title}">
-          <img
-            src="/content/photos/${photo.filename}"
-            alt="${photo.alt || photo.title || ''}"
-            loading="lazy"
-          >
-        </div>
-      `).join('');
+        var grid = document.getElementById('photo-grid');
+        grid.innerHTML = photos.map(function (photo, n) {
+          return '<button class="gf-photo" type="button" data-index="' + n + '"' +
+            ' aria-label="View ' + window.gf.escape(photo.alt || photo.title || ('photograph ' + (n + 1))) + '">' +
+            '<img src="/content/photos/' + window.gf.escape(photo.filename) + '"' +
+            ' alt="' + window.gf.escape(photo.alt || photo.title || '') + '" loading="lazy" decoding="async">' +
+            '</button>';
+        }).join('');
 
-      grid.querySelectorAll('.photo-item').forEach(item => {
-        item.addEventListener('click', () => openLightbox(Number(item.dataset.index)));
-        item.addEventListener('keydown', e => {
-          if (e.key === 'Enter' || e.key === ' ') openLightbox(Number(item.dataset.index));
+        grid.addEventListener('click', function (e) {
+          var button = e.target.closest('.gf-photo');
+          if (button) open(Number(button.dataset.index));
         });
+
+        stateEl.hidden = true;
+        grid.hidden = false;
+
+        if (next && next.slug !== album.slug) {
+          document.getElementById('next-label').textContent = 'Next pressing: ' + next.title;
+          document.getElementById('next-link').href = next.href;
+          document.getElementById('pager').hidden = false;
+        }
+      })
+      .catch(function (err) {
+        stateEl.textContent = 'Failed to load collection.';
+        console.error(err);
       });
-
-      stateEl.style.display = 'none';
-      document.getElementById('photo-grid-container').style.display = 'block';
-
-    } catch (err) {
-      stateEl.textContent = 'Failed to load collection: ' + err.message;
-      console.error(err);
-    }
   }
 
-  loadPortfolio();
-
-  document.addEventListener('contextmenu', e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-  document.addEventListener('dragstart',   e => { if (e.target.tagName === 'IMG') e.preventDefault(); });
-</script>
-
-<script>
-  const navHamburger = document.getElementById('navHamburger');
-  const navMobileMenu = document.getElementById('navMobileMenu');
-  if (navHamburger && navMobileMenu) {
-    navHamburger.addEventListener('click', () => {
-      navHamburger.classList.toggle('open');
-      navMobileMenu.classList.toggle('open');
-      document.body.style.overflow = navMobileMenu.classList.contains('open') ? 'hidden' : '';
-    });
-    navMobileMenu.querySelectorAll('a').forEach(a => {
-      a.addEventListener('click', () => {
-        navHamburger.classList.remove('open');
-        navMobileMenu.classList.remove('open');
-        document.body.style.overflow = '';
-      });
-    });
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
   }
+})();
 </script>
+
 </body>
 </html>

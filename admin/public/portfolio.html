@@ -279,6 +279,30 @@
       letter-spacing: 0.5px;
     }
 
+    /* Star toggle — marks a photo for the public "Selects" page. */
+    .select-btn {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,0.55);
+      border: none;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 13px;
+      line-height: 1;
+      color: rgba(255,255,255,0.45);
+      transition: color 0.15s, background 0.15s;
+      padding: 0;
+    }
+
+    .select-btn:hover { background: rgba(0,0,0,0.75); color: #fff; }
+    .select-btn[aria-pressed="true"] { color: #F5C542; }
+
     .set-cover-btn {
       display: block;
       width: 100%;
@@ -554,6 +578,9 @@
     grid.innerHTML = photos.map((photo, i) => `
       <div class="photo-card" data-filename="${photo.filename}">
         <div class="drag-handle">⠿</div>
+        <button class="select-btn" aria-pressed="${photo.selected ? 'true' : 'false'}"
+                title="${photo.selected ? 'Remove from Selects' : 'Add to Selects'}"
+                onclick="toggleSelect('${photo.filename}')">${photo.selected ? '★' : '☆'}</button>
         ${photo.filename === port.cover ? '<div class="cover-badge">Cover</div>' : ''}
         <img src="/content/photos/${photo.filename}" alt="${photo.alt || photo.filename}" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.05)';this.style.height='90px'" />
         <button class="set-cover-btn" onclick="setCover('${photo.filename}')">Set as cover</button>
@@ -591,6 +618,17 @@
     const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
     if (!port) return;
     port.cover = filename;
+    renderPhotoGrid(port);
+  }
+
+  // Star a photo for the public Selects page (portfolio.html). Like every other
+  // edit here this only mutates in memory — it lands when you press Save.
+  function toggleSelect(filename) {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    const photo = (port.photos || []).find(p => p.filename === filename);
+    if (!photo) return;
+    photo.selected = !photo.selected;
     renderPhotoGrid(port);
   }
 
