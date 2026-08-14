@@ -2,3 +2,7 @@
 .env
 .env.local
 node_modules
+
+# The ~52MB master the hero encodes are cut from. Kept locally so the clips can
+# be re-encoded from source rather than from a previous encode. Never ship it.
+assets/higgsfield asset/

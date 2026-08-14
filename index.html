@@ -63,11 +63,11 @@
        no-preference: under reduced motion the script never fetches a clip, and
        a preload has no way to know that on its own. -->
   <link rel="preload" as="fetch" type="video/mp4" crossorigin
-        href="/assets/video/vinyl-mobile-v2.mp4"
+        href="/assets/video/vinyl-mobile-v3.mp4"
         media="(prefers-reduced-motion: no-preference) and (hover: none) and (pointer: coarse),
                (prefers-reduced-motion: no-preference) and (max-width: 860px)">
   <link rel="preload" as="fetch" type="video/mp4" crossorigin
-        href="/assets/video/vinyl-desktop-v2.mp4"
+        href="/assets/video/vinyl-desktop-v3.mp4"
         media="(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) and (min-width: 861px)">
 
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
@@ -111,8 +111,8 @@
 
   <!-- ─── 1. the journey: scroll-scrub film ─── -->
   <section class="scroll-scrub"
-           data-clip="/assets/video/vinyl-desktop-v2.mp4"
-           data-mobile-clip="/assets/video/vinyl-mobile-v2.mp4"
+           data-clip="/assets/video/vinyl-desktop-v3.mp4"
+           data-mobile-clip="/assets/video/vinyl-mobile-v3.mp4"
            data-linger="0.18"
            data-fps="24"
            data-frames="361">
@@ -120,8 +120,8 @@
       <div class="scroll-scrub__media" aria-hidden="true">
         <figure class="scroll-scrub__layer" data-scroll-scrub-layer>
           <picture class="scroll-scrub__picture">
-            <source media="(max-width: 860px)" srcset="/assets/video/vinyl-mobile-v2-poster.jpg">
-            <img class="scroll-scrub__poster" src="/assets/video/vinyl-desktop-v2-poster.jpg"
+            <source media="(max-width: 860px)" srcset="/assets/video/vinyl-mobile-v3-poster.jpg">
+            <img class="scroll-scrub__poster" src="/assets/video/vinyl-desktop-v3-poster.jpg"
                  alt="" decoding="async" fetchpriority="high">
           </picture>
         </figure>
