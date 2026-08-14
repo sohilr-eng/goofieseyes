@@ -43,15 +43,20 @@
     var FPS = parseFloat(root.dataset.fps || '24');
     var FRAMES = parseInt(root.dataset.frames || '0', 10);
 
-    /* Smoothing rate, per second. 13.4 reproduces the old fixed 0.2-per-frame
-     * lerp exactly at 60Hz — 1 - exp(-13.4/60) = 0.2 — but now a 120Hz display
-     * converges at the same wall-clock rate instead of twice as fast. */
-    var SMOOTH = parseFloat(root.dataset.smooth || '13.4');
+    /* Smoothing rate, per second. 13.4 reproduced the old fixed 0.2-per-frame
+     * lerp exactly at 60Hz — 1 - exp(-13.4/60) = 0.2 — and expressing it as a
+     * rate means a 120Hz display converges at the same wall-clock rate instead
+     * of twice as fast. Softened to 9.0 because a wheel notch arrives as one
+     * large discrete jump: at 13.4 the filter tracked it closely enough that
+     * each notch still read as a step. Tune by eye with ?smooth= before
+     * changing this. */
+    var SMOOTH = parseFloat(root.dataset.smooth || '9.0');
     var SNAP = 0.2;          /* jump further than this and teleport */
     var SEEK_TIMEOUT = 400;  /* ms before assuming a seek was dropped */
 
-    /* Both curves want tuning by eye on the real page with the real film, and
-     * neither is worth a deploy to try. Follows the ?spin= precedent in site.js. */
+    /* These three want tuning by eye on the real page with the real film, on
+     * real hardware, and none is worth a deploy to try. Follows the ?spin=
+     * precedent in site.js. */
     try {
       var query = new URLSearchParams(window.location.search);
       if (query.get('linger') !== null && !isNaN(parseFloat(query.get('linger')))) {
@@ -59,6 +64,18 @@
       }
       if (query.get('smooth') !== null && !isNaN(parseFloat(query.get('smooth')))) {
         SMOOTH = parseFloat(query.get('smooth'));
+      }
+      /* Band height decides how much scroll the film is spread across, and it
+       * trades two ways: longer scrubs more smoothly but makes the pin read as
+       * a frozen page, shorter feels responsive but puts more film under every
+       * pixel. There is no value that wins both, so it has to be chosen by
+       * feel. The default stays on the markup — this only overrides it, and
+       * only within a range that still leaves a scrubbable band. Units are
+       * svh, matching the stage, the pin and the story margin; dvh would
+       * resize this mid-scroll when the mobile URL bar hides. */
+      var track = parseFloat(query.get('track'));
+      if (query.get('track') !== null && !isNaN(track) && track >= 50 && track <= 1000) {
+        band.style.minHeight = track + 'svh';
       }
     } catch (e) {
       /* blocked or unsupported — the markup defaults stand */
