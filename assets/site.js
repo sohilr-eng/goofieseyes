@@ -193,7 +193,29 @@
     });
   }
 
+  /* Disc rotation mode, so the two candidates can be compared on the real page
+   * with the real photographs. `?spin=full` / `?spin=label` / `?spin=hover`
+   * sets it and remembers the choice; the markup default is "label". */
+  function gfInitSpin() {
+    var modes = ['label', 'full', 'hover', 'none'];
+    var wanted = null;
+    try {
+      wanted = new URLSearchParams(window.location.search).get('spin');
+      if (wanted && modes.indexOf(wanted) !== -1) {
+        window.localStorage.setItem('gf-spin', wanted);
+      } else {
+        wanted = window.localStorage.getItem('gf-spin');
+      }
+    } catch (e) {
+      /* private mode / blocked storage — fall through to the markup default */
+    }
+    if (wanted && modes.indexOf(wanted) !== -1) {
+      document.documentElement.setAttribute('data-gf-spin', wanted);
+    }
+  }
+
   function gfInit() {
+    gfInitSpin();
     gfInitNav();
     gfProtectImages();
     gfInitRails(document.querySelector('[data-gf-rails]'));

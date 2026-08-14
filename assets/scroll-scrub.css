@@ -1,0 +1,251 @@
+/* Scroll-scrub hero — ported from the design's React component.
+ *
+ * Single-scene variant: the journey is one continuous ~15s take, so there are no
+ * connector segments, no layer crossfade and no chapter route nav. What remains
+ * is a sticky stage with the film, and one liner-note chapter scrolling over it.
+ */
+
+.scroll-scrub {
+  --ss-progress: 0;
+  --ss-bg: var(--gf-ink);
+  --ss-ink: var(--gf-paper);
+  --ss-muted: #a8a196;
+  --ss-accent: var(--gf-coral);
+  position: relative;
+  isolation: isolate;
+  color: var(--ss-ink);
+  background: var(--ss-bg);
+}
+
+.scroll-scrub__stage {
+  position: sticky;
+  top: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--ss-bg);
+}
+
+.scroll-scrub__media,
+.scroll-scrub__layer,
+.scroll-scrub__picture,
+.scroll-scrub__poster,
+.scroll-scrub__video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.scroll-scrub__media {
+  z-index: 0;
+}
+
+.scroll-scrub__layer {
+  margin: 0;
+  overflow: hidden;
+}
+
+.scroll-scrub__poster,
+.scroll-scrub__video {
+  display: block;
+  object-fit: cover;
+  object-position: var(--ss-object-position, 50% 50%);
+}
+
+.scroll-scrub__poster {
+  z-index: 0;
+}
+
+.scroll-scrub__video {
+  z-index: 1;
+}
+
+/* The poster is only hidden once the video has actually painted a frame,
+   which is what the first `seeked` event tells us. Hiding it earlier shows
+   a flash of empty video element. */
+.scroll-scrub__layer[data-video-painted="true"] .scroll-scrub__poster {
+  visibility: hidden;
+}
+
+.scroll-scrub__progress {
+  position: absolute;
+  z-index: 5;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 2px;
+  background: rgba(247, 244, 238, 0.14);
+  pointer-events: none;
+}
+
+.scroll-scrub__progress span {
+  display: block;
+  width: 100%;
+  height: 100%;
+  background: var(--ss-accent);
+  transform: scaleX(var(--ss-progress));
+  transform-origin: left center;
+}
+
+.scroll-scrub__story {
+  position: relative;
+  z-index: 3;
+  margin-top: -100dvh;
+  pointer-events: none;
+}
+
+.scroll-scrub__chapter {
+  position: relative;
+}
+
+.scroll-scrub__chapter-pin {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  min-height: 100dvh;
+  padding: clamp(5rem, 9vw, 8rem) clamp(1.25rem, 6vw, 6rem);
+  pointer-events: none;
+}
+
+.scroll-scrub__copy {
+  position: relative;
+  width: min(40rem, 48vw);
+  pointer-events: auto;
+}
+
+/* Scrim so the copy stays readable over whatever frame is showing. */
+.scroll-scrub__copy::before {
+  position: absolute;
+  z-index: -1;
+  inset: -3rem -5rem;
+  content: "";
+  background: radial-gradient(
+    ellipse at center,
+    rgba(18, 17, 15, 0.88) 0%,
+    rgba(18, 17, 15, 0.58) 52%,
+    transparent 76%
+  );
+  pointer-events: none;
+}
+
+.scroll-scrub__kicker {
+  max-width: 30ch;
+  margin: 0 0 1rem;
+  color: var(--ss-accent);
+  font-family: var(--gf-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.scroll-scrub__title {
+  max-width: 15ch;
+  margin: 0;
+  color: var(--ss-ink);
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.75rem, 6vw, 6rem);
+  line-height: 0.96;
+  letter-spacing: -0.02em;
+  text-wrap: balance;
+}
+
+.scroll-scrub__body {
+  max-width: 42ch;
+  margin: 1.5rem 0 0;
+  color: var(--ss-muted);
+  font-size: clamp(1rem, 1.35vw, 1.2rem);
+  line-height: 1.55;
+}
+
+.scroll-scrub__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.scroll-scrub__tags li {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid rgba(247, 244, 238, 0.2);
+  color: var(--ss-ink);
+  font-family: var(--gf-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.scroll-scrub__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-top: 2rem;
+}
+
+.scroll-scrub__hint {
+  position: absolute;
+  z-index: 4;
+  bottom: 2rem;
+  left: 50%;
+  transform: translateX(-50%);
+  color: var(--ss-muted);
+  font-family: var(--gf-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  pointer-events: none;
+  transition: opacity 0.4s ease;
+}
+
+.scroll-scrub[data-scrolled="true"] .scroll-scrub__hint {
+  opacity: 0;
+}
+
+@media (max-width: 860px) {
+  .scroll-scrub__poster,
+  .scroll-scrub__video {
+    object-position: var(--ss-mobile-position, 50% 50%);
+  }
+
+  .scroll-scrub__chapter-pin {
+    align-items: flex-end;
+    justify-content: flex-start;
+    padding: 6.5rem max(1.25rem, env(safe-area-inset-right))
+      calc(4rem + env(safe-area-inset-bottom))
+      max(1.25rem, env(safe-area-inset-left));
+  }
+
+  .scroll-scrub__copy {
+    width: min(100%, 36rem);
+  }
+
+  .scroll-scrub__copy::before {
+    inset: -3rem -2rem;
+    background: linear-gradient(
+      to top,
+      var(--ss-bg) 0%,
+      rgba(18, 17, 15, 0.82) 58%,
+      transparent 100%
+    );
+  }
+
+  .scroll-scrub__title {
+    max-width: 14ch;
+    font-size: clamp(2.3rem, 11vw, 4.5rem);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .scroll-scrub__chapter {
+    min-height: 100dvh !important;
+  }
+
+  .scroll-scrub__progress span {
+    transition: none;
+  }
+}
