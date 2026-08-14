@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Collection | GoofiesEyes</title>
   <meta name="robots" content="index, follow" />
+  <!-- Query-driven page: href is set to the resolved ?slug= URL once the collection loads. -->
+  <link rel="canonical" id="canonical" href="https://goofieseyes.live/portfolios.html" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -332,6 +334,8 @@
       }
 
       document.title = `${portfolio.name} | GoofiesEyes`;
+      document.getElementById('canonical').href =
+        `https://goofieseyes.live/collection.html?slug=${encodeURIComponent(portfolio.slug)}`;
 
       document.getElementById('portfolio-title').innerHTML =
         portfolio.name.replace(/(\S+)\s*$/, '<em>$1</em>');
