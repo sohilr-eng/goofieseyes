@@ -22,9 +22,16 @@
   top: 0;
   z-index: 0;
   width: 100%;
-  height: 100dvh;
+  /* svh, not dvh: dvh changes as the mobile URL bar hides, which resizes a
+     sticky element mid-scroll and shifts the scroll-to-progress mapping under
+     the gesture. The JS deliberately ignores that resize (see onResize), so the
+     geometry it has cached would go stale. svh is constant. */
+  height: 100svh;
   overflow: hidden;
   background: var(--ss-bg);
+  /* Already overflow:hidden and a stacking context, so this adds no new
+     constraint — it just lets the compositor bound damage to the stage. */
+  contain: paint;
 }
 
 .scroll-scrub__media,
@@ -60,6 +67,10 @@
 
 .scroll-scrub__video {
   z-index: 1;
+  /* Own layer, so decoding a new frame does not re-raster the story text
+     stacked above it. The overlay fast-path is already off here — the video is
+     occluded by .scroll-scrub__story — so promotion costs nothing it still had. */
+  will-change: transform;
 }
 
 /* The poster is only hidden once the video has actually painted a frame,
@@ -87,12 +98,13 @@
   background: var(--ss-accent);
   transform: scaleX(var(--ss-progress));
   transform-origin: left center;
+  will-change: transform;
 }
 
 .scroll-scrub__story {
   position: relative;
   z-index: 3;
-  margin-top: -100dvh;
+  margin-top: -100svh;
   pointer-events: none;
 }
 
@@ -105,7 +117,7 @@
   top: 0;
   display: flex;
   align-items: center;
-  min-height: 100dvh;
+  min-height: 100svh;
   padding: clamp(5rem, 9vw, 8rem) clamp(1.25rem, 6vw, 6rem);
   pointer-events: none;
 }
@@ -242,7 +254,7 @@
 
 @media (prefers-reduced-motion: reduce) {
   .scroll-scrub__chapter {
-    min-height: 100dvh !important;
+    min-height: 100svh !important;
   }
 
   .scroll-scrub__progress span {

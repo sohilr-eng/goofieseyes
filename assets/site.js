@@ -127,31 +127,69 @@
     var rails = [].slice.call(wrap.querySelectorAll('.gf-rail'));
     if (rails.length < 2) return;
 
-    var frame = 0;
+    /* The page script calls this again once the records have been rendered —
+     * the first call, from gfInit(), measures empty rails. That second call
+     * needs a re-measure, not a second scroll listener and a second rAF chain
+     * writing to the same two elements. */
+    if (wrap.gfRails) {
+      wrap.gfRails.measure();
+      return;
+    }
 
+    var travels = [];
+    var frame = 0;
+    var visible = true;
+
+    /* Reads only, and only when the geometry can actually have changed.
+     * These used to be read inside the write loop below, which forced a
+     * synchronous layout on every rail on every scroll frame. */
+    function measure() {
+      var vw = window.innerWidth;
+      for (var i = 0; i < rails.length; i++) {
+        var overflow = Math.max(0, rails[i].scrollWidth - rails[i].clientWidth);
+        travels[i] = Math.min(340, vw * 0.34, overflow / 2);
+      }
+      schedule();
+    }
+
+    /* One read, then writes only. */
     function update() {
       frame = 0;
       var rect = wrap.getBoundingClientRect();
       var span = rect.height + window.innerHeight;
       if (span <= 0) return;
       var progress = Math.min(1, Math.max(0, (window.innerHeight - rect.top) / span));
-
-      rails.forEach(function (rail, i) {
-        var overflow = Math.max(0, rail.scrollWidth - rail.clientWidth);
-        var travel = Math.min(340, window.innerWidth * 0.34, overflow / 2);
-        var offset = (progress - 0.5) * 2 * travel;
-        rail.style.transform = 'translate3d(' + (i % 2 ? offset : -offset) + 'px,0,0)';
-      });
+      for (var i = 0; i < rails.length; i++) {
+        var offset = (progress - 0.5) * 2 * travels[i];
+        rails[i].style.transform =
+          'translate3d(' + (i % 2 ? offset : -offset) + 'px,0,0)';
+      }
     }
 
-    function onScroll() {
-      if (frame) return;
+    function schedule() {
+      if (frame || !visible) return;
       frame = window.requestAnimationFrame(update);
     }
 
-    update();
-    window.addEventListener('scroll', onScroll, { passive: true });
-    window.addEventListener('resize', onScroll);
+    window.addEventListener('scroll', schedule, { passive: true });
+    window.addEventListener('resize', measure);
+
+    /* The crate sits a viewport below the hero, so this loop used to run for
+     * the whole time the film was being scrubbed, for elements nobody could
+     * see. */
+    if (window.IntersectionObserver) {
+      new IntersectionObserver(function (entries) {
+        visible = entries[0].isIntersecting;
+        if (visible) schedule();
+        else if (frame) {
+          window.cancelAnimationFrame(frame);
+          frame = 0;
+        }
+      }, { rootMargin: '150px 0px' }).observe(wrap);
+    }
+
+    wrap.gfRails = { measure: measure };
+    measure();
   }
 
   /* --------------------------------------------------------- mobile nav --- */

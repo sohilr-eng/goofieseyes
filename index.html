@@ -51,6 +51,25 @@
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/site.css">
   <link rel="stylesheet" href="/assets/scroll-scrub.css">
+
+  <!-- The film is fetched as a blob by scroll-scrub.js, which cannot start
+       until DOMContentLoaded. These start it with the HTML parse instead.
+       `crossorigin` is required even same-origin: as=fetch preloads are made in
+       CORS mode, and without it the preload will not match fetch()'s defaults
+       (mode cors, credentials same-origin) and the clip downloads twice. The
+       media queries mirror isMobile() in scroll-scrub.js; the desktop one is
+       deliberately stricter than the exact negation, so an odd device gets no
+       preload rather than the wrong several-MB one. Every arm is also gated on
+       no-preference: under reduced motion the script never fetches a clip, and
+       a preload has no way to know that on its own. -->
+  <link rel="preload" as="fetch" type="video/mp4" crossorigin
+        href="/assets/video/vinyl-mobile.mp4"
+        media="(prefers-reduced-motion: no-preference) and (hover: none) and (pointer: coarse),
+               (prefers-reduced-motion: no-preference) and (max-width: 860px)">
+  <link rel="preload" as="fetch" type="video/mp4" crossorigin
+        href="/assets/video/vinyl-desktop.mp4"
+        media="(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine) and (min-width: 861px)">
+
   <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
@@ -94,7 +113,9 @@
   <section class="scroll-scrub"
            data-clip="/assets/video/vinyl-desktop.mp4"
            data-mobile-clip="/assets/video/vinyl-mobile.mp4"
-           data-linger="0.18">
+           data-linger="0.18"
+           data-fps="24"
+           data-frames="361">
     <div class="scroll-scrub__stage">
       <div class="scroll-scrub__media" aria-hidden="true">
         <figure class="scroll-scrub__layer" data-scroll-scrub-layer>
@@ -111,7 +132,7 @@
 
     <div class="scroll-scrub__story">
       <article class="scroll-scrub__chapter" id="the-crate" data-scroll-scrub-band
-               style="min-height: 340dvh">
+               style="min-height: 340svh">
         <div class="scroll-scrub__chapter-pin">
           <div class="scroll-scrub__copy">
             <p class="scroll-scrub__kicker">goofieseyes</p>
