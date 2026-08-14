@@ -1,88 +1,83 @@
 # Handoff — scroll-scrub hero smoothness
 
-Working notes for whoever picks this up. Written 2026-08-14 after two commits
-shipped to `claude/desktop-recent-changes-56iv8g` and the user tested on real
-hardware. **Read the traps section before writing any code or running any
-benchmark** — several non-obvious things will waste your time otherwise.
+Working notes for whoever picks this up. Updated 2026-08-14 after a local
+desktop session that had the master film, real Chrome and ffmpeg — none of which
+the earlier remote session had. **Read the traps section before writing any code
+or running any benchmark.**
 
-Delete this file when the work lands.
+Delete this file when the work lands on `master`.
 
 ---
 
 ## 1. Where things stand
 
-Branch `claude/desktop-recent-changes-56iv8g`, two commits ahead of `master`:
+Branch `claude/desktop-recent-changes-56iv8g`, five commits ahead of `master`:
 
 | commit | what |
 |---|---|
 | `f3e2723` | JS/CSS: playhead pipeline rewrite, rails fix, loop gating, compositing, preload/cache |
 | `830255d` | Re-encode: 1080p, keyframe every 24 frames, B-frames removed |
+| `79e2d69` | Handoff notes, benchmark tooling |
+| *(new)* | Re-encode at 720p/540p, keyframe every 8 frames, cut from the master |
+| *(new)* | `SMOOTH` 13.4 → 9.0, `?track=` knob |
 
-**Not merged. Not live.** Production serves `master` (`09b5e07`). Nothing the
-user sees on `goofieseyes.live` includes any of this yet.
+**Not merged. Not live.** Production serves `master` (`09b5e07`).
 
 Current assets on the branch:
 
 ```
-assets/video/vinyl-desktop-v2.mp4   6.31 MB   1920x1080  g=24  no B-frames
-assets/video/vinyl-mobile-v2.mp4    2.91 MB   1280x720   g=24  no B-frames
+assets/video/vinyl-desktop-v3.mp4   5.02 MB   1280x720   g=8   no B-frames
+assets/video/vinyl-mobile-v3.mp4    2.92 MB    960x540   g=8   no B-frames
 + matching -poster.jpg for each, extracted from frame 0 of their own clip
 ```
 
-### User's real-hardware verdict
+Both cut from the master, not from a previous encode, so there is no generation
+loss. Verified: `has_b_frames=0`, `nb_frames=361`, 46 keyframes each.
 
-- **PC — still choppy.** Note: they briefly reported it as smooth, then
-  corrected themselves — they had been scrolling the Higgsfield demo site, not
-  this one. Treat PC as unfixed.
-- **iOS — much better, except scrolling *up*,** which is still choppy.
-- **New, unrelated complaint:** "it takes 5 scrolls to get into actually
-  scrolling the website." Not yet addressed. See §4.
+### What is still unverified
+
+The whole point of the change is how it feels on **the user's PC** and **their
+iPhone**, and neither has been tested since the re-encode. Everything below is
+bench data from one Windows desktop with hardware H.264 decode.
+
+Specifically still open:
+- **PC choppiness** — the complaint that motivated all of this.
+- **iOS scrolling *up*** — reported choppy, and see trap 5.
+- **120 Hz displays** and the **iOS Safari priming path** — never verified anywhere.
 
 ---
 
-## 2. What is decided but NOT implemented
+## 2. What was decided and is now implemented
 
-The user answered these, then the session was interrupted before implementation.
-**These are approved — build them.**
+All three items the previous session left pending are done.
 
-1. **Desktop re-encode → 1280×720, keyframe every 8 frames.** Measured 5.03 MB,
-   *smaller* than the 6.31 MB currently on the branch, at roughly half the
-   per-seek cost. This is the main fix for PC choppiness.
-2. **Mobile re-encode to match** (960×540 suggested, g=8).
-3. **Soften the smoothing** for mouse-wheel input. `SMOOTH` in
-   `assets/scroll-scrub.js` is currently `13.4` (per second). Try `9.0`. The
-   user can then fine-tune live via `?smooth=` without a redeploy.
+1. **Desktop re-encode → 1280×720, keyframe every 8 frames.** Done, from the
+   master. 5.02 MB, *smaller* than the 6.31 MB it replaces.
+2. **Mobile re-encode → 960×540, g=8.** Done. 2.92 MB, effectively unchanged in
+   size — the denser keyframes eat the resolution saving.
+3. **`SMOOTH` 13.4 → 9.0.** Done. Still overridable live with `?smooth=`.
+
+Plus one addition the user chose when asked about the "5 scrolls" complaint:
+
+4. **`?track=` knob.** Overrides the hero band height in `svh` at runtime,
+   clamped to 50–1000, falling back to the markup default on anything invalid.
+   The default stays `min-height: 340svh` on `.scroll-scrub__chapter` in
+   `index.html`. This exists because the trade in §4 cannot be resolved from a
+   bench — it needs the user's eye on the user's hardware.
 
 ### The master film
-
-The user has a ~52 MB master at:
 
 ```
 C:\Users\sohil\claude-workspace\goofieseyes\assets\higgsfield asset\hf_20260814_031522_481166dd-55d1-43c0-883d-b0f51c2a9ba5 (1).mp4
 ```
 
-It is **not in the repo** and was never committed. The user has confirmed a
-local desktop session *can* read that path — if that is you, encode from it.
-
-If you cannot reach it, encoding from `vinyl-desktop-v2.mp4` is an acceptable
-fallback: measured PSNR 47.5 dB / SSIM 0.992 against the file it replaced, which
-is visually transparent, because the re-encode runs at roughly twice its
-source's bitrate. **Never commit the master** — add it to `.gitignore` if it
-sits in the working tree.
-
-If you are running locally with real Chrome, you also get a better benchmark
-than any of the numbers in §6: Chrome decodes H.264, so `scripts/scrub-bench.js`
-will measure the actual shipped files instead of a VP9 stand-in. Re-baseline
-before and after your change rather than comparing against the proxy figures
-below.
-
-Since the target is 720p, the master matters less than it sounds: downscaling
-discards more detail than the generation loss does. Do not block on it.
+1920×1080, 24 fps, 361 frames, 29 Mbps H.264, ~52 MB. A local desktop session
+can read it. It is now covered by `.gitignore` (`assets/higgsfield asset/`), so
+it can sit in the working tree safely. **Never commit it.**
 
 ### Encode commands
 
-Replace `$SRC` with the master if available, else `assets/video/vinyl-desktop-v2.mp4`.
-Use **new versioned filenames** (`-v3`) — see trap 6.
+These are the ones actually used. `$SRC` is the master.
 
 ```bash
 # desktop
@@ -110,36 +105,34 @@ get no guaranteed interval on a continuous take). `-bf 0` removes B-frames,
 which decode out of order and add latency to every seek — as important as the
 GOP. `-refs 1` shrinks decoder state setup per seek.
 
-Then update references in `index.html` (6 places: two `<link rel=preload href>`,
-`data-clip`, `data-mobile-clip`, the poster `<source srcset>` and `<img src>`),
-`git rm` the `-v2` files, and confirm nothing stale remains:
+Any future re-encode needs a **new filename** (`-v4`) — see trap 6 — plus the
+6 references in `index.html` (two `<link rel=preload href>`, `data-clip`,
+`data-mobile-clip`, the poster `<source srcset>` and `<img src>`). Then confirm:
 
 ```bash
-grep -rn 'vinyl-.*-v2' --include=*.html --include=*.js --include=*.json .
+grep -rn 'vinyl-.*-v3' --include=*.html --include=*.js --include=*.json .
+ffprobe -v error -select_streams v:0 -show_entries stream=width,height,nb_frames,has_b_frames -of default=noprint_wrappers=1 assets/video/vinyl-desktop-v4.mp4
+ffprobe -v error -select_streams v:0 -skip_frame nokey -show_entries frame=pts_time -of csv=p=0 assets/video/vinyl-desktop-v4.mp4 | wc -l
 ```
-
-### Verify the encode before touching anything else
-
-```bash
-ffprobe -v error -select_streams v:0 -show_entries stream=width,height,nb_frames,has_b_frames -of default=noprint_wrappers=1 assets/video/vinyl-desktop-v3.mp4
-ffprobe -v error -select_streams v:0 -skip_frame nokey -show_entries frame=pts_time -of csv=p=0 assets/video/vinyl-desktop-v3.mp4 | wc -l
-```
-
-Expect `has_b_frames=0`, `nb_frames=361`, and ~46 keyframes (was 2 originally,
-16 on the current `-v2`).
 
 ---
 
 ## 3. Traps — read these first
 
-1. **The Playwright Chromium has no H.264 at all.** `canPlayType('video/mp4;
-   codecs="avc1.42E01E")` returns `""`. Any harness that loads the real `.mp4`
-   will hang forever at "waiting for video ready". Workaround used here: encode a
-   VP9 `.webm` proxy and intercept the request with
-   `page.route('**/vinyl-*.mp4', r => r.fulfill({contentType:'video/webm', body}))`.
-   **If you are on a desktop with real Chrome, you do not need this** — Chrome
-   has H.264 and you can benchmark the actual shipped files, which is strictly
-   better. `scripts/scrub-bench.js` auto-detects and tells you which mode it used.
+1. **Playwright's bundled Chromium has no H.264 at all.**
+   `canPlayType('video/mp4; codecs="avc1.42E01E")` returns `""`, and any harness
+   loading the real `.mp4` hangs forever at "waiting for video ready". The remote
+   session worked around this with a VP9 `.webm` proxy.
+   **On Windows with Chrome installed, do not use the proxy** — point Playwright
+   at real Chrome and you measure the actual shipped files:
+
+   ```bash
+   npm install --no-save playwright        # PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
+   CHROME="C:\Program Files\Google\Chrome\Application\chrome.exe" node scripts/scrub-regress.js
+   ```
+
+   `node_modules` is gitignored and `--no-save` leaves `package.json` alone.
+   Both scripts print which decoder they got; want "native H.264".
 
 2. **`scroll-scrub.js` is a deferred script, so it initialises before any
    `DOMContentLoaded` hook.** Deferred scripts run with
@@ -149,26 +142,22 @@ Expect `has_b_frames=0`, `nb_frames=361`, and ~46 keyframes (was 2 originally,
    too late. Intercept at the network layer instead.
 
 3. **At 1080p, denser keyframes stop helping.** Measured: g=24 → 32.9 ms per
-   seek, g=8 → 32.7 ms, g=4 → 31.4 ms. All the same. The cost is *pixels*, not
-   the dependency chain. Only at 720p does g=8 drop to 16.3 ms. **Resolution is
-   the lever above ~720p; GOP is the lever below it.** Do not burn time making
-   the GOP denser at 1080p — it only inflates the file.
+   seek, g=8 → 32.7 ms, g=4 → 31.4 ms. The cost is *pixels*, not the dependency
+   chain. **Resolution is the lever above ~720p; GOP is the lever below it.**
 
-4. **Do not race `seeked` against `requestVideoFrameCallback`.** It was tried and
-   measured *worse*: 1.47 seeks per presented frame versus 1.04. `seeked` fires
-   before composition, so the pipeline outruns the compositor and spends decodes
-   on frames superseded before anyone sees them. The seek chain must settle on
-   rVFC only. `seeked` is still used as a one-shot fallback for lifting the
-   poster, which is correct and different.
+4. **Do not race `seeked` against `requestVideoFrameCallback`.** Measured
+   *worse*: 1.47 seeks per presented frame versus 1.04. `seeked` fires before
+   composition, so the pipeline outruns the compositor and spends decodes on
+   frames superseded before anyone sees them. The seek chain must settle on rVFC
+   only. `seeked` is still used as a one-shot fallback for lifting the poster,
+   which is correct and different.
 
-5. **The backward-scroll penalty does not reproduce in the headless harness.**
-   Measured 32.4 ms backward vs 33.0 ms forward — no asymmetry. This is because
-   software VP9 decode gains nothing from decoder state, so forward is *equally*
-   slow. On real hardware H.264, forward continues from decoder state while
-   backward must flush and restart from a keyframe. **The iOS scroll-up chop is
-   real but is not measurable in this container.** Do not conclude it is fixed
-   because the harness looks symmetric. Denser keyframes and lower resolution are
-   the levers; verify on a real device.
+5. **The backward-scroll penalty does not reproduce on a bench — in either
+   container.** The remote VP9 harness measured no asymmetry, and real Chrome
+   with real H.264 measured backward *faster* than forward (5.3 ms vs 6.9 ms
+   p50), because a fully-buffered blob makes Chrome's seek path symmetric.
+   **The iOS scroll-up chop is real but is not reproducible in Chrome.** Do not
+   conclude it is fixed because a bench looks symmetric; verify on the device.
 
 6. **`/assets/video/` is served `immutable` for one year** (`vercel.json`). Every
    re-encode **must** use a new filename or cached clients keep the old file for
@@ -182,46 +171,63 @@ Expect `has_b_frames=0`, `nb_frames=361`, and ~46 keyframes (was 2 originally,
 
 8. **Posters must be extracted from the encodes, not the master.** The poster is
    shown until the video's first frame paints, and a mismatch is a visible jump
-   at the handoff. Extracting from a different source guarantees a mismatch.
+   at the handoff.
 
-9. **ffmpeg is not preinstalled in the remote container.**
-   `apt-get update && apt-get install -y ffmpeg` (the `update` is required — the
-   index is stale and the install 404s without it). The Playwright-bundled
-   binary at `/opt/pw-browsers/ffmpeg-1011/ffmpeg-linux` is built
-   `--disable-everything` with only VP8/webm/mjpeg/png — **no libx264, no mp4
-   muxer** — it cannot do this job.
+9. **Never rewrite `index.html` through PowerShell `Get-Content`/`Set-Content`.**
+   The file is UTF-8 with no BOM; `Get-Content -Raw` decodes it as ANSI and
+   writing it back turns every em-dash into `â€”` across the whole file,
+   including the `<title>` and the JSON-LD block. This happened once and was
+   caught only by a byte-exact backup. Use the editing tools, or `git checkout`
+   to restore. Check with `Select-String -Pattern 'â€'` — want zero hits.
 
-10. **Outbound network is allowlisted.** `goofieseyes.live` returns a proxy 403.
-    You cannot fetch the live site or a Vercel preview from the remote container.
+10. **The Claude in-app Browser pane does not composite while hidden.**
+    `document.hidden` stays true, so `requestAnimationFrame` never fires, the
+    scrub loop never runs, and `requestVideoFrameCallback` never resolves — the
+    page looks broken when it is fine. Screenshots fail with an explicit message.
+    For anything involving rAF or presentation, drive Playwright instead. The
+    `_bench` harness used for encode A/B has a `mode=seeked` fallback for this,
+    since `seeked` fires on decode completion regardless of visibility.
+
+11. **On Windows, a static-file server needs `path.resolve` on its root.**
+    `path.join` returns backslashes, so a forward-slash root fails the
+    `f.startsWith(ROOT)` traversal guard and 404s every request. Cost twenty
+    minutes of debugging a harness that looked like a page bug.
+
+12. **ffmpeg is not preinstalled in the remote container** (it is on this
+    desktop, via winget, at 8.0.1). `apt-get update && apt-get install -y ffmpeg`
+    — the `update` is required. The Playwright-bundled binary is built
+    `--disable-everything`: no libx264, no mp4 muxer.
+
+13. **Outbound network is allowlisted in the remote container.**
+    `goofieseyes.live` returns a proxy 403.
 
 ---
 
-## 4. Open questions for the user — do not decide these alone
+## 4. Open questions for the user
 
-**The "5 scrolls" complaint and the scroll track length are the same question,
-and they pull against each other.**
+**The track length trade is now tunable rather than decided.** The user chose
+the knob over a fixed value, so the answer comes from their hardware.
 
-The hero band is `min-height: 340svh` (inline style on `.scroll-scrub__chapter`
-in `index.html`) — about 3060 px on a 900 px viewport, mapping 361 video frames
-onto that distance at roughly 8.5 px per frame. Consequences:
+The hero band defaults to `min-height: 340svh` — about 3060 px on a 900 px
+viewport, mapping 361 frames at roughly 8.5 px per frame. Five wheel notches
+≈ 500 px ≈ 16% in, which is why the page reads as frozen at first.
 
-- Five wheel notches ≈ 500 px ≈ 16% of the way in, so the page reads as frozen
-  while it is actually scrubbing. That is the design working as specified.
-- **Shortening the track** makes it feel responsive but puts *more* video frames
-  under each pixel of scroll, which is choppier.
-- **Lengthening it** scrubs more smoothly but makes the "stuck" feeling worse.
+- **Shorter** feels responsive but puts more film under each pixel.
+- **Longer** scrubs more smoothly but makes the "stuck" feeling worse.
 
-There is no setting that fixes both. The user has to choose the trade. A third
-option worth offering: keep the track long but let the copy/CTA make it obvious
-the film is responding, so the pin does not read as a frozen page.
+What changed: that trade used to be expensive, because a seek cost 16–39 ms. At
+5 ms it is much cheaper, so shortening is viable in a way it was not when this
+document was first written. Measured with `?track=`, an 850 px scroll reaches
+0.312 of the film at 340svh, 0.544 at 170svh, 0.190 at 600svh.
 
-Also open:
-- Whether to analyse the Higgsfield demo. The user finds it smoother. The
-  high-value, low-effort version is to get the video file *their* demo serves and
-  probe its resolution and keyframe spacing — that answers whether their
+Ask the user for the value that feels right on both devices, then bake it into
+the inline style in `index.html` and keep the knob for future tuning.
+
+Also still open:
+- Whether to analyse the Higgsfield demo the user finds smoother. The
+  high-value, low-effort version is to grab the video file *their* demo serves
+  and probe its resolution and keyframe spacing — that answers whether their
   advantage is the encode or a different technique, in about a minute.
-- Never verified anywhere: **iOS Safari priming path** and **120 Hz displays**.
-  Both need real hardware.
 
 ---
 
@@ -230,22 +236,21 @@ Also open:
 Do not undo these; each was measured or reasoned and the reasons are not obvious
 from the code alone.
 
-- **No shared rAF scheduler.** An earlier plan called for one. Once both loops
-  are IntersectionObserver-gated and idle-exit, measured idle cost is 0 either
-  way, and a scheduler adds a cross-file lifecycle dependency between `site.js`
-  and `scroll-scrub.js` for one saved callback in a narrow overlap band.
-- **The poster keeps `fetchpriority="high"`.** A plan had it demoted. It is
-  ~110 KB, it is the first thing on screen, and the hero is black without it.
+- **No shared rAF scheduler.** Once both loops are IntersectionObserver-gated
+  and idle-exit, measured idle cost is 0 either way, and a scheduler adds a
+  cross-file lifecycle dependency between `site.js` and `scroll-scrub.js`.
+- **The poster keeps `fetchpriority="high"`.** It is the first thing on screen
+  and the hero is black without it.
 - **Seek watchdog (`SEEK_TIMEOUT`) and generation counter (`seekGen`) are load
   bearing.** Once seeks are serialised, one dropped `seeked` would latch the
   pipeline shut for the life of the page; and a seek the watchdog abandoned can
   still land late and clobber whatever is in flight. Do not remove either.
 - **`SNAP = 0.2`** teleports the playhead on large jumps. Without it, a reload
   mid-page or following `#the-crate` seeks the whole way from frame 0.
-- **`svh`, not `dvh`,** on the stage, chapter-pin, story margin and the inline
-  track height. `dvh` changes when the mobile URL bar hides, resizing a sticky
-  element mid-scroll while the JS's cached geometry goes stale. All four must
-  stay consistent or the scroll-to-progress mapping breaks.
+- **`svh`, not `dvh`,** on the stage, chapter-pin, story margin, the inline track
+  height and the `?track=` override. `dvh` changes when the mobile URL bar hides,
+  resizing a sticky element mid-scroll while the JS's cached geometry goes stale.
+  All five must stay consistent or the scroll-to-progress mapping breaks.
 - **`--ss-progress` is written on `.scroll-scrub__progress span`, not the
   section root.** Custom properties inherit, so writing it on the root
   invalidated style for the whole hero subtree — including the pinned copy and
@@ -265,59 +270,59 @@ from the code alone.
 
 ## 6. How to verify
 
-Two scripts are in `scripts/`. Both need Playwright; on the remote container it
-is global at `/opt/node22/lib/node_modules/playwright` with Chromium at
-`/opt/pw-browsers/chromium`.
-
 ```bash
 node scripts/scrub-regress.js          # 15 correctness checks, exits non-zero on failure
 node scripts/scrub-bench.js            # cadence + seek latency, forward and backward
 ```
 
-`scrub-regress.js` covers: reduced-motion fetches nothing and idles, exactly one
-clip request per breakpoint, the right encode per breakpoint, poster lifts after
-first seek, progress property on the bar not the root, rails single-instance and
-still transforming, and no page errors on the four other pages. **Run it before
-every commit.**
+Set `CHROME` to real Chrome (trap 1). **Run the regression before every commit.**
 
-### Baseline numbers to beat
+### Real H.264 measurements
 
-4 s scroll across the band, VP9 proxies in headless Chromium. These are
-**relative A/B numbers only** — absolute decode cost does not transfer to H.264
-on real hardware.
+Same harness, same machine, real Chrome, 4 s scroll across the band. These
+replace the VP9-proxy figures the earlier revision of this document carried —
+those were relative-only and understated the gain.
 
-| | frames presented | cadence | lag p50 | idle rAF |
-|---|---|---|---|---|
-| original code + original encode | 27 | 143 ± 119 ms | 2.41 s | 120 |
-| current branch (`830255d`) | 114 | 35 ± 15 ms | 0.26 s | 0 |
-| target (720p, g=8) | ~189 | ~21 ± 8 ms | — | 0 |
-
-Seek latency, write → presented, by encode:
-
-| encode | frames decoded per seek | p50 |
+| | v2 (1080p g=24) | v3 (720p g=8) |
 |---|---|---|
-| 1080p g=24 (current branch) | ~10 | 32.9 ms |
-| 1080p g=8 | 3.4 | 32.7 ms |
-| 1080p g=4 | 1.6 | 31.4 ms |
-| **720p g=8 (target)** | 3.8 | **16.3 ms** |
+| distinct frames presented, forward | 215 | **356** |
+| distinct frames presented, backward | 207 | **360** |
+| seek latency p50 | 16.3 ms | **4.9 ms** |
+| seek latency p95 | 38.7 ms | **5.1 ms** |
+| jitter (std dev) | 12.1 ms | **2.5 ms** |
+| holds over 100 ms | 0 | 0 |
+| long tasks | 0 | 0 |
+| idle rAF, hero off screen | 0 | 0 |
 
-16.3 ms is one 60 Hz display frame — decode stops being the bottleneck. 33 ms is
-two, which caps presentation at 30 fps and is what the user perceives as choppy.
+Per-seek latency measured directly against each file, 181 seeks per direction:
+
+| encode | fwd p50 | fwd p90 | back p50 | back p90 |
+|---|---|---|---|---|
+| desktop v2 — 1080p g=24 | 18.3 ms | 31.2 ms | 16.3 ms | 28.6 ms |
+| **desktop v3 — 720p g=8** | **6.9 ms** | **12.9 ms** | **5.3 ms** | **8.7 ms** |
+| mobile v2 — 720p g=24 | 9.7 ms | 16.8 ms | 8.9 ms | 14.5 ms |
+| **mobile v3 — 540p g=8** | **6.4 ms** | **10.1 ms** | **4.2 ms** | **6.2 ms** |
+
+Note the "holds over 100 ms" row: **identical for both encodes**, while p95 and
+jitter show a 7× gap. That is exactly the metric that caused g=24 to ship over
+g=8 last time. Do not use it to decide anything.
 
 ---
 
 ## 7. Working agreement with this user
 
 They test on real hardware and report precisely; take the reports seriously even
-when the harness disagrees — the harness has been wrong twice (traps 1 and 5).
+when the harness disagrees — the harness has now been wrong three times
+(traps 1, 5 and 10).
 
 They asked directly for an honest recommendation when a plan looked wrong, and
-they were right to. One judgement call already went wrong and is worth learning
-from: g=24 was shipped over the planned g=8 on the strength of a
-"zero stalls over 100 ms" metric that was too coarse to see the 33 ms vs 16 ms
-gap. **Pick metrics fine enough to resolve the thing the user will actually
-feel.**
+they were right to. One judgement call already went wrong: g=24 was shipped over
+the planned g=8 on the strength of a "zero stalls over 100 ms" metric that was
+too coarse to see the gap. **Pick metrics fine enough to resolve the thing the
+user will actually feel.**
 
 Flag size and quality trade-offs explicitly with real measured numbers rather
 than estimates — an early "roughly 2×" guess turned out to be 3.7×, and
-measuring the variants took two minutes.
+measuring the variants took two minutes. When a decision is genuinely theirs,
+ask, and offer a runtime knob so the answer can come from their eye rather than
+a bench.
