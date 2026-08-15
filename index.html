@@ -132,19 +132,32 @@
     </div>
 
     <div class="scroll-scrub__story">
-      <!-- Band height is what decides how fast the film reads. 361 frames are
-           mapped across this distance, so it sets the pixels of scroll per film
-           frame, and therefore how many times per second the picture changes at
-           a given scroll speed — which is what "slow motion" actually means
-           here. At 340svh this was 8.5px per frame: scrolling at a natural
-           90px/s advanced the film only ~10 times a second, i.e. the take
-           played at roughly 40% speed. 200svh gives 5.0px per frame and ~18
-           updates/s, matching the reference the film was compared against.
-           Smoothing does not affect this — see the SMOOTH note in
+      <!-- Band height sets two things at once and they pull against each other.
+           361 frames are mapped across this distance, so it fixes the pixels of
+           scroll per film frame — which decides both how fast the film reads
+           and how long a visitor is held on the animation before reaching the
+           crate.
+
+           History: 340svh was 8.5px/frame, so a natural 90px/s scroll advanced
+           the film only ~10 times a second and the take played at roughly 40%
+           speed — that was the "slow motion" complaint. 200svh fixed the speed
+           but still took about five scroll gestures to clear, which reads as
+           being stuck on the same animation.
+
+           130svh is ~3.2px/frame: ~27 picture updates/s at 90px/s, so the film
+           runs at about 1.14x its native 24fps — brisk rather than slow — and
+           clears in roughly three gestures.
+
+           Floor: .scroll-scrub__chapter-pin is sticky at 100svh, so the copy's
+           travel is this value minus 100. Below ~110svh the headline has
+           essentially no travel and flashes past; do not shorten further
+           without re-thinking the pin.
+
+           Smoothing does not affect the speed — see the SMOOTH note in
            scroll-scrub.js. Override live with ?track= before changing it.
            svh, not dvh: see the stage in scroll-scrub.css. -->
       <article class="scroll-scrub__chapter" id="the-crate" data-scroll-scrub-band
-               style="min-height: 200svh">
+               style="min-height: 130svh">
         <div class="scroll-scrub__chapter-pin">
           <div class="scroll-scrub__copy">
             <p class="scroll-scrub__kicker">goofieseyes</p>

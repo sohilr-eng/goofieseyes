@@ -21,7 +21,8 @@ Branch `claude/desktop-recent-changes-56iv8g`, five commits ahead of `master`:
 | `eac5648` | Re-encode at 720p/540p, keyframe every 8 frames, cut from the master |
 | `d926872` | `SMOOTH` 13.4 → 9.0, `?track=` knob |
 | `83734db` | Handoff notes updated for the re-encode |
-| *(new)* | Track 340→200svh, `SMOOTH` 9→30, `linger` 0.18→0; bench gains a human-speed profile |
+| `5a03986` | Track 340→200svh, `SMOOTH` 9→30, `linger` 0.18→0; bench gains a human-speed profile |
+| *(new)* | Track 200→130svh, to cut the hold on the animation from ~5 gestures to ~3 |
 
 **Not merged. Not live.** Production serves `master` (`09b5e07`).
 
@@ -79,6 +80,11 @@ Then, after the user reported the film still "moves almost in slow motion":
    live in the markup (`data-smooth`, `data-linger`, the inline `min-height`).
    Measured: picture updates went 13 → 17.7 per second at a human 90px/s scroll,
    settle-after-stop 61ms → 16ms, with seek latency unchanged at 5ms p50.
+
+6. **Track 200svh → 130svh.** 200 fixed the speed but still held the visitor on
+   the animation for about five scroll gestures, which reads as being stuck.
+   The same band height controls both, so this is one number serving two
+   requirements — see §4a.
 
 ### The master film
 
@@ -260,6 +266,40 @@ literally slow motion.
 The lesson: the user correctly described *what they saw*; they are not obliged
 to correctly attribute it to a mechanism. A multiple-choice answer about
 symptoms is evidence, not a diagnosis. Measure before ruling a lever out.
+
+## 4a. Band height is one number serving two requirements
+
+Shortening to 200svh fixed the speed but not the dwell: the user still counted
+about five scroll gestures before clearing the animation, and asked for ~3.
+Both requirements are governed by the same `min-height`, so it cannot be tuned
+for one without moving the other.
+
+Their input works out to roughly **40svh per scroll gesture** (5 gestures at
+200svh). Useful for converting a "how many scrolls" request into a number.
+
+Measured at 90 px/s, against the film's native 24 fps:
+
+| band | px/frame | updates/s | vs native speed | ~gestures |
+|---|---|---|---|---|
+| 340svh | 8.5 | 13.0 | 0.54× — slow motion | 8.5 |
+| 200svh | 5.0 | 17.7 | 0.74× | 5 |
+| 150svh | 3.7 | 23.7 | 0.99× | 3.75 |
+| **130svh** | **3.2** | **27.3** | **1.14×** | **~3.25** |
+| 120svh | 3.0 | 29.7 | 1.24× | 3 |
+
+130svh was chosen over 120: it meets the ~3-gesture request within rounding
+while keeping the film nearer native speed, and it preserves more of the copy's
+travel.
+
+**Hard floor, ~110svh.** `.scroll-scrub__chapter-pin` is sticky with
+`min-height: 100svh`, so the copy's travel is the band minus 100. At 130svh
+that is 30svh; below ~110svh the headline has no travel and flashes past.
+Shortening further means re-thinking the pin, not just the number.
+
+**Do not read the bench's high-speed rows as frame counts.** Headless Chrome is
+not vsync-capped, so at 400 px/s it reported 100–119 updates/s — well past what
+a 60 Hz display can present. The 90 px/s figures are the trustworthy ones; they
+match the screen-recording measurement.
 
 Note this also dissolved the older "5 scrolls before the page moves" complaint —
 same root cause, same fix.
