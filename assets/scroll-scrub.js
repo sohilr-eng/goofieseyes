@@ -43,14 +43,22 @@
     var FPS = parseFloat(root.dataset.fps || '24');
     var FRAMES = parseInt(root.dataset.frames || '0', 10);
 
-    /* Smoothing rate, per second. 13.4 reproduced the old fixed 0.2-per-frame
-     * lerp exactly at 60Hz — 1 - exp(-13.4/60) = 0.2 — and expressing it as a
-     * rate means a 120Hz display converges at the same wall-clock rate instead
-     * of twice as fast. Softened to 9.0 because a wheel notch arrives as one
-     * large discrete jump: at 13.4 the filter tracked it closely enough that
-     * each notch still read as a step. Tune by eye with ?smooth= before
-     * changing this. */
-    var SMOOTH = parseFloat(root.dataset.smooth || '9.0');
+    /* Smoothing rate, per second: the playhead converges on the scroll target
+     * with time constant 1/SMOOTH. Raised to 30 (33ms) from 9.0 (111ms).
+     *
+     * The filter was tuned when a seek cost 16-39ms and existed to hide that.
+     * At ~5ms it is mostly redundant, and Chrome already animates wheel
+     * scrolling — so a heavy filter here re-smooths an input that arrived
+     * smoothed, which is what made the film carry on gliding after the scroll
+     * stopped. Measured at a human 90px/s: settle lag 61ms at 9.0, 0-16ms at 30.
+     *
+     * What this does NOT control is how slow the film looks. An exponential
+     * filter changes phase, not steady-state rate, so picture updates per
+     * second are essentially unaffected by it: at a 340svh band, smooth 9 and
+     * smooth 30 both measured ~10-13 updates/s. That number is set by the band
+     * height — see the note on it in index.html. Mistaking one for the other
+     * cost a whole round of tuning. */
+    var SMOOTH = parseFloat(root.dataset.smooth || '30');
     var SNAP = 0.2;          /* jump further than this and teleport */
     var SEEK_TIMEOUT = 400;  /* ms before assuming a seek was dropped */
 

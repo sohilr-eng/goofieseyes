@@ -113,7 +113,8 @@
   <section class="scroll-scrub"
            data-clip="/assets/video/vinyl-desktop-v3.mp4"
            data-mobile-clip="/assets/video/vinyl-mobile-v3.mp4"
-           data-linger="0.18"
+           data-linger="0"
+           data-smooth="30"
            data-fps="24"
            data-frames="361">
     <div class="scroll-scrub__stage">
@@ -131,8 +132,19 @@
     </div>
 
     <div class="scroll-scrub__story">
+      <!-- Band height is what decides how fast the film reads. 361 frames are
+           mapped across this distance, so it sets the pixels of scroll per film
+           frame, and therefore how many times per second the picture changes at
+           a given scroll speed — which is what "slow motion" actually means
+           here. At 340svh this was 8.5px per frame: scrolling at a natural
+           90px/s advanced the film only ~10 times a second, i.e. the take
+           played at roughly 40% speed. 200svh gives 5.0px per frame and ~18
+           updates/s, matching the reference the film was compared against.
+           Smoothing does not affect this — see the SMOOTH note in
+           scroll-scrub.js. Override live with ?track= before changing it.
+           svh, not dvh: see the stage in scroll-scrub.css. -->
       <article class="scroll-scrub__chapter" id="the-crate" data-scroll-scrub-band
-               style="min-height: 340svh">
+               style="min-height: 200svh">
         <div class="scroll-scrub__chapter-pin">
           <div class="scroll-scrub__copy">
             <p class="scroll-scrub__kicker">goofieseyes</p>

@@ -18,8 +18,10 @@ Branch `claude/desktop-recent-changes-56iv8g`, five commits ahead of `master`:
 | `f3e2723` | JS/CSS: playhead pipeline rewrite, rails fix, loop gating, compositing, preload/cache |
 | `830255d` | Re-encode: 1080p, keyframe every 24 frames, B-frames removed |
 | `79e2d69` | Handoff notes, benchmark tooling |
-| *(new)* | Re-encode at 720p/540p, keyframe every 8 frames, cut from the master |
-| *(new)* | `SMOOTH` 13.4 → 9.0, `?track=` knob |
+| `eac5648` | Re-encode at 720p/540p, keyframe every 8 frames, cut from the master |
+| `d926872` | `SMOOTH` 13.4 → 9.0, `?track=` knob |
+| `83734db` | Handoff notes updated for the re-encode |
+| *(new)* | Track 340→200svh, `SMOOTH` 9→30, `linger` 0.18→0; bench gains a human-speed profile |
 
 **Not merged. Not live.** Production serves `master` (`09b5e07`).
 
@@ -41,9 +43,18 @@ iPhone**, and neither has been tested since the re-encode. Everything below is
 bench data from one Windows desktop with hardware H.264 decode.
 
 Specifically still open:
-- **PC choppiness** — the complaint that motivated all of this.
+- **The pacing change on real hardware.** 340→200svh is a large visual change to
+  the hero. It benches at 17.7 updates/s against a 18.5 reference, but only the
+  user can say whether the film now reads at the right speed, and whether the
+  shorter band still gives the copy room to land.
 - **iOS scrolling *up*** — reported choppy, and see trap 5.
+- **iOS momentum scrolling with `SMOOTH=30`.** Momentum is a different input
+  profile from a wheel; a filter that feels crisp on desktop can feel jumpy
+  under a flick. If it does, split the default on `isMobile()`.
 - **120 Hz displays** and the **iOS Safari priming path** — never verified anywhere.
+
+Resolved since the last revision: **PC choppiness** (the 720p/g=8 re-encode) and
+**the slow-motion feel** (§4).
 
 ---
 
@@ -61,9 +72,13 @@ Plus one addition the user chose when asked about the "5 scrolls" complaint:
 
 4. **`?track=` knob.** Overrides the hero band height in `svh` at runtime,
    clamped to 50–1000, falling back to the markup default on anything invalid.
-   The default stays `min-height: 340svh` on `.scroll-scrub__chapter` in
-   `index.html`. This exists because the trade in §4 cannot be resolved from a
-   bench — it needs the user's eye on the user's hardware.
+
+Then, after the user reported the film still "moves almost in slow motion":
+
+5. **Track 340svh → 200svh, `SMOOTH` 9 → 30, `linger` 0.18 → 0.** Defaults now
+   live in the markup (`data-smooth`, `data-linger`, the inline `min-height`).
+   Measured: picture updates went 13 → 17.7 per second at a human 90px/s scroll,
+   settle-after-stop 61ms → 16ms, with seek latency unchanged at 5ms p50.
 
 ### The master film
 
@@ -188,42 +203,68 @@ ffprobe -v error -select_streams v:0 -skip_frame nokey -show_entries frame=pts_t
     `_bench` harness used for encode A/B has a `mode=seeked` fallback for this,
     since `seeked` fires on decode completion regardless of visibility.
 
-11. **On Windows, a static-file server needs `path.resolve` on its root.**
+11. **The bench's sweep runs ~9x faster than a human scrolls, and that hid the
+    real problem.** `run()` covers the whole band in `SCROLL_MS` — about
+    765 px/s. A person wheel-scrolling this page runs closer to 90 px/s. At
+    sweep speed the film races through frames and every metric looks perfect,
+    which is exactly why the page could bench flawlessly while still feeling
+    slow. `runSteady()` exists for this: constant `SCROLL_PXS`, then a dead
+    stop. **Judge feel from the steady profile, throughput from the sweep.**
+
+12. **`SMOOTH` does not control how slow the film looks.** An exponential
+    filter changes phase, not steady-state rate: at a fixed scroll speed the
+    playhead still traverses the same frames per second, just delayed. Measured
+    at 340svh, `smooth=9` gave 13 updates/s and `smooth=30` gave 10.3 — no
+    improvement. What sets that number is **pixels of scroll per film frame**,
+    i.e. the band height. `SMOOTH` governs the *lag* and the *glide after you
+    stop* (61ms → 16ms), which is a different complaint with a different fix.
+    Two rounds of tuning were spent conflating them.
+
+13. **On Windows, a static-file server needs `path.resolve` on its root.**
     `path.join` returns backslashes, so a forward-slash root fails the
     `f.startsWith(ROOT)` traversal guard and 404s every request. Cost twenty
     minutes of debugging a harness that looked like a page bug.
 
-12. **ffmpeg is not preinstalled in the remote container** (it is on this
+14. **ffmpeg is not preinstalled in the remote container** (it is on this
     desktop, via winget, at 8.0.1). `apt-get update && apt-get install -y ffmpeg`
     — the `update` is required. The Playwright-bundled binary is built
     `--disable-everything`: no libx264, no mp4 muxer.
 
-13. **Outbound network is allowlisted in the remote container.**
+15. **Outbound network is allowlisted in the remote container.**
     `goofieseyes.live` returns a proxy 403.
 
 ---
 
-## 4. Open questions for the user
+## 4. The track length question — resolved by measurement
 
-**The track length trade is now tunable rather than decided.** The user chose
-the knob over a fixed value, so the answer comes from their hardware.
+**This was thought to be a taste trade. It was not; it was the bug.** Recorded
+here because the reasoning went wrong twice in the same way.
 
-The hero band defaults to `min-height: 340svh` — about 3060 px on a 900 px
-viewport, mapping 361 frames at roughly 8.5 px per frame. Five wheel notches
-≈ 500 px ≈ 16% in, which is why the page reads as frozen at first.
+The user reported the film moved "in slow motion." They were asked which
+symptom fit and did *not* pick "have to scroll forever," so track length was
+ruled out and the smoothing filter was blamed. Measurement said otherwise:
 
-- **Shorter** feels responsive but puts more film under each pixel.
-- **Longer** scrubs more smoothly but makes the "stuck" feeling worse.
+| config (at 90 px/s) | updates/s | settle lag |
+|---|---|---|
+| 340svh, smooth 9, linger 0.18 | 13.0 | 61 ms |
+| smooth 30 + linger 0, track unchanged | 10.3 | 16 ms |
+| track 195, smooth/linger unchanged | 21.7 | 160 ms |
+| **track 200 + smooth 30 + linger 0** | **17.7** | **16 ms** |
 
-What changed: that trade used to be expensive, because a seek cost 16–39 ms. At
-5 ms it is much cheaper, so shortening is viable in a way it was not when this
-document was first written. Measured with `?track=`, an 850 px scroll reaches
-0.312 of the film at 340svh, 0.544 at 170svh, 0.190 at 600svh.
+Smoothing alone did nothing for the slow-motion feel. **Band height was the
+only lever that moved it**, because it sets pixels of scroll per film frame and
+therefore how many times a second the picture can change. At 340svh that was
+8.5 px/frame, so a natural 90 px/s scroll played the take at roughly 40% speed —
+literally slow motion.
 
-Ask the user for the value that feels right on both devices, then bake it into
-the inline style in `index.html` and keep the knob for future tuning.
+The lesson: the user correctly described *what they saw*; they are not obliged
+to correctly attribute it to a mechanism. A multiple-choice answer about
+symptoms is evidence, not a diagnosis. Measure before ruling a lever out.
 
-Also still open:
+Note this also dissolved the older "5 scrolls before the page moves" complaint —
+same root cause, same fix.
+
+Still open:
 - Whether to analyse the Higgsfield demo the user finds smoother. The
   high-value, low-effort version is to grab the video file *their* demo serves
   and probe its resolution and keyframe spacing — that answers whether their
@@ -272,10 +313,34 @@ from the code alone.
 
 ```bash
 node scripts/scrub-regress.js          # 15 correctness checks, exits non-zero on failure
-node scripts/scrub-bench.js            # cadence + seek latency, forward and backward
+node scripts/scrub-bench.js            # sweep + human-speed profiles
+QS='?track=260&smooth=20' node scripts/scrub-bench.js variant   # A/B the knobs
+SCROLL_PXS=60 node scripts/scrub-bench.js slow                  # other scroll speeds
 ```
 
 Set `CHROME` to real Chrome (trap 1). **Run the regression before every commit.**
+
+### Judging feel, not just throughput
+
+The bench reports two scroll profiles; read the right one (trap 11):
+
+- **sweep** — whole band in `SCROLL_MS`, ~765 px/s. Decode throughput.
+- **steady** — constant `SCROLL_PXS` (default 90, human), then a dead stop.
+  Reports **picture updates per second** and **settle lag**. These are the
+  numbers that correspond to what the user feels.
+
+`updates/s` is directly comparable to a screen recording of the real site,
+which is how the target was set. To measure a recording (writes nothing):
+
+```bash
+ffmpeg -hide_banner -loglevel error -i "capture.mp4" \
+  -vf "scdet=threshold=0,metadata=print:file=-" -f null - 2>/dev/null \
+| grep -o 'lavfi.scd.score=[0-9.]*' | cut -d= -f2
+```
+
+Count scores ≥ 0.05 per second of the active scroll window — that is how often
+the picture actually changed. Reference capture of the site the user compares
+against: **~18.5/s**. This site before the fix: **10.4/s**. After: **17.7/s**.
 
 ### Real H.264 measurements
 
@@ -326,3 +391,18 @@ than estimates — an early "roughly 2×" guess turned out to be 3.7×, and
 measuring the variants took two minutes. When a decision is genuinely theirs,
 ask, and offer a runtime knob so the answer can come from their eye rather than
 a bench.
+
+Two failures worth not repeating, both the same shape — **reasoning from a
+plausible mechanism instead of measuring it**:
+
+- g=24 shipped over g=8 on a "zero stalls over 100 ms" metric too coarse to see
+  a 33 ms vs 16 ms gap.
+- The slow-motion complaint was blamed on the smoothing filter, with a written
+  latency budget "proving" it was 80% of the problem, and track length was
+  explicitly ruled out. One bench run showed smoothing changed the symptom by
+  nothing and track length by 1.7×. The budget was real but measured the wrong
+  quantity — lag, not update rate.
+
+When the user reports a feel, build a metric that reproduces their number first
+(here: updates/s from a screen recording), then tune against it. A metric that
+cannot reproduce the complaint cannot validate the fix.

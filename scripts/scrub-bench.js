@@ -21,6 +21,22 @@
  *
  * Always treat results as a relative A/B against the same harness, never as
  * absolute performance.
+ *
+ * Two scroll profiles are measured, and they answer different questions:
+ *
+ *   sweep  — the whole band in SCROLL_MS (default ~765 px/s). Stresses the
+ *            decode pipeline. This is what the seek-latency numbers describe.
+ *   steady — a constant SCROLL_PXS (default 90 px/s, roughly what a human
+ *            wheel-scrolling actually does), then a dead stop. Reports how
+ *            often the picture changes, and how long it keeps changing after
+ *            input ceases.
+ *
+ * The distinction matters: the sweep can look flawless while the page still
+ * feels slow, because at 9x human scroll speed the film races through frames
+ * regardless of how the playhead is filtered.
+ *
+ * QS appends a query string, so the runtime knobs can be A/B'd without editing
+ * markup:  QS='?smooth=30&linger=0' node scripts/scrub-bench.js snappy
  */
 
 const http = require('http');
@@ -33,6 +49,9 @@ const PROXY = process.env.PROXY || '';
 const PORT = Number(process.env.PORT || 8710);
 const SCROLL_MS = Number(process.env.SCROLL_MS || 4000);
 const FPS = Number(process.env.FPS || 24);
+const QS = process.env.QS || '';
+const SCROLL_PXS = Number(process.env.SCROLL_PXS || 90);
+const STEADY_MS = Number(process.env.STEADY_MS || 3000);
 
 function loadPlaywright() {
   const candidates = [
@@ -102,7 +121,7 @@ const pct = (a, p) => (a.length
 
   // Timestamp every currentTime write so it can be paired with its presented frame.
   await page.addInitScript(() => {
-    window.__s = { pending: null, seeks: [], long: 0, longN: 0, raf: 0 };
+    window.__s = { pending: null, seeks: [], long: 0, longN: 0, raf: 0, stopAt: 0 };
     const d = Object.getOwnPropertyDescriptor(HTMLMediaElement.prototype, 'currentTime');
     Object.defineProperty(HTMLMediaElement.prototype, 'currentTime', {
       get() { return d.get.call(this); },
@@ -125,7 +144,7 @@ const pct = (a, p) => (a.length
     window.requestAnimationFrame = function (cb) { window.__s.raf++; return raf(cb); };
   });
 
-  await page.goto(`http://localhost:${PORT}/index.html`, { waitUntil: 'load' });
+  await page.goto(`http://localhost:${PORT}/index.html${QS}`, { waitUntil: 'load' });
   await page.waitForFunction(() => {
     const v = document.querySelector('.scroll-scrub__video');
     return v && v.readyState >= 1 && v.duration > 0;
@@ -137,7 +156,10 @@ const pct = (a, p) => (a.length
     function rv(now, meta) {
       const p = window.__s.pending;
       if (p) {
-        window.__s.seeks.push({ lat: now - p.t, to: p.to, from: p.from, mt: meta.mediaTime });
+        /* `at` is the presentation timestamp, on the same clock as
+         * performance.now(), so presentations can be placed relative to the
+         * moment scrolling stopped. */
+        window.__s.seeks.push({ lat: now - p.t, at: now, to: p.to, from: p.from, mt: meta.mediaTime });
         window.__s.pending = null;
       }
       v.requestVideoFrameCallback(rv);
@@ -164,6 +186,54 @@ const pct = (a, p) => (a.length
     }, { band, dir, ms: SCROLL_MS });
     await page.waitForTimeout(400);
     return page.evaluate(() => window.__s.seeks.slice());
+  }
+
+  /* Scroll at a human speed, then stop dead. The sweep above runs ~765 px/s;
+   * a person wheel-scrolling this page runs closer to 90, and the two produce
+   * very different pictures of the same build. */
+  async function runSteady(pxPerSec, ms) {
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await page.waitForTimeout(900);
+    await page.evaluate(() => { window.__s.seeks.length = 0; window.__s.stopAt = 0; });
+    await page.evaluate(async ({ v, ms }) => {
+      await new Promise((resolve) => {
+        const t0 = performance.now();
+        (function step(now) {
+          var dt = now - t0;
+          window.scrollTo(0, Math.round((v * dt) / 1000));
+          if (dt < ms) requestAnimationFrame(step);
+          else { window.__s.stopAt = performance.now(); resolve(); }
+        })(t0);
+      });
+    }, { v: pxPerSec, ms });
+    /* Long enough for even a heavily filtered playhead to finish gliding. */
+    await page.waitForTimeout(1500);
+    return page.evaluate(() => ({ seeks: window.__s.seeks.slice(), stopAt: window.__s.stopAt }));
+  }
+
+  function summariseSteady(name, data, ms) {
+    const { seeks, stopAt } = data;
+    const idx = seeks.map((s) => Math.round(s.mt * FPS));
+
+    /* How often the picture actually changed while the scroll was running.
+     * This is the same quantity the ffmpeg scene-score analysis of a screen
+     * recording produces, so bench and recording can be compared directly. */
+    const duringIdx = seeks.filter((s) => s.at <= stopAt).map((s) => Math.round(s.mt * FPS));
+    const updatesPerSec = new Set(duringIdx).size / (ms / 1000);
+
+    /* Time from the last scroll write until the last presentation that still
+     * changed the frame — "it keeps gliding after I stop", in milliseconds. */
+    let settle = 0;
+    for (let i = 1; i < seeks.length; i++) {
+      if (idx[i] !== idx[i - 1] && seeks[i].at > stopAt) settle = seeks[i].at - stopAt;
+    }
+
+    return {
+      scenario: name,
+      updatesPerSec: +updatesPerSec.toFixed(1),
+      framesAfterStop: idx.filter((v, i) => i > 0 && v !== idx[i - 1] && seeks[i].at > stopAt).length,
+      settleLagMs: Math.round(settle),
+    };
   }
 
   function summarise(name, seeks) {
@@ -193,6 +263,8 @@ const pct = (a, p) => (a.length
 
   const forward = summarise('forward', await run(1));
   const backward = summarise('backward', await run(-1));
+  const steady = summariseSteady(
+    `steady ${SCROLL_PXS} px/s`, await runSteady(SCROLL_PXS, STEADY_MS), STEADY_MS);
 
   const idleOff = await page.evaluate(async () => {
     window.scrollTo(0, document.documentElement.scrollHeight);
@@ -217,6 +289,11 @@ const pct = (a, p) => (a.length
     console.log(`  latency std dev           : ${r.latencyStdDev} ms   (jitter — lower is smoother)`);
     console.log(`  holds over 100ms          : ${r.holdsOver100ms}`);
   }
+  console.log(`\n${steady.scenario}   (human-speed scroll, then a dead stop)`);
+  console.log(`  picture updates per sec   : ${steady.updatesPerSec}   (recording of the live site: 10.4; Higgsfield reference: 18.5)`);
+  console.log(`  frames drawn after stop   : ${steady.framesAfterStop}`);
+  console.log(`  settle lag after stop     : ${steady.settleLagMs} ms   (how long it keeps gliding)`);
+
   console.log(`\nlong tasks: ${cost.longN} totalling ${cost.longMs} ms`);
   console.log(`rAF frames while idle, hero off screen (want 0): ${idleOff}\n`);
 
