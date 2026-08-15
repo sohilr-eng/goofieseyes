@@ -565,22 +565,43 @@ body.gf-body {
   to { transform: translate(0, 0) rotate(360deg); }
 }
 
+/* Cover art turns inside a circle exactly as wide as the artwork is square, so
+ * the square's four edges are tangent to the circle rather than clear of it.
+ * At tangency subpixel antialiasing can flash a hairline of whatever is behind
+ * — here the disc's pigment background — once per quarter turn. The 2% overfill
+ * puts the edge permanently outside the clip. Invisible at any disc size; only
+ * the labels and the 45 keep the plain rotation, because they are already
+ * circles and scaling those would just make them bigger. */
+@keyframes gf-spin-cover {
+  from { transform: rotate(0deg) scale(1.02); }
+  to { transform: rotate(360deg) scale(1.02); }
+}
+
 [data-gf-spin="label"] .gf-record-label,
 [data-gf-spin="label"] .gf-now-label {
   animation: gf-spin-label 26s linear infinite;
 }
 
-[data-gf-spin="full"] .gf-record-disc img,
+[data-gf-spin="full"] .gf-record-disc img {
+  animation: gf-spin-cover 26s linear infinite;
+}
+
 [data-gf-spin="full"] .gf-record-label {
   animation: gf-spin 26s linear infinite;
 }
 
-[data-gf-spin="full"] .gf-now-disc img,
+[data-gf-spin="full"] .gf-now-disc img {
+  animation: gf-spin-cover 40s linear infinite;
+}
+
 [data-gf-spin="full"] .gf-now-label {
   animation: gf-spin 40s linear infinite;
 }
 
-[data-gf-spin="hover"] .gf-record:hover .gf-record-disc img,
+[data-gf-spin="hover"] .gf-record:hover .gf-record-disc img {
+  animation: gf-spin-cover 26s linear infinite;
+}
+
 [data-gf-spin="hover"] .gf-record:hover .gf-record-label {
   animation: gf-spin 26s linear infinite;
 }

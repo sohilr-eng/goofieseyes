@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" data-gf-spin="label">
+<html lang="en" data-gf-spin="full">
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -190,7 +190,8 @@
     <div class="gf-crate-head">
       <h2 class="gf-display">The crate</h2>
       <p class="gf-lede" style="max-width: 34ch">
-        Filed at a lean. Pull one out to see the whole side.
+        <span data-gf-crate-count>Filed</span> at a lean. Pull one out to see the
+        whole side.
       </p>
     </div>
     <div data-gf-rails>
@@ -395,7 +396,11 @@
 
     var cover = document.getElementById('now-cover');
     if (album.cover) {
-      cover.src = album.cover;
+      /* Square pre-crop, same as the crate's records; the full cover is the
+         fallback if this collection's disc has not been generated yet. The
+         swap itself is handled by the delegated listener in assets/site.js. */
+      if (album.disc) cover.setAttribute('data-gf-fallback', album.cover);
+      cover.src = album.disc || album.cover;
       cover.alt = album.title;
     } else {
       cover.hidden = true;
@@ -492,6 +497,18 @@
         if (!albums.length) throw new Error('no collections');
         var tag = document.querySelector('[data-gf-pressings]');
         if (tag) tag.textContent = albums.length + (albums.length === 1 ? ' pressing' : ' pressings');
+
+        /* "Seven pressings, filed at a lean." The design counts the crate out
+           loud rather than opening on a bare "Filed at a lean" — spelled out,
+           because a numeral in the middle of a sentence reads like a spec
+           sheet. Falls back to the digits past twelve. */
+        var WORDS = ['', 'One', 'Two', 'Three', 'Four', 'Five', 'Six', 'Seven',
+                     'Eight', 'Nine', 'Ten', 'Eleven', 'Twelve'];
+        var lede = document.querySelector('[data-gf-crate-count]');
+        if (lede) {
+          lede.textContent = (WORDS[albums.length] || albums.length) +
+            (albums.length === 1 ? ' pressing, filed' : ' pressings, filed');
+        }
         renderCrate(albums);
         renderNowPlaying(albums);
       })
