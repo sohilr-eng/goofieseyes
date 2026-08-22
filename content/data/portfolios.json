@@ -3944,6 +3944,114 @@
           "uploadedAt": "2026-08-22T01:28:03.183Z"
         }
       ]
+    },
+    {
+      "id": "wedding-1787362123797",
+      "slug": "wedding",
+      "name": "Wedding",
+      "description": "",
+      "cover": "",
+      "photos": [
+        {
+          "filename": "img-7724.webp",
+          "title": "IMG_7724",
+          "tags": [],
+          "alt": "IMG_7724",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 1,
+          "uploadedAt": "2026-08-22T01:28:55.827Z"
+        },
+        {
+          "filename": "img-7743.webp",
+          "title": "IMG_7743",
+          "tags": [],
+          "alt": "IMG_7743",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 2,
+          "uploadedAt": "2026-08-22T01:28:56.234Z"
+        },
+        {
+          "filename": "img-7784.webp",
+          "title": "IMG_7784",
+          "tags": [],
+          "alt": "IMG_7784",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 3,
+          "uploadedAt": "2026-08-22T01:28:56.777Z"
+        },
+        {
+          "filename": "img-7789.webp",
+          "title": "IMG_7789",
+          "tags": [],
+          "alt": "IMG_7789",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 4,
+          "uploadedAt": "2026-08-22T01:28:57.299Z"
+        },
+        {
+          "filename": "img-7790.webp",
+          "title": "IMG_7790",
+          "tags": [],
+          "alt": "IMG_7790",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 5,
+          "uploadedAt": "2026-08-22T01:28:58.234Z"
+        },
+        {
+          "filename": "img-7791.webp",
+          "title": "IMG_7791",
+          "tags": [],
+          "alt": "IMG_7791",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 6,
+          "uploadedAt": "2026-08-22T01:28:58.687Z"
+        },
+        {
+          "filename": "img-7793.webp",
+          "title": "IMG_7793",
+          "tags": [],
+          "alt": "IMG_7793",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 7,
+          "uploadedAt": "2026-08-22T01:28:59.202Z"
+        },
+        {
+          "filename": "img-7794.webp",
+          "title": "IMG_7794",
+          "tags": [],
+          "alt": "IMG_7794",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 8,
+          "uploadedAt": "2026-08-22T01:28:59.636Z"
+        },
+        {
+          "filename": "img-7843.webp",
+          "title": "IMG_7843",
+          "tags": [],
+          "alt": "IMG_7843",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 9,
+          "uploadedAt": "2026-08-22T01:29:00.091Z"
+        }
+      ]
     }
   ]
 }
