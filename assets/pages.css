@@ -751,7 +751,7 @@
   color: var(--gf-paper);
 }
 
-.gf-film-body {.gf-film-body {
+.gf-film-body {
   display: grid;
   gap: 0.8rem;
   align-content: start;
