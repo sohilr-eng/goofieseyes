@@ -524,7 +524,23 @@ app.post('/api/publish', (req, res) => {
     if (commitResult.output) send(commitResult.output);
     if (commitResult.code !== 0) {
       const out = commitResult.output.toLowerCase();
-      if (out.includes('nothing to commit') || out.includes('nothing added')) {
+      // git has several ways of saying "there was nothing to do", and which one
+      // you get depends on the state of the tree:
+      //   "nothing to commit, working tree clean"   — genuinely nothing changed
+      //   "no changes added to commit"              — changes exist but nothing
+      //                                               staged, which is what a
+      //                                               dirty nested git repo
+      //                                               produces: `git add .`
+      //                                               cannot stage inside one
+      // Only the first two were matched here, so the third reported the whole
+      // publish as FAILED and skipped the push, for a tree that was already
+      // fully pushed. All of them mean the same thing to us: nothing new to
+      // commit, so carry on and push whatever HEAD already is.
+      const nothingToDo = out.includes('nothing to commit') ||
+                          out.includes('nothing added') ||
+                          out.includes('no changes added to commit') ||
+                          out.includes('working tree clean');
+      if (nothingToDo) {
         send('\n[publish] Nothing new to commit — pushing existing HEAD.');
       } else {
         throw new Error(commitResult.output || 'git commit failed');

@@ -374,6 +374,19 @@
 
     .portfolio-tally b { color: #fff; font-weight: 600; }
 
+    /* Says out loud that a click already reached disk, so "Save Changes" is
+     * only ever about the text fields above it. */
+    .save-state {
+      font-size: 11px;
+      align-self: center;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+
+    .save-state[data-state="saving"] { color: var(--warning); }
+    .save-state[data-state="saved"]  { color: var(--success); }
+    .save-state[data-state="error"]  { color: var(--danger); font-weight: 600; }
+
     .set-cover-btn {
       display: block;
       width: 100%;
@@ -498,6 +511,7 @@
         <div class="meta-card-header">
           <h3>Portfolio Details</h3>
           <div style="display:flex;gap:8px">
+            <span class="save-state" id="save-state"></span>
             <button class="btn btn-primary btn-sm" onclick="savePortfolio()">Save Changes</button>
             <button class="btn btn-danger btn-sm" onclick="deletePortfolio()">Delete</button>
           </div>
@@ -699,19 +713,73 @@
           const p = port.photos.find(ph => ph.filename === fn);
           return p ? { ...p, order: i + 1 } : null;
         }).filter(Boolean);
+        persistPortfolios('order');
       }
     });
   }
+
+  /* Write portfolios.json now, without touching the name/slug/description
+   * fields the way savePortfolio() does.
+   *
+   * Every per-photo control used to mutate memory and wait for "Save Changes".
+   * Publish lives on the Dashboard, a different page — so the ordinary way to
+   * use this app was: pick covers and sections here, navigate to the Dashboard,
+   * press Publish. Navigating away threw all of it on the floor without a
+   * word, and Publish happily shipped the unchanged file. A whole session of
+   * cover and section picks was lost that way.
+   *
+   * Single-click toggles have no "form" the way a text field does, so they
+   * save themselves. Debounced, because dragging a photo fires a burst. */
+  let persistTimer = null;
+  let persistPending = false;
+
+  function persistPortfolios(label) {
+    persistPending = true;
+    setSaveState('saving');
+    clearTimeout(persistTimer);
+    persistTimer = setTimeout(async () => {
+      try {
+        const res = await fetch('/api/portfolios', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(portfoliosData)
+        });
+        if (!res.ok) throw new Error('save failed');
+        persistPending = false;
+        setSaveState('saved', label);
+      } catch (e) {
+        persistPending = false;
+        setSaveState('error');
+        showToast('Could not save — your last change is not on disk', 'error');
+      }
+    }, 400);
+  }
+
+  function setSaveState(state, label) {
+    const el = document.getElementById('save-state');
+    if (!el) return;
+    if (state === 'saving') { el.textContent = 'Saving…'; el.dataset.state = 'saving'; }
+    else if (state === 'saved') { el.textContent = label ? `Saved · ${label}` : 'Saved'; el.dataset.state = 'saved'; }
+    else { el.textContent = 'Not saved'; el.dataset.state = 'error'; }
+  }
+
+  /* Backstop for the debounce window and for a failed write. */
+  window.addEventListener('beforeunload', (e) => {
+    if (!persistPending) return;
+    e.preventDefault();
+    e.returnValue = '';
+  });
 
   function setCover(filename) {
     const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
     if (!port) return;
     port.cover = filename;
     renderPhotoGrid(port);
+    renderPortfolioList();
+    persistPortfolios('cover set');
   }
 
-  // Star a photo for the public Selects page (portfolio.html). Like every other
-  // edit here this only mutates in memory — it lands when you press Save.
+  // Star a photo for the public Selects page (portfolio.html).
   function toggleSelect(filename) {
     const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
     if (!port) return;
@@ -719,6 +787,7 @@
     if (!photo) return;
     photo.selected = !photo.selected;
     renderPhotoGrid(port);
+    persistPortfolios(photo.selected ? 'starred' : 'unstarred');
   }
 
   /* Put a frame in one half of the Portfolio page's stills, or take it out.
@@ -738,6 +807,7 @@
     photo.portfolio = photo.portfolio === section ? '' : section;
     renderPhotoGrid(port);
     renderPortfolioTally();
+    persistPortfolios(photo.portfolio ? photo.portfolio : 'removed from portfolio');
   }
 
   /* Counts every section pick across all albums, not just the open one — the
@@ -766,6 +836,7 @@
     if (port.cover === filename) port.cover = (port.photos[0] || {}).filename || '';
     renderPhotoGrid(port);
     renderPortfolioList();
+    persistPortfolios('photo removed');
   }
 
   async function savePortfolio() {

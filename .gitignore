@@ -10,3 +10,9 @@ assets/higgsfield asset/
 # Camera masters for the film portfolio (~780MB of ProRes-grade .mov). The web
 # encodes in assets/film/ are cut from these and are what actually ships.
 assets/video portfolio/
+
+# Claude Code's per-session git worktrees. These were committed as a gitlink by
+# accident; the tree inside is always dirty, which made `git add .` stage
+# nothing and `git commit` exit non-zero, so the admin portal's Publish button
+# reported FAILED on every publish that had no other content change.
+.claude/worktrees/
