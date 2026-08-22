@@ -138,7 +138,10 @@
     var scrolled = false;
     var observer = null;
 
+    var clipAttempts = 0;
+
     function unloadClip() {
+      clipAttempts = 0;
       if (state.abort) state.abort.abort();
       if (state.video) state.video.remove();
       if (state.objectUrl) URL.revokeObjectURL(state.objectUrl);
@@ -175,6 +178,7 @@
         return;
       }
 
+      clipAttempts++;
       state.loading = true;
       state.loadedSource = source;
       state.abort = new AbortController();
@@ -254,9 +258,21 @@
           if (request.signal.aborted || error.name === 'AbortError' || state.loadedSource !== source) {
             return;
           }
+
+          /* One retry before giving up for good. This used to latch
+           * state.failed on the very first rejection, so a single transient
+           * failure left the visitor scrolling a still poster for the life of
+           * the page — and because the rejection is swallowed here, with
+           * nothing in the console to explain why. The retry costs one
+           * request and recovers the film. */
+          state.loading = false;
+          state.loadedSource = null;
+          if (clipAttempts < 2) {
+            window.setTimeout(loadClip, 400);
+            return;
+          }
           layer.dataset.videoFailed = 'true';
           state.failed = true;
-          state.loading = false;
         });
     }
 
