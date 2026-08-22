@@ -3836,6 +3836,114 @@
           "uploadedAt": "2026-08-22T01:24:49.804Z"
         }
       ]
+    },
+    {
+      "id": "fender-stratocaster-1787362060798",
+      "slug": "fender-stratocaster",
+      "name": "Fender Stratocaster",
+      "description": "",
+      "cover": "",
+      "photos": [
+        {
+          "filename": "img-5513.webp",
+          "title": "IMG_5513",
+          "tags": [],
+          "alt": "IMG_5513",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 1,
+          "uploadedAt": "2026-08-22T01:27:59.863Z"
+        },
+        {
+          "filename": "img-5515.webp",
+          "title": "IMG_5515",
+          "tags": [],
+          "alt": "IMG_5515",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 2,
+          "uploadedAt": "2026-08-22T01:28:00.280Z"
+        },
+        {
+          "filename": "img-5517.webp",
+          "title": "IMG_5517",
+          "tags": [],
+          "alt": "IMG_5517",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 3,
+          "uploadedAt": "2026-08-22T01:28:00.719Z"
+        },
+        {
+          "filename": "img-5521.webp",
+          "title": "IMG_5521",
+          "tags": [],
+          "alt": "IMG_5521",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 4,
+          "uploadedAt": "2026-08-22T01:28:01.115Z"
+        },
+        {
+          "filename": "img-5522.webp",
+          "title": "IMG_5522",
+          "tags": [],
+          "alt": "IMG_5522",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 5,
+          "uploadedAt": "2026-08-22T01:28:01.567Z"
+        },
+        {
+          "filename": "img-5524.webp",
+          "title": "IMG_5524",
+          "tags": [],
+          "alt": "IMG_5524",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 6,
+          "uploadedAt": "2026-08-22T01:28:01.969Z"
+        },
+        {
+          "filename": "img-5526.webp",
+          "title": "IMG_5526",
+          "tags": [],
+          "alt": "IMG_5526",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 7,
+          "uploadedAt": "2026-08-22T01:28:02.384Z"
+        },
+        {
+          "filename": "img-5527.webp",
+          "title": "IMG_5527",
+          "tags": [],
+          "alt": "IMG_5527",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 8,
+          "uploadedAt": "2026-08-22T01:28:02.780Z"
+        },
+        {
+          "filename": "img-5528.webp",
+          "title": "IMG_5528",
+          "tags": [],
+          "alt": "IMG_5528",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 9,
+          "uploadedAt": "2026-08-22T01:28:03.183Z"
+        }
+      ]
     }
   ]
 }
