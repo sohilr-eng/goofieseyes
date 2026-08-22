@@ -814,6 +814,42 @@
   margin: 1.2rem 0 0;
 }
 
+/* ---------- the two stills sections ---------- */
+.gf-still-set + .gf-still-set {
+  margin-top: clamp(2.6rem, 6vw, 4.2rem);
+}
+
+.gf-still-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  margin: clamp(2.2rem, 5vw, 3.4rem) 0 0;
+  padding-bottom: 0.8rem;
+  border-bottom: 1px solid var(--gf-line);
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 3vw, 2.1rem);
+  line-height: 1;
+}
+
+.gf-still-heading[hidden] {
+  display: none;
+}
+
+.gf-still-heading span {
+  font-family: var(--gf-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gf-ink-soft);
+}
+
+/* The heading already provides the gap above each grid. */
+.gf-still-set .gf-still-grid {
+  margin-top: clamp(1.2rem, 2.5vw, 1.8rem);
+}
+
 .gf-still-grid {
   display: grid;
   gap: clamp(0.5rem, 1.4vw, 1rem);

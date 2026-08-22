@@ -303,6 +303,77 @@
     .select-btn:hover { background: rgba(0,0,0,0.75); color: #fff; }
     .select-btn[aria-pressed="true"] { color: #F5C542; }
 
+    /* Portfolio section picker — which half of the Portfolio page's stills a
+     * frame appears in, or neither. Two buttons rather than one cycling button
+     * so any state is reachable in a single click, and so the current state is
+     * readable without having to remember what the cycle order is. */
+    .portfolio-pick {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      border-top: 1px solid var(--border-card);
+    }
+
+    .pick-btn {
+      background: none;
+      border: none;
+      border-right: 1px solid var(--border-card);
+      color: var(--text-muted);
+      font-size: 10px;
+      letter-spacing: 0.04em;
+      padding: 5px 2px;
+      cursor: pointer;
+      transition: color 0.15s, background 0.15s;
+    }
+
+    .pick-btn:last-child { border-right: none; }
+    .pick-btn:hover { color: #fff; background: rgba(255,255,255,0.06); }
+
+    .pick-btn[aria-pressed="true"] {
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .pick-btn[aria-pressed="true"][data-section="travel"]   { background: #1f6f73; }
+    .pick-btn[aria-pressed="true"][data-section="portrait"] { background: #b0577a; }
+
+    /* Anchored to the image rather than the card: measured against the card it
+     * landed on top of "Set as cover", and the offset that would clear it
+     * depends on the height of three stacked rows of text. */
+    .card-media {
+      position: relative;
+      display: block;
+    }
+
+    /* Scanning a 70-frame album, the chips are too small to read at a glance —
+     * this is the marker that says "already in the portfolio" from across the
+     * grid. Bottom-left, clear of the cover badge and the star. */
+    .pick-badge {
+      position: absolute;
+      left: 6px;
+      bottom: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 2px 6px;
+      border-radius: 10px;
+      color: #fff;
+      pointer-events: none;
+    }
+
+    .pick-badge[data-section="travel"]   { background: #1f6f73; }
+    .pick-badge[data-section="portrait"] { background: #b0577a; }
+
+    /* Running total across every album, so curating does not mean counting
+     * cards by hand in seven places. */
+    .portfolio-tally {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-left: 10px;
+    }
+
+    .portfolio-tally b { color: #fff; font-weight: 600; }
+
     .set-cover-btn {
       display: block;
       width: 100%;
@@ -450,8 +521,8 @@
       <!-- Photos -->
       <div class="photos-header">
         <div>
-          <h3>Photos <span id="photo-count" style="color:var(--text-muted);font-weight:400;font-size:13px"></span></h3>
-          <p>Drag to reorder · Click ✕ to remove from portfolio</p>
+          <h3>Photos <span id="photo-count" style="color:var(--text-muted);font-weight:400;font-size:13px"></span><span class="portfolio-tally" id="portfolio-tally"></span></h3>
+          <p>Drag to reorder · ✕ removes from this album · ★ is the Selects page · Travel / Portrait picks the Portfolio page section</p>
         </div>
         <a href="upload.html" class="btn btn-secondary btn-sm">+ Add Photos</a>
       </div>
@@ -517,6 +588,7 @@
       const photoData = await photoRes.json();
       allPhotos = photoData.photos || [];
       renderPortfolioList();
+      renderPortfolioTally();
     } catch (e) {
       showToast('Failed to load data', 'error');
     }
@@ -575,23 +647,38 @@
       return;
     }
 
-    grid.innerHTML = photos.map((photo, i) => `
+    grid.innerHTML = photos.map((photo, i) => {
+      const section = photo.portfolio === 'travel' || photo.portfolio === 'portrait'
+        ? photo.portfolio : '';
+      const pick = (value, label) => `
+        <button class="pick-btn" data-section="${value}"
+                aria-pressed="${section === value ? 'true' : 'false'}"
+                title="${section === value
+                  ? `In the Portfolio page's ${label} section. Click to take it out.`
+                  : `Put this frame in the Portfolio page's ${label} section.`}"
+                onclick="setPortfolioSection('${photo.filename}', '${value}')">${label}</button>`;
+
+      return `
       <div class="photo-card" data-filename="${photo.filename}">
         <div class="drag-handle">⠿</div>
         <button class="select-btn" aria-pressed="${photo.selected ? 'true' : 'false'}"
                 title="${photo.selected
-                  ? 'Starred — showing on the Portfolio page and Selects. Click to remove.'
-                  : 'Star this frame to put it on the Portfolio page (and Selects).'}"
+                  ? 'Starred for the Selects page. Click to remove.'
+                  : 'Star this frame for the Selects page.'}"
                 onclick="toggleSelect('${photo.filename}')">${photo.selected ? '★' : '☆'}</button>
         ${photo.filename === port.cover ? '<div class="cover-badge">Cover</div>' : ''}
-        <img src="/content/photos/${photo.filename}" alt="${photo.alt || photo.filename}" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.05)';this.style.height='90px'" />
+        <div class="card-media">
+          <img src="/content/photos/${photo.filename}" alt="${photo.alt || photo.filename}" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.05)';this.style.height='90px'" />
+          ${section ? `<span class="pick-badge" data-section="${section}">${section}</span>` : ''}
+        </div>
+        <div class="portfolio-pick">${pick('travel', 'Travel')}${pick('portrait', 'Portrait')}</div>
         <button class="set-cover-btn" onclick="setCover('${photo.filename}')">Set as cover</button>
         <div class="card-footer">
           <span class="card-name">${photo.title || photo.filename}</span>
           <button class="remove-btn" onclick="removePhoto('${photo.filename}')" title="Remove from portfolio">✕</button>
         </div>
-      </div>
-    `).join('');
+      </div>`;
+    }).join('');
 
     // Destroy old sortable
     if (sortable) sortable.destroy();
@@ -632,6 +719,43 @@
     if (!photo) return;
     photo.selected = !photo.selected;
     renderPhotoGrid(port);
+  }
+
+  /* Put a frame in one half of the Portfolio page's stills, or take it out.
+   *
+   * Separate from the star on purpose. The star is the Selects page, which is
+   * every good frame; this is the client-facing Portfolio page, which is a
+   * short deliberate edit — the two sets are not the same and were fighting
+   * over one boolean. A frame belongs to at most one section, so clicking the
+   * section it is already in is how you remove it.
+   *
+   * In memory only, like every other edit here. Press Save. */
+  function setPortfolioSection(filename, section) {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    const photo = (port.photos || []).find(p => p.filename === filename);
+    if (!photo) return;
+    photo.portfolio = photo.portfolio === section ? '' : section;
+    renderPhotoGrid(port);
+    renderPortfolioTally();
+  }
+
+  /* Counts every section pick across all albums, not just the open one — the
+   * Portfolio page is assembled from all of them and there is nowhere else to
+   * see the whole edit at once. */
+  function renderPortfolioTally() {
+    const el = document.getElementById('portfolio-tally');
+    if (!el) return;
+    let travel = 0, portrait = 0;
+    (portfoliosData.portfolios || []).forEach(p => {
+      (p.photos || []).forEach(ph => {
+        if (ph.portfolio === 'travel') travel++;
+        else if (ph.portfolio === 'portrait') portrait++;
+      });
+    });
+    el.innerHTML = travel || portrait
+      ? `Portfolio page: <b>${travel}</b> travel · <b>${portrait}</b> portrait`
+      : 'Portfolio page: nothing picked yet';
   }
 
   function removePhoto(filename) {

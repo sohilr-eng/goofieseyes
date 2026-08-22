@@ -178,6 +178,9 @@ app.post('/api/upload', upload.single('photo'), async (req, res) => {
       printPrice: printPrice ? parseFloat(printPrice) : 0,
       // Starred in the admin photo grid; surfaced on the public Selects page.
       selected: false,
+      // '' | 'travel' | 'portrait' — which section of the Portfolio page's
+      // stills this frame appears in. Set from the photo grid, not on upload.
+      portfolio: '',
       order: 999,
       uploadedAt: new Date().toISOString()
     };

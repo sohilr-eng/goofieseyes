@@ -121,7 +121,19 @@
         Frames pulled from the collections — the ones I would show a client
         first. The full crate sits <a href="portfolios.html" style="color: inherit">over here</a>.
       </p>
-      <div class="gf-still-grid" id="still-grid" hidden></div>
+      <!-- Two sections, filled from the Travel / Portrait pick in the admin
+           portal. Either one is dropped entirely when nothing is in it, so a
+           half-curated page never shows an empty heading. -->
+      <div id="still-sections" hidden>
+        <section class="gf-still-set" id="still-set-travel" hidden>
+          <h3 class="gf-still-heading">Travel<span id="still-count-travel"></span></h3>
+          <div class="gf-still-grid" data-still-grid="travel"></div>
+        </section>
+        <section class="gf-still-set" id="still-set-portrait" hidden>
+          <h3 class="gf-still-heading">Portrait<span id="still-count-portrait"></span></h3>
+          <div class="gf-still-grid" data-still-grid="portrait"></div>
+        </section>
+      </div>
       <p class="gf-state" id="stills-state">Loading…</p>
     </div>
   </section>
@@ -417,35 +429,39 @@
   }
 
   function renderStills(albums) {
-    var grid = document.getElementById('still-grid');
     var state = document.getElementById('stills-state');
+    var wrap = document.getElementById('still-sections');
 
-    /* Starred frames are the photographer's own picks, so if there are any at
-       all they are the whole section — starring six and getting six covers
-       mixed in alongside them would make the curation look arbitrary. Collection
-       covers stand in only when nothing has been starred yet, so the page is
-       never empty in front of a client. */
+    /* Travel and Portrait are set per photograph in the admin portal. They are
+       a different edit from the star: the star is the Selects page, which is
+       every frame worth keeping, while this is the short client-facing cut. A
+       frame carries at most one of the two. */
+    var sets = { travel: [], portrait: [] };
+
     albums.forEach(function (album) {
       album.photos.forEach(function (photo) {
-        if (photo.selected) {
-          photos.push({
-            filename: photo.filename,
-            alt: photo.alt,
-            title: photo.title,
-            album: album.title
-          });
-        }
+        var section = photo.portfolio;
+        if (section !== 'travel' && section !== 'portrait') return;
+        sets[section].push({
+          filename: photo.filename,
+          alt: photo.alt,
+          title: photo.title,
+          album: album.title
+        });
       });
     });
 
-    if (!photos.length) {
+    /* Nothing picked yet: rather than show a client two empty headings, fall
+       back to one ungrouped row of collection covers. The headings only appear
+       once there is a real edit behind them. */
+    var picked = sets.travel.length + sets.portrait.length;
+    if (!picked) {
       var have = {};
-      photos.forEach(function (p) { have[p.filename] = true; });
       albums.forEach(function (album) {
         var first = album.photos[0];
         if (first && !have[first.filename]) {
           have[first.filename] = true;
-          photos.push({
+          sets.travel.push({
             filename: first.filename,
             alt: first.alt,
             title: first.title,
@@ -455,26 +471,47 @@
       });
     }
 
-    if (!photos.length) {
+    if (!sets.travel.length && !sets.portrait.length) {
       state.textContent = 'No frames to show yet.';
       return;
     }
 
-    grid.innerHTML = photos.map(function (photo, n) {
-      return '<button class="gf-still" type="button" data-index="' + n + '"' +
-        ' aria-label="View ' + esc(photo.alt || photo.title || ('photograph ' + (n + 1))) + '">' +
-        '<img src="/content/photos/' + esc(photo.filename) + '"' +
-        ' alt="' + esc(photo.alt || photo.title || '') + '" loading="lazy" decoding="async">' +
-        '</button>';
-    }).join('');
+    /* One flat list behind the two grids, so the lightbox steps from the last
+       travel frame straight into the first portrait one instead of trapping the
+       visitor inside whichever section they opened. */
+    ['travel', 'portrait'].forEach(function (section) {
+      var list = sets[section];
+      var block = document.getElementById('still-set-' + section);
+      var grid = wrap.querySelector('[data-still-grid="' + section + '"]');
+      if (!list.length) return;
 
-    grid.addEventListener('click', function (e) {
+      grid.innerHTML = list.map(function (photo) {
+        var n = photos.push(photo) - 1;          /* index into the flat list */
+        return '<button class="gf-still" type="button" data-index="' + n + '"' +
+          ' aria-label="View ' + esc(photo.alt || photo.title || ('photograph ' + (n + 1))) + '">' +
+          '<img src="/content/photos/' + esc(photo.filename) + '"' +
+          ' alt="' + esc(photo.alt || photo.title || '') + '" loading="lazy" decoding="async">' +
+          '</button>';
+      }).join('');
+
+      var count = document.getElementById('still-count-' + section);
+      if (count) count.textContent = list.length + (list.length === 1 ? ' frame' : ' frames');
+      block.hidden = false;
+    });
+
+    /* Headings would be lying if the only thing on show is the cover fallback. */
+    if (!picked) {
+      var travelHead = document.querySelector('#still-set-travel .gf-still-heading');
+      if (travelHead) travelHead.hidden = true;
+    }
+
+    wrap.addEventListener('click', function (e) {
       var button = e.target.closest('.gf-still');
       if (button) open(Number(button.dataset.index));
     });
 
     state.hidden = true;
-    grid.hidden = false;
+    wrap.hidden = false;
   }
 
   function initLightbox() {
