@@ -3697,6 +3697,145 @@
           "uploadedAt": "2026-05-13T15:57:38.891Z"
         }
       ]
+    },
+    {
+      "id": "tiger-1787361589592",
+      "slug": "tiger",
+      "name": "Tiger",
+      "description": "",
+      "cover": "",
+      "photos": [
+        {
+          "filename": "img-7520.webp",
+          "title": "IMG_7520",
+          "tags": [],
+          "alt": "IMG_7520",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 1,
+          "uploadedAt": "2026-08-22T01:20:04.622Z"
+        },
+        {
+          "filename": "img-7521.webp",
+          "title": "IMG_7521",
+          "tags": [],
+          "alt": "IMG_7521",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 2,
+          "uploadedAt": "2026-08-22T01:20:05.138Z"
+        },
+        {
+          "filename": "img-7521-2.webp",
+          "title": "IMG_7521-2",
+          "tags": [],
+          "alt": "IMG_7521-2",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 3,
+          "uploadedAt": "2026-08-22T01:20:05.253Z"
+        },
+        {
+          "filename": "img-7521-3.webp",
+          "title": "IMG_7521-3",
+          "tags": [],
+          "alt": "IMG_7521-3",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 4,
+          "uploadedAt": "2026-08-22T01:20:05.549Z"
+        },
+        {
+          "filename": "img-7523.webp",
+          "title": "IMG_7523",
+          "tags": [],
+          "alt": "IMG_7523",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 5,
+          "uploadedAt": "2026-08-22T01:20:06.051Z"
+        },
+        {
+          "filename": "img-7523-2.webp",
+          "title": "IMG_7523-2",
+          "tags": [],
+          "alt": "IMG_7523-2",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 6,
+          "uploadedAt": "2026-08-22T01:20:06.237Z"
+        }
+      ]
+    },
+    {
+      "id": "rutgers-graduation-2026-1787361847867",
+      "slug": "rutgers-graduation-2026",
+      "name": "Rutgers Graduation 2026",
+      "description": "",
+      "cover": "",
+      "photos": [
+        {
+          "filename": "img-6414.webp",
+          "title": "IMG_6414",
+          "tags": [],
+          "alt": "IMG_6414",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 1,
+          "uploadedAt": "2026-08-22T01:24:47.514Z"
+        },
+        {
+          "filename": "img-6418.webp",
+          "title": "IMG_6418",
+          "tags": [],
+          "alt": "IMG_6418",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 2,
+          "uploadedAt": "2026-08-22T01:24:48.055Z"
+        },
+        {
+          "filename": "img-6420.webp",
+          "title": "IMG_6420",
+          "tags": [],
+          "alt": "IMG_6420",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 3,
+          "uploadedAt": "2026-08-22T01:24:48.565Z"
+        },
+        {
+          "filename": "img-5967.webp",
+          "title": "IMG_5967",
+          "tags": [],
+          "alt": "IMG_5967",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 4,
+          "uploadedAt": "2026-08-22T01:24:49.008Z"
+        },
+        {
+          "filename": "img-6046.webp",
+          "title": "IMG_6046",
+          "tags": [],
+          "alt": "IMG_6046",
+          "printAvailable": false,
+          "printPrice": 0,
+          "selected": false,
+          "order": 5,
+          "uploadedAt": "2026-08-22T01:24:49.804Z"
+        }
+      ]
     }
   ]
 }
