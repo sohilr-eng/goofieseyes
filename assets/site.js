@@ -32,6 +32,12 @@
    *   my-model      golden backlit portrait
    *   smoky-mountains  black bears in spring grass
    *   new-york-city cherry blossom canopy
+   *   tiger         amber tiger against near-black stone
+   *   rutgers-graduation-2026  golden retriever on summer park green
+   *   fender-stratocaster  cream body, cool blue-grey wall, teal cable
+   *   wedding       amber and deep red glasses on a dark bar
+   *   paria-trinidad  green cliff scrub over dark rock
+   *   hummingbirds  red feeder, the one saturated note in a green frame
    *
    * Re-check the pigment when you change a collection's cover. Neighbours in a
    * rail should not repeat: the crate renders these in id order, four to the
@@ -43,7 +49,13 @@
     'macaws': 'coral',
     'my-model': 'sakura',
     'smoky-mountains': 'chartreuse',
-    'new-york-city': 'sakura'
+    'new-york-city': 'sakura',
+    'tiger': 'coral',
+    'rutgers-graduation-2026': 'chartreuse',
+    'fender-stratocaster': 'teal',
+    'wedding': 'coral',
+    'paria-trinidad': 'chartreuse',
+    'hummingbirds': 'coral'
   };
 
   /* Where each collection was shot, for the record's meta line.
@@ -64,7 +76,14 @@
     'macaws': 'Trinidad',
     'my-model': 'Portrait',
     'smoky-mountains': 'Tennessee',
-    'new-york-city': 'New York'
+    'new-york-city': 'New York',
+    'paria-trinidad': 'Trinidad',
+    'hummingbirds': 'Trinidad',
+    'rutgers-graduation-2026': 'New Jersey'
+    /* tiger, fender-stratocaster and wedding are deliberately absent: the frames
+     * do not say where they were shot and a place printed under a photograph is
+     * a claim, not decoration. They fall back to the frame count alone. Add them
+     * here when you know — one line each, no other change needed. */
   };
 
   /* Portfolio ids look like "tobago-1775076165587". The epoch suffix is the
