@@ -1561,7 +1561,7 @@
           "printPrice": 0,
           "order": 4,
           "uploadedAt": "2026-04-17T18:40:15.722Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-3852.webp",
@@ -1913,7 +1913,7 @@
           "printPrice": 0,
           "order": 36,
           "uploadedAt": "2026-04-18T02:23:24.279Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-3801.webp",
@@ -2001,7 +2001,7 @@
           "printPrice": 0,
           "order": 44,
           "uploadedAt": "2026-04-18T02:23:27.365Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-3825.webp",
@@ -2155,7 +2155,7 @@
           "printPrice": 0,
           "order": 58,
           "uploadedAt": "2026-04-18T02:23:33.805Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-3840.webp",
@@ -2563,7 +2563,7 @@
           "printPrice": 0,
           "order": 24,
           "uploadedAt": "2026-05-13T15:47:20.357Z",
-          "portfolio": ""
+          "portfolio": "portrait"
         },
         {
           "filename": "img-4125-2.webp",
@@ -2682,7 +2682,7 @@
           "printPrice": 0,
           "order": 7,
           "uploadedAt": "2026-05-13T15:49:34.583Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-4686.webp",
@@ -3001,7 +3001,7 @@
           "printPrice": 0,
           "order": 36,
           "uploadedAt": "2026-05-13T15:49:46.779Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-4761.webp",
@@ -3232,7 +3232,7 @@
           "printPrice": 0,
           "order": 57,
           "uploadedAt": "2026-05-13T15:49:57.226Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-5035.webp",
@@ -3507,7 +3507,7 @@
           "printPrice": 0,
           "order": 82,
           "uploadedAt": "2026-05-13T15:50:09.018Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-5131.webp",
@@ -3748,7 +3748,7 @@
           "order": 18,
           "uploadedAt": "2026-05-13T15:57:24.024Z",
           "selected": true,
-          "portfolio": "travel"
+          "portfolio": "portrait"
         },
         {
           "filename": "img-4288.webp",
@@ -3815,7 +3815,7 @@
           "order": 28,
           "uploadedAt": "2026-05-13T15:57:28.630Z",
           "selected": true,
-          "portfolio": "travel"
+          "portfolio": "portrait"
         },
         {
           "filename": "img-4318.webp",
@@ -4237,7 +4237,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 15,
-          "uploadedAt": "2026-08-22T03:01:23.818Z"
+          "uploadedAt": "2026-08-22T03:01:23.818Z",
+          "portfolio": "travel"
         },
         {
           "filename": "img-7527.webp",
@@ -4290,7 +4291,7 @@
       "slug": "rutgers-graduation-2026",
       "name": "Rutgers Graduation 2026",
       "description": "",
-      "cover": "",
+      "cover": "img-6288.webp",
       "photos": [
         {
           "filename": "img-6414.webp",
@@ -4338,7 +4339,7 @@
           "selected": false,
           "order": 4,
           "uploadedAt": "2026-08-22T01:24:49.008Z",
-          "portfolio": ""
+          "portfolio": "portrait"
         },
         {
           "filename": "img-6046.webp",
@@ -4460,7 +4461,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 15,
-          "uploadedAt": "2026-08-22T02:58:03.727Z"
+          "uploadedAt": "2026-08-22T02:58:03.727Z",
+          "portfolio": "portrait"
         },
         {
           "filename": "img-6094.webp",
@@ -4724,7 +4726,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 39,
-          "uploadedAt": "2026-08-22T02:58:15.020Z"
+          "uploadedAt": "2026-08-22T02:58:15.020Z",
+          "portfolio": "portrait"
         },
         {
           "filename": "img-6293.webp",
@@ -4867,7 +4870,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 52,
-          "uploadedAt": "2026-08-22T02:58:21.696Z"
+          "uploadedAt": "2026-08-22T02:58:21.696Z",
+          "portfolio": "portrait"
         },
         {
           "filename": "img-6395.webp",
@@ -4922,7 +4926,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 57,
-          "uploadedAt": "2026-08-22T02:58:24.533Z"
+          "uploadedAt": "2026-08-22T02:58:24.533Z",
+          "portfolio": "portrait"
         },
         {
           "filename": "img-6410.webp",
@@ -5032,7 +5037,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 67,
-          "uploadedAt": "2026-08-22T02:58:29.558Z"
+          "uploadedAt": "2026-08-22T02:58:29.558Z",
+          "portfolio": "portrait"
         }
       ]
     },
@@ -5206,7 +5212,7 @@
           "selected": false,
           "order": 4,
           "uploadedAt": "2026-08-22T01:28:57.299Z",
-          "portfolio": ""
+          "portfolio": "portrait"
         },
         {
           "filename": "img-7790.webp",
@@ -5242,7 +5248,7 @@
           "selected": false,
           "order": 7,
           "uploadedAt": "2026-08-22T01:28:59.202Z",
-          "portfolio": ""
+          "portfolio": "portrait"
         },
         {
           "filename": "img-7794.webp",
@@ -5359,7 +5365,7 @@
           "selected": false,
           "order": 7,
           "uploadedAt": "2026-08-22T01:29:47.953Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-6936.webp",
@@ -5743,7 +5749,7 @@
           "selected": false,
           "order": 39,
           "uploadedAt": "2026-08-22T01:30:04.810Z",
-          "portfolio": ""
+          "portfolio": "travel"
         },
         {
           "filename": "img-6882.webp",
@@ -6221,7 +6227,8 @@
           "printPrice": 0,
           "selected": false,
           "order": 39,
-          "uploadedAt": "2026-08-22T02:56:15.932Z"
+          "uploadedAt": "2026-08-22T02:56:15.932Z",
+          "portfolio": "travel"
         },
         {
           "filename": "img-7193.webp",
