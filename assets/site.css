@@ -1018,3 +1018,167 @@ body.gf-body {
     transition: none !important;
   }
 }
+
+/* ---------- nav: seven links ----------
+ * The link row was laid out for six. "Portfolio" makes seven, which overruns
+ * the wordmark between 800px (where .gf-nav-links appears) and roughly 1000px.
+ * Tighten the row across that window rather than pushing the burger breakpoint
+ * up, which would take the full nav away from pages that still fit.
+ */
+@media (min-width: 800px) and (max-width: 1010px) {
+  .gf-nav-links {
+    gap: 1rem;
+  }
+
+  .gf-nav-links.gf-meta {
+    font-size: 0.6rem;
+    letter-spacing: 0.11em;
+  }
+}
+
+/* ---------- the reel: the film portfolio, previewed ----------
+ * Sits between the scroll-scrub film and the crate, so it is the first thing
+ * under the hero. Full-bleed clip, muted and looping, with the copy laid over
+ * it. The <video> carries no src in the markup — assets/site.js picks the
+ * weight by viewport and skips the fetch entirely under reduced motion, where
+ * the poster is left standing on its own.
+ */
+.gf-reel {
+  position: relative;
+  background: var(--gf-ink);
+  color: var(--gf-paper);
+  isolation: isolate;
+  overflow: hidden;
+}
+
+.gf-reel-media {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.gf-reel-media img,
+.gf-reel-media video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* The footage is high-key beach, so paper-coloured type needs a scrim to hold
+   contrast. Weighted to the left, where the copy sits, and eased rather than
+   stepped so the grade of the sky survives on the right. */
+.gf-reel-media::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(100deg, rgba(18, 17, 15, 0.92) 0%, rgba(18, 17, 15, 0.72) 38%,
+                    rgba(18, 17, 15, 0.28) 68%, rgba(18, 17, 15, 0.42) 100%),
+    linear-gradient(to top, rgba(18, 17, 15, 0.7) 0%, rgba(18, 17, 15, 0) 45%);
+}
+
+.gf-reel-inner {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: clamp(1.6rem, 4vw, 2.4rem);
+  align-content: center;
+  min-height: clamp(30rem, 78svh, 46rem);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1rem, 4vw, 2.6rem);
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.gf-reel-kicker {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  color: rgba(247, 244, 238, 0.72);
+}
+
+/* A recording light, because this is the moving-picture half of the site. */
+.gf-reel-kicker::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 50%;
+  background: var(--gf-coral);
+  flex: none;
+  animation: gf-reel-pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes gf-reel-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.25; }
+}
+
+.gf-reel h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.7rem, 7.4vw, 5.6rem);
+  line-height: 0.94;
+  letter-spacing: -0.015em;
+  margin: 0;
+  max-width: 15ch;
+}
+
+.gf-reel-lede {
+  font-size: clamp(1rem, 1.6vw, 1.15rem);
+  line-height: 1.55;
+  max-width: 44ch;
+  margin: 0;
+  color: rgba(247, 244, 238, 0.8);
+}
+
+.gf-reel-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1.4rem 2rem;
+  margin-top: 0.4rem;
+}
+
+/* The three films named in the open, so the section reads as a portfolio and
+   not a decorative video band. */
+.gf-reel-index {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.6rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: rgba(247, 244, 238, 0.62);
+}
+
+.gf-reel-index li {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+}
+
+.gf-reel-index b {
+  font-weight: 500;
+  color: var(--gf-paper);
+}
+
+.gf-reel-index li + li::before {
+  content: "";
+  width: 1px;
+  height: 0.8em;
+  background: rgba(247, 244, 238, 0.28);
+  align-self: center;
+  margin-right: 1rem;
+}
+
+/* The sound is off by design; say so rather than leaving a visitor hunting for
+   a control that is not there. */
+.gf-reel-muted {
+  color: rgba(247, 244, 238, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-reel-kicker::before {
+    animation: none;
+  }
+}

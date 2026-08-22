@@ -80,7 +80,10 @@
 </head>
 <body class="gf-body">
 
-<a class="gf-skip" href="#crate">Skip to the crate</a>
+<!-- Targets the reel, not the crate: the point is to clear the scroll-scrub
+     band, and the reel is now the first real content under it. Sending the link
+     to #crate would skip past the portfolio as well. -->
+<a class="gf-skip" href="#reel">Skip the animation</a>
 
 <main class="gf" id="top">
 
@@ -89,8 +92,9 @@
     <a class="gf-wordmark" href="#top">goofieseyes</a>
     <div class="gf-nav-links gf-meta">
       <a href="#crate">The crate</a>
+      <a href="professional.html">Portfolio</a>
       <a href="#now-playing">Now playing</a>
-      <a href="#b-side">B-side</a>
+      <a href="#video">Video</a>
       <a href="prints.html">Prints</a>
       <a href="journal.html">Journal</a>
       <a href="#pressing">Contact</a>
@@ -102,8 +106,9 @@
 
   <div class="gf-mobile-menu" id="gf-mobile-menu">
     <a href="#crate">The crate</a>
+    <a href="professional.html">Portfolio</a>
     <a href="#now-playing">Now playing</a>
-    <a href="#b-side">B-side</a>
+    <a href="#video">Video</a>
     <a href="#liner-notes">Liner notes</a>
     <a href="prints.html">Prints</a>
     <a href="journal.html">Journal</a>
@@ -186,7 +191,42 @@
     </div>
   </section>
 
-  <!-- ─── 2. the crate ─── -->
+  <!-- ─── 2. the reel: the professional portfolio, previewed ───
+       The first thing under the hero, and deliberately so: a visitor who is
+       here to hire sees commissioned work before the record-crate framing
+       starts. The clip is silent and decorative — everything it says is also
+       in the copy and in the link through to professional.html. -->
+  <section class="gf-reel" id="reel">
+    <div class="gf-reel-media" aria-hidden="true">
+      <img id="reel-poster" src="/assets/film/reel-hero-poster.jpg" alt=""
+           decoding="async" loading="lazy">
+      <video id="reel-video" muted loop playsinline preload="none" hidden></video>
+    </div>
+
+    <div class="gf-reel-inner">
+      <p class="gf-meta gf-reel-kicker">The portfolio · commissioned film</p>
+      <h2>Some of it moves.</h2>
+      <p class="gf-reel-lede">
+        Brand films, vertical spots and short narrative pieces — shot, graded
+        and cut by me. The reel is three pieces long and takes about two
+        minutes.
+      </p>
+
+      <ul class="gf-reel-index gf-meta" id="reel-index"></ul>
+
+      <div class="gf-reel-actions">
+        <a class="gf-cta-tab" href="professional.html">
+          See the portfolio
+          <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
+            <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </a>
+        <span class="gf-meta gf-reel-muted">Sound off</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── 3. the crate ─── -->
   <section class="gf-crate" id="crate">
     <div class="gf-crate-head">
       <h2 class="gf-display">The crate</h2>
@@ -207,7 +247,7 @@
     </p>
   </section>
 
-  <!-- ─── 3. now playing ─── -->
+  <!-- ─── 4. now playing ─── -->
   <section class="gf-now" id="now-playing" hidden>
     <div class="gf-now-grid">
       <div class="gf-now-disc" id="now-disc">
@@ -227,27 +267,30 @@
     </div>
   </section>
 
-  <!-- ─── 4. the b-side ─── -->
-  <section class="gf-bside" id="b-side">
+  <!-- ─── 5. video: the b-side ─── -->
+  <section class="gf-bside" id="video">
     <p class="gf-meta">Side B · moving pictures</p>
     <h2>The same eye, twenty four times a second.</h2>
     <div class="gf-bside-grid">
       <div><div class="gf-45"></div></div>
       <div>
+        <!-- Replaced from motion.json on load. This is what stands if the fetch
+             fails, so it has to be true on its own — it used to say the films
+             were not filed yet, which stopped being true when they were. -->
         <ul id="bside-list">
           <li class="gf-bside-soon">
-            <span>Motion work</span>
-            <span>Being catalogued</span>
+            <span>Three films</span>
+            <span>Brand · narrative · vertical</span>
           </li>
         </ul>
         <p class="gf-lede gf-bside-soon" id="bside-note"
            style="margin-top: 1.4rem; max-width: 40ch; color: rgba(247,244,238,0.55)">
-          The films are shot. They are not filed yet — this side of the record is
-          still being cut.
+          Commissioned brand films, a narrative short, and vertical work cut for
+          a phone. They play in full on the portfolio.
         </p>
-        <a class="gf-cta-sleeve" href="#pressing" style="margin-top: 2rem">
+        <a class="gf-cta-sleeve" href="professional.html" style="margin-top: 2rem">
           <span>
-            Ask about motion work
+            Watch the films
             <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
               <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
             </svg>
@@ -257,7 +300,7 @@
     </div>
   </section>
 
-  <!-- ─── 5. liner notes ─── -->
+  <!-- ─── 6. liner notes ─── -->
   <section class="gf-liner" id="liner-notes">
     <div class="gf-liner-inner">
       <p class="gf-meta">Liner notes</p>
@@ -292,7 +335,7 @@
     </div>
   </section>
 
-  <!-- ─── 6. request a pressing ─── -->
+  <!-- ─── 7. request a pressing ─── -->
   <section class="gf-press" id="pressing">
     <form class="gf-slip" id="pressing-form" novalidate>
       <p class="gf-meta">Order slip</p>
@@ -343,6 +386,7 @@
     <div class="gf-meta" style="text-align: right">
       <div class="gf-foot-links">
         <a href="portfolios.html">The crate</a>
+        <a href="professional.html">Portfolio</a>
         <a href="prints.html">Prints</a>
         <a href="journal.html">Journal</a>
         <a href="#liner-notes">Liner notes</a>
@@ -424,21 +468,96 @@
     section.hidden = false;
   }
 
-  /* ---------- b-side: real motion work when there is any ---------- */
-  function renderBSide() {
+  /* ---------- motion: the b-side list and the reel's film index ----------
+     One fetch feeds both. Either half is allowed to be missing without taking
+     the other down: the b-side keeps its "being catalogued" placeholder and the
+     reel keeps its copy, which already stands on its own. */
+  function renderMotion() {
     fetch('/content/data/motion.json')
       .then(function (r) { return r.ok ? r.json() : null; })
       .then(function (data) {
         var pieces = data && data.pieces;
         if (!pieces || !pieces.length) return;   // keep the placeholder
+
         document.getElementById('bside-list').innerHTML = pieces.map(function (p) {
           return '<li><span>' + esc(p.title) + '</span><span>' +
             esc(p.format) + (p.runtime ? ' · ' + esc(p.runtime) : '') + '</span></li>';
         }).join('');
         var note = document.getElementById('bside-note');
         if (note) note.hidden = true;
+
+        var index = document.getElementById('reel-index');
+        if (index) {
+          index.innerHTML = pieces.map(function (p) {
+            return '<li><b>' + esc(p.title) + '</b>' +
+              (p.runtime ? '<span>' + esc(p.runtime) + '</span>' : '') + '</li>';
+          }).join('');
+        }
       })
       .catch(function () { /* placeholder stands */ });
+  }
+
+  /* ---------- the reel's background clip ----------
+     Silent, looping and purely decorative, so it is held to the same bar as the
+     scroll-scrub film above it: nothing is fetched under reduced motion, and
+     nothing is fetched until the band is actually near the viewport. The poster
+     underneath is what a visitor sees in either case, so failure is invisible.
+
+     The <video> carries no src in the markup on purpose — a `media` attribute
+     on <source> is ignored inside <video>, so picking the weight in markup is
+     not possible and the browser would fetch whichever came first. */
+  function initReel() {
+    var video = document.getElementById('reel-video');
+    var poster = document.getElementById('reel-poster');
+    if (!video) return;
+
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    var narrow = window.matchMedia('(max-width: 860px)').matches;
+    var src = narrow ? '/assets/film/reel-hero-960.mp4'
+                     : '/assets/film/reel-hero-1600.mp4';
+
+    function start() {
+      if (!video.src) video.src = src;
+      video.play().then(function () {
+        /* Only swap once the clip is genuinely running, so a refused autoplay
+           leaves the poster in place rather than a black rectangle. */
+        video.hidden = false;
+        if (poster) poster.hidden = true;
+      }).catch(function () { /* poster stands */ });
+    }
+
+    var section = document.getElementById('reel');
+    var inView = false;
+
+    function resume() {
+      if (inView && video.src && video.paused && !document.hidden) {
+        video.play().catch(function () {});
+      }
+    }
+
+    /* Chrome pauses muted, video-only elements when the tab goes to the
+       background. Nothing re-fires the observer on return — the band is still
+       exactly as intersecting as it was — so without this the visitor comes
+       back to a frozen frame instead of a loop. */
+    document.addEventListener('visibilitychange', resume);
+
+    if (!('IntersectionObserver' in window)) { inView = true; start(); return; }
+
+    var seen = false;
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        inView = entry.isIntersecting;
+        if (inView) {
+          if (!seen) { seen = true; start(); }
+          else resume();
+        } else if (video.src) {
+          video.pause();          /* off-screen decode is wasted battery */
+        }
+      });
+    }, { rootMargin: '200px 0px' });
+
+    io.observe(section);
   }
 
   /* ---------- the order slip ---------- */
@@ -518,7 +637,8 @@
         console.error(err);
       });
 
-    renderBSide();
+    renderMotion();
+    initReel();
     initForm();
   }
 

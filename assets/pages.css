@@ -487,3 +487,417 @@
   padding-top: clamp(1.6rem, 3vw, 2.4rem);
   border-top: 1px solid var(--gf-line);
 }
+
+/* ============================================================
+   professional.html — the client-facing portfolio
+   ============================================================
+   Deliberately plainer than the record-crate framing on the landing page.
+   Someone arriving here is deciding whether to hire, so the work is shown
+   large and the metaphor is dropped: no discs, no catalogue numbers.
+*/
+
+.gf-pro-hero {
+  background: var(--gf-ink);
+  color: var(--gf-paper);
+  padding: calc(var(--gf-nav-h) + clamp(3.5rem, 8vw, 6.5rem)) clamp(1rem, 4vw, 2.6rem)
+           clamp(3.5rem, 8vw, 6rem);
+}
+
+.gf-pro-hero-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gf-pro-hero h1 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  line-height: 0.94;
+  letter-spacing: -0.015em;
+  margin: 1.2rem 0 0;
+  max-width: 16ch;
+}
+
+.gf-pro-hero p {
+  font-size: clamp(1.02rem, 1.7vw, 1.2rem);
+  line-height: 1.55;
+  max-width: 52ch;
+  margin: 1.6rem 0 0;
+  color: rgba(247, 244, 238, 0.76);
+}
+
+/* Capability row — what can actually be commissioned. */
+.gf-pro-facts {
+  display: grid;
+  gap: 1.6rem clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  margin: clamp(2.5rem, 6vw, 4rem) 0 0;
+  padding: clamp(2rem, 4vw, 2.6rem) 0 0;
+  border-top: 1px solid rgba(247, 244, 238, 0.18);
+}
+
+.gf-pro-facts div {
+  margin: 0;
+}
+
+.gf-pro-facts dt {
+  font-family: var(--gf-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: rgba(247, 244, 238, 0.5);
+}
+
+.gf-pro-facts dd {
+  margin: 0.7rem 0 0;
+  font-size: 0.98rem;
+  line-height: 1.45;
+  color: var(--gf-paper);
+}
+
+/* ---------- films ---------- */
+.gf-pro-films {
+  background: var(--gf-ink);
+  color: var(--gf-paper);
+  padding: 0 clamp(1rem, 4vw, 2.6rem) clamp(4rem, 9vw, 7rem);
+}
+
+.gf-pro-films-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(3rem, 7vw, 5.5rem);
+}
+
+.gf-film {
+  display: grid;
+  gap: clamp(1.4rem, 3vw, 2.4rem);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  /* Landscape pieces lead with the frame; the vertical piece is narrow enough
+     that a full-width column would strand it, so it sits beside its notes. */
+  .gf-film--landscape {
+    grid-template-columns: 1fr;
+  }
+
+  .gf-film--portrait {
+    grid-template-columns: minmax(0, 22rem) 1fr;
+    align-items: center;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+}
+
+.gf-film-frame {
+  position: relative;
+  margin: 0;
+  background: #000;
+  overflow: hidden;
+  border: 1px solid rgba(247, 244, 238, 0.14);
+}
+
+.gf-film--landscape .gf-film-frame {
+  aspect-ratio: 16 / 9;
+}
+
+/* A 9:16 frame given a full-width column turns into a black column taller than
+   the viewport — at 768px it came out 1229px high. Cap it and centre it, so the
+   vertical piece reads as a phone-shaped cut at every width. */
+.gf-film--portrait .gf-film-frame {
+  aspect-ratio: 9 / 16;
+  width: min(100%, 22rem);
+  margin-inline: auto;
+}
+
+.gf-film-frame video,
+.gf-film-frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Films play by themselves. The poster sits above the <video> only until the
+   clip is actually running, so a visitor never looks at a black rectangle while
+   it buffers, and it comes back if autoplay is refused or the tab is hidden.
+   Under reduced motion it stays put and the play control does the work. */
+.gf-film-cover {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+  background: none;
+  color: var(--gf-paper);
+  display: block;
+  transition: opacity 0.5s ease;
+}
+
+.gf-film-cover[hidden] {
+  display: none;
+}
+
+/* Faded rather than removed while the clip runs: the element keeps its place so
+   a stall can bring it straight back without a layout jump. */
+.gf-film-frame[data-playing="true"] .gf-film-cover {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.gf-film-cover::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(18, 17, 15, 0.55), rgba(18, 17, 15, 0.05) 55%);
+}
+
+.gf-film-play {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 1;
+  width: clamp(3.6rem, 7vw, 5rem);
+  height: clamp(3.6rem, 7vw, 5rem);
+  border-radius: 50%;
+  border: 1px solid rgba(247, 244, 238, 0.7);
+  background: rgba(18, 17, 15, 0.32);
+  backdrop-filter: blur(6px);
+  display: grid;
+  place-items: center;
+  transition: background 0.4s cubic-bezier(0.2, 0.8, 0.2, 1),
+              transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gf-film-play svg {
+  width: 34%;
+  height: 34%;
+  fill: currentColor;
+  /* Optical centring: a triangle's visual mass sits left of its bounding box. */
+  margin-left: 8%;
+}
+
+.gf-film-cover:hover .gf-film-play,
+.gf-film-cover:focus-visible .gf-film-play {
+  background: var(--gf-coral);
+  border-color: var(--gf-coral);
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+/* ---------- the bar over a running film ---------- */
+.gf-film-bar {
+  position: absolute;
+  left: 0.9rem;
+  right: 0.9rem;
+  bottom: 0.9rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  pointer-events: none;      /* only the controls inside take the pointer */
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+
+/* Visible once the film is running, and always while a control has keyboard
+   focus — otherwise a tabbing visitor focuses something they cannot see. */
+.gf-film-frame[data-playing="true"] .gf-film-bar,
+.gf-film-frame:hover .gf-film-bar,
+.gf-film-bar:focus-within {
+  opacity: 1;
+}
+
+.gf-film-sound {
+  pointer-events: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  border: 1px solid rgba(247, 244, 238, 0.4);
+  background: rgba(18, 17, 15, 0.62);
+  backdrop-filter: blur(6px);
+  color: var(--gf-paper);
+  font-family: var(--gf-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  /* 44px minimum touch target, which the type alone does not reach. */
+  min-height: 2.75rem;
+  padding: 0 0.9rem;
+  cursor: pointer;
+  transition: background 0.3s ease, border-color 0.3s ease;
+}
+
+.gf-film-sound:hover {
+  background: var(--gf-coral);
+  border-color: var(--gf-coral);
+}
+
+.gf-film-sound svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  fill: currentColor;
+  flex: none;
+}
+
+.gf-film-runtime {
+  pointer-events: none;
+  font-family: var(--gf-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  padding: 0.3rem 0.55rem;
+  background: rgba(18, 17, 15, 0.6);
+  color: var(--gf-paper);
+}
+
+.gf-film-body {.gf-film-body {
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+}
+
+.gf-film-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem 1.5rem;
+}
+
+.gf-film-body h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 3.6vw, 2.8rem);
+  line-height: 1.02;
+  margin: 0;
+}
+
+.gf-film-tag {
+  font-family: var(--gf-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: rgba(247, 244, 238, 0.55);
+}
+
+.gf-film-body p {
+  margin: 0;
+  max-width: 58ch;
+  line-height: 1.6;
+  color: rgba(247, 244, 238, 0.78);
+}
+
+/* ---------- stills ---------- */
+.gf-pro-stills {
+  background: var(--gf-paper);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1rem, 4vw, 2.6rem);
+}
+
+.gf-pro-stills-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gf-pro-stills h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5vw, 3.6rem);
+  line-height: 1;
+  margin: 0.8rem 0 0;
+}
+
+.gf-pro-stills > .gf-pro-stills-inner > p {
+  max-width: 46ch;
+  line-height: 1.6;
+  color: var(--gf-ink-soft);
+  margin: 1.2rem 0 0;
+}
+
+.gf-still-grid {
+  display: grid;
+  gap: clamp(0.5rem, 1.4vw, 1rem);
+  grid-template-columns: repeat(2, 1fr);
+  margin-top: clamp(2.2rem, 5vw, 3.4rem);
+}
+
+@media (min-width: 700px) {
+  .gf-still-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (min-width: 1000px) {
+  .gf-still-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.gf-still {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  background: var(--gf-paper-2);
+  aspect-ratio: 4 / 5;
+  border: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+/* Every fourth frame runs tall, so the grid keeps a rhythm instead of reading
+   as a contact sheet. */
+.gf-still:nth-child(4n + 1) {
+  aspect-ratio: 4 / 6;
+}
+
+.gf-still img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.7s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gf-still:hover img,
+.gf-still:focus-visible img {
+  transform: scale(1.05);
+}
+
+/* ---------- the ask ---------- */
+.gf-pro-cta {
+  background: var(--gf-ink);
+  color: var(--gf-paper);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1rem, 4vw, 2.6rem);
+}
+
+.gf-pro-cta-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(1.6rem, 4vw, 2.6rem);
+  justify-items: start;
+}
+
+.gf-pro-cta h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.3rem, 6vw, 4.2rem);
+  line-height: 0.98;
+  margin: 0;
+  max-width: 18ch;
+}
+
+.gf-pro-cta p {
+  margin: 0;
+  max-width: 48ch;
+  line-height: 1.6;
+  color: rgba(247, 244, 238, 0.75);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gf-film-play,
+  .gf-still img,
+  .gf-film-cover {
+    transition: none !important;
+  }
+}

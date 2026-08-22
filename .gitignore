@@ -6,3 +6,7 @@ node_modules
 # The ~52MB master the hero encodes are cut from. Kept locally so the clips can
 # be re-encoded from source rather than from a previous encode. Never ship it.
 assets/higgsfield asset/
+
+# Camera masters for the film portfolio (~780MB of ProRes-grade .mov). The web
+# encodes in assets/film/ are cut from these and are what actually ships.
+assets/video portfolio/

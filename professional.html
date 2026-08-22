@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en" data-gf-spin="full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Portfolio — commissioned film and photography | GoofiesEyes</title>
+  <meta name="description" content="The professional portfolio of GoofiesEyes: commissioned brand films, vertical social spots and narrative shorts, alongside selected photography. Available for film and stills work." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://goofieseyes.live/professional.html" />
+
+  <meta property="og:title" content="Portfolio — commissioned film and photography | GoofiesEyes" />
+  <meta property="og:description" content="Commissioned brand films, vertical social spots and narrative shorts, alongside selected photography." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://goofieseyes.live/professional.html" />
+  <meta property="og:site_name" content="GoofiesEyes" />
+  <meta property="og:image" content="https://goofieseyes.live/assets/film/film-01-poster.jpg" />
+  <meta property="og:image:width" content="1920" />
+  <meta property="og:image:height" content="1080" />
+  <meta property="og:image:alt" content="A frame from a GoofiesEyes barbershop brand film" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="https://goofieseyes.live/assets/film/film-01-poster.jpg" />
+  <meta name="twitter:title" content="Portfolio — commissioned film and photography | GoofiesEyes" />
+  <meta name="twitter:description" content="Commissioned brand films, vertical social spots and narrative shorts, alongside selected photography." />
+
+  <script type="application/ld+json" id="pro-ld">
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Portfolio — GoofiesEyes",
+    "description": "Commissioned film and photography by GoofiesEyes.",
+    "url": "https://goofieseyes.live/professional.html",
+    "hasPart": []
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/pages.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <script defer src="/assets/site.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body class="gf-body">
+
+<main class="gf" id="top">
+
+  <nav class="gf-nav">
+    <a class="gf-wordmark" href="index.html">goofieseyes</a>
+    <div class="gf-nav-links gf-meta">
+      <a href="index.html#crate">The crate</a>
+      <a href="professional.html" aria-current="page">Portfolio</a>
+      <a href="index.html#video">Video</a>
+      <a href="prints.html">Prints</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#pressing">Contact</a>
+    </div>
+    <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="gf-mobile-menu" id="gf-mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">The crate</a>
+    <a href="professional.html">Portfolio</a>
+    <a href="index.html#video">Video</a>
+    <a href="prints.html">Prints</a>
+    <a href="journal.html">Journal</a>
+    <a href="index.html#pressing">Contact</a>
+  </div>
+
+  <!-- ─── hero ─── -->
+  <header class="gf-pro-hero">
+    <div class="gf-pro-hero-inner">
+      <p class="gf-meta" style="color: rgba(247,244,238,0.55)">Portfolio · commissioned work</p>
+      <h1>Films made on the floor, not from a shot list.</h1>
+      <p>
+        I shoot and cut brand films, vertical social spots and short narrative
+        pieces, and I photograph the same way — close in, handheld, working with
+        the light a room already has. Below is the current reel and a set of
+        stills from the same eye.
+      </p>
+
+      <dl class="gf-pro-facts">
+        <div>
+          <dt>Film</dt>
+          <dd>Brand films, social spots, narrative shorts</dd>
+        </div>
+        <div>
+          <dt>Photography</dt>
+          <dd>Portrait, editorial, travel, documentary</dd>
+        </div>
+        <div>
+          <dt>End to end</dt>
+          <dd>Shot, graded and cut by me</dd>
+        </div>
+        <div>
+          <dt>Based</dt>
+          <dd>Trinidad and Tobago · New York City</dd>
+        </div>
+      </dl>
+    </div>
+  </header>
+
+  <!-- ─── the films ─── -->
+  <section class="gf-pro-films" id="films">
+    <div class="gf-pro-films-inner" id="film-list"></div>
+    <p class="gf-state" id="films-state" style="color: rgba(247,244,238,0.55)">Loading the reel…</p>
+  </section>
+
+  <!-- ─── stills ─── -->
+  <section class="gf-pro-stills" id="stills">
+    <div class="gf-pro-stills-inner">
+      <p class="gf-meta" style="color: var(--gf-ink-soft)">Stills</p>
+      <h2>The same eye, held still.</h2>
+      <p>
+        Frames pulled from the collections — the ones I would show a client
+        first. The full crate sits <a href="portfolios.html" style="color: inherit">over here</a>.
+      </p>
+      <div class="gf-still-grid" id="still-grid" hidden></div>
+      <p class="gf-state" id="stills-state">Loading…</p>
+    </div>
+  </section>
+
+  <!-- ─── the ask ─── -->
+  <section class="gf-pro-cta">
+    <div class="gf-pro-cta-inner">
+      <p class="gf-meta" style="color: rgba(247,244,238,0.5)">Commissions</p>
+      <h2>If you have something that should move, tell me about it.</h2>
+      <p>
+        Brand films, launch spots, a shop that deserves better than a phone
+        clip, or a set of photographs. One slip and it reaches me directly.
+      </p>
+      <a class="gf-cta-sleeve" href="index.html#pressing">
+        <span>
+          Start a commission
+          <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
+            <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </span>
+      </a>
+    </div>
+  </section>
+
+  <footer class="gf-foot">
+    <div class="gf-foot-mark">goofieseyes</div>
+    <div class="gf-meta" style="text-align: right">
+      <div class="gf-foot-links">
+        <a href="index.html">Home</a>
+        <a href="portfolios.html">The crate</a>
+        <a href="professional.html">Portfolio</a>
+        <a href="prints.html">Prints</a>
+        <a href="journal.html">Journal</a>
+        <a href="mailto:goofiesfotos@gmail.com">Email</a>
+      </div>
+      <div>Photography and motion</div>
+      <div>All frames the photographer's own</div>
+    </div>
+  </footer>
+
+</main>
+
+<div class="gf-lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Photograph">
+  <button class="gf-lb-close" id="lb-close" type="button" aria-label="Close">&#10005;</button>
+  <button class="gf-lb-prev" id="lb-prev" type="button" aria-label="Previous">&#8249;</button>
+  <button class="gf-lb-next" id="lb-next" type="button" aria-label="Next">&#8250;</button>
+  <img id="lb-img" alt="">
+  <span class="gf-lb-count" id="lb-count"></span>
+</div>
+
+<script>
+/* professional.html — the client-facing portfolio.
+   Films come from content/data/motion.json (the same file the landing page's
+   Video section reads); stills come from portfolios.json via assets/site.js, so
+   the admin portal stays the only place anything is edited. */
+(function () {
+  'use strict';
+
+  var esc = function (s) { return window.gf.escape(s); };
+
+  /* Small screens get the 720 encode. Deciding at play time rather than load
+     time means a visitor who rotates or resizes before pressing play still
+     gets the right weight. */
+  function pickSource(piece) {
+    var narrow = window.matchMedia('(max-width: 860px)').matches;
+    return narrow ? piece.sources.sd : piece.sources.hd;
+  }
+
+  /* ---------- playback ----------
+     The films start on their own as they reach the viewport: muted, looping,
+     no click. Muted is not a style choice — it is the only way a browser will
+     autoplay at all — so every film carries a sound toggle, and turning sound
+     on is what upgrades it to a real player (native controls, no loop).
+
+     Bandwidth is the thing to be careful about with three films on one page.
+     `preload="none"` plus loading inside the observer means a clip is only
+     fetched when it is actually about to be seen, and only one plays at a
+     time, so a visitor who stops at the first film never pays for the rest. */
+  function wireFilms(pieces) {
+    var list = document.getElementById('film-list');
+    var frames = [].slice.call(list.querySelectorAll('.gf-film-frame'));
+    var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    function videoOf(i) { return document.getElementById('film-v-' + i); }
+
+    function markPlaying(frame, on) {
+      frame.dataset.playing = on ? 'true' : 'false';
+    }
+
+    /* Sound is exclusive: unmuting one film silences the others, so a page of
+       three never talks over itself. */
+    function soloAudio(keep) {
+      frames.forEach(function (frame) {
+        var i = frame.dataset.film;
+        if (i === String(keep)) return;
+        var v = videoOf(i);
+        if (v.muted) return;
+        v.muted = true;
+        v.loop = true;
+        v.controls = false;
+        setSoundLabel(frame, false);
+      });
+    }
+
+    function setSoundLabel(frame, on) {
+      var button = frame.querySelector('.gf-film-sound');
+      if (!button) return;
+      button.setAttribute('aria-pressed', on ? 'true' : 'false');
+      button.querySelector('[data-sound-label]').textContent = on ? 'Sound on' : 'Sound off';
+      var title = button.getAttribute('aria-label').replace(/^Turn sound (on|off) for /, '');
+      button.setAttribute('aria-label', 'Turn sound ' + (on ? 'off' : 'on') + ' for ' + title);
+    }
+
+    function start(frame) {
+      var i = frame.dataset.film;
+      var video = videoOf(i);
+      if (!video.src) video.src = pickSource(pieces[Number(i)]);
+      return video.play().then(function () {
+        markPlaying(frame, true);
+      }).catch(function () {
+        /* Refused (a data-saver mode, an aggressive power setting). The poster
+           and its play control are still there, so the film is one tap away. */
+        markPlaying(frame, false);
+      });
+    }
+
+    /* The play control is still wired even though nothing needs clicking: it is
+       the way back in after a refused autoplay, and the only way in at all under
+       reduced motion. */
+    list.addEventListener('click', function (e) {
+      var cover = e.target.closest('.gf-film-cover');
+      if (cover) {
+        start(cover.closest('.gf-film-frame'));
+        return;
+      }
+
+      var sound = e.target.closest('.gf-film-sound');
+      if (!sound) return;
+
+      var frame = sound.closest('.gf-film-frame');
+      var video = videoOf(frame.dataset.film);
+      var turningOn = video.muted;
+
+      if (turningOn) soloAudio(frame.dataset.film);
+      video.muted = !turningOn;
+      /* With sound on this stops being wallpaper and becomes something being
+         watched: give it a scrub bar and let it end rather than loop. */
+      video.loop = !turningOn;
+      video.controls = turningOn;
+      setSoundLabel(frame, turningOn);
+      if (video.paused) start(frame);
+    });
+
+    /* A film that is playing with sound is being watched deliberately — do not
+       stop it just because another one scrolls into view. */
+    function audible() {
+      return frames.some(function (f) { return !videoOf(f.dataset.film).muted; });
+    }
+
+    if (still || !('IntersectionObserver' in window)) return;
+
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        var frame = entry.target;
+        var video = videoOf(frame.dataset.film);
+        if (entry.isIntersecting) {
+          if (video.paused && !audible()) start(frame);
+        } else if (!video.paused) {
+          video.pause();
+          markPlaying(frame, false);
+          if (!video.muted) {          /* left the screen mid-watch */
+            video.muted = true;
+            video.loop = true;
+            video.controls = false;
+            setSoundLabel(frame, false);
+          }
+        }
+      });
+    }, { threshold: 0.35 });
+
+    frames.forEach(function (frame) { io.observe(frame); });
+
+    /* Chrome pauses muted, video-only playback in a background tab and nothing
+       re-fires the observer on return. Without this the visitor comes back to
+       three frozen frames. */
+    document.addEventListener('visibilitychange', function () {
+      if (document.hidden || audible()) return;
+      frames.forEach(function (frame) {
+        var video = videoOf(frame.dataset.film);
+        if (!video.src || !video.paused) return;
+        var box = frame.getBoundingClientRect();
+        if (box.top < window.innerHeight && box.bottom > 0) start(frame);
+      });
+    });
+  }
+
+  /* ---------- the reel ---------- */
+  function renderFilms(pieces) {
+    var list = document.getElementById('film-list');
+    var state = document.getElementById('films-state');
+
+    list.innerHTML = pieces.map(function (p, i) {
+      var portrait = p.orientation === 'portrait';
+      var tag = [p.client, p.format, p.year].filter(Boolean).join(' · ');
+      return '' +
+        '<article class="gf-film gf-film--' + (portrait ? 'portrait' : 'landscape') + '">' +
+          '<figure class="gf-film-frame" data-film="' + i + '">' +
+            '<video id="film-v-' + i + '" preload="none" playsinline muted loop ' +
+                   'poster="' + esc(p.poster) + '"></video>' +
+            '<button class="gf-film-cover" type="button" data-play="' + i + '" ' +
+                    'aria-label="Play ' + esc(p.title) + ', ' + esc(p.runtime) + '">' +
+              '<img src="' + esc(p.poster) + '" alt="" loading="lazy" decoding="async">' +
+              '<span class="gf-film-play">' +
+                '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 3l16 9-16 9z"/></svg>' +
+              '</span>' +
+            '</button>' +
+            '<div class="gf-film-bar">' +
+              '<button class="gf-film-sound" type="button" data-sound="' + i + '" ' +
+                      'aria-pressed="false" ' +
+                      'aria-label="Turn sound on for ' + esc(p.title) + '">' +
+                '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+                  '<path d="M4 9v6h4l5 4V5L8 9H4z"/>' +
+                  '<path d="M16.5 8.5l5 5m0-5l-5 5" stroke="currentColor" ' +
+                        'stroke-width="1.8" fill="none" stroke-linecap="round"/>' +
+                '</svg>' +
+                '<span data-sound-label>Sound off</span>' +
+              '</button>' +
+              '<span class="gf-film-runtime">' + esc(p.runtime) + '</span>' +
+            '</div>' +
+          '</figure>' +
+          '<div class="gf-film-body">' +
+            '<div class="gf-film-head">' +
+              '<h2>' + esc(p.title) + '</h2>' +
+              '<span class="gf-film-tag">' + esc(tag) + '</span>' +
+            '</div>' +
+            (p.blurb ? '<p>' + esc(p.blurb) + '</p>' : '') +
+          '</div>' +
+        '</article>';
+    }).join('');
+
+    state.hidden = true;
+    wireFilms(pieces);
+
+    /* Tell search engines what the films are. */
+    var ld = document.getElementById('pro-ld');
+    try {
+      var data = JSON.parse(ld.textContent);
+      data.hasPart = pieces.map(function (p) {
+        return {
+          '@type': 'VideoObject',
+          name: p.title,
+          description: p.blurb || '',
+          thumbnailUrl: 'https://goofieseyes.live' + p.poster,
+          contentUrl: 'https://goofieseyes.live' + p.sources.hd,
+          uploadDate: (p.year || '2026') + '-01-01'
+        };
+      });
+      ld.textContent = JSON.stringify(data, null, 2);
+    } catch (err) { /* the page stands without it */ }
+  }
+
+  /* ---------- stills ---------- */
+  var photos = [];
+  var index = 0;
+  var lb = document.getElementById('lightbox');
+  var lbImg = document.getElementById('lb-img');
+  var lbCount = document.getElementById('lb-count');
+  var lastFocused = null;
+
+  function show() {
+    var photo = photos[index];
+    lbImg.src = '/content/photos/' + photo.filename;
+    lbImg.alt = photo.alt || photo.title || '';
+    lbCount.textContent = (index + 1) + ' / ' + photos.length;
+  }
+
+  function open(n) {
+    lastFocused = document.activeElement;
+    index = n;
+    show();
+    lb.classList.add('is-open');
+    document.getElementById('lb-close').focus();
+  }
+
+  function close() {
+    lb.classList.remove('is-open');
+    if (lastFocused) lastFocused.focus();
+  }
+
+  function step(by) {
+    index = (index + by + photos.length) % photos.length;
+    show();
+  }
+
+  function renderStills(albums) {
+    var grid = document.getElementById('still-grid');
+    var state = document.getElementById('stills-state');
+
+    /* Starred frames are the photographer's own picks, so if there are any at
+       all they are the whole section — starring six and getting six covers
+       mixed in alongside them would make the curation look arbitrary. Collection
+       covers stand in only when nothing has been starred yet, so the page is
+       never empty in front of a client. */
+    albums.forEach(function (album) {
+      album.photos.forEach(function (photo) {
+        if (photo.selected) {
+          photos.push({
+            filename: photo.filename,
+            alt: photo.alt,
+            title: photo.title,
+            album: album.title
+          });
+        }
+      });
+    });
+
+    if (!photos.length) {
+      var have = {};
+      photos.forEach(function (p) { have[p.filename] = true; });
+      albums.forEach(function (album) {
+        var first = album.photos[0];
+        if (first && !have[first.filename]) {
+          have[first.filename] = true;
+          photos.push({
+            filename: first.filename,
+            alt: first.alt,
+            title: first.title,
+            album: album.title
+          });
+        }
+      });
+    }
+
+    if (!photos.length) {
+      state.textContent = 'No frames to show yet.';
+      return;
+    }
+
+    grid.innerHTML = photos.map(function (photo, n) {
+      return '<button class="gf-still" type="button" data-index="' + n + '"' +
+        ' aria-label="View ' + esc(photo.alt || photo.title || ('photograph ' + (n + 1))) + '">' +
+        '<img src="/content/photos/' + esc(photo.filename) + '"' +
+        ' alt="' + esc(photo.alt || photo.title || '') + '" loading="lazy" decoding="async">' +
+        '</button>';
+    }).join('');
+
+    grid.addEventListener('click', function (e) {
+      var button = e.target.closest('.gf-still');
+      if (button) open(Number(button.dataset.index));
+    });
+
+    state.hidden = true;
+    grid.hidden = false;
+  }
+
+  function initLightbox() {
+    document.getElementById('lb-close').addEventListener('click', close);
+    document.getElementById('lb-prev').addEventListener('click', function () { step(-1); });
+    document.getElementById('lb-next').addEventListener('click', function () { step(1); });
+    lb.addEventListener('click', function (e) { if (e.target === lb) close(); });
+    document.addEventListener('keydown', function (e) {
+      if (!lb.classList.contains('is-open')) return;
+      if (e.key === 'Escape') close();
+      if (e.key === 'ArrowLeft') step(-1);
+      if (e.key === 'ArrowRight') step(1);
+    });
+  }
+
+  function boot() {
+    fetch('/content/data/motion.json')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        var pieces = data && data.pieces;
+        if (!pieces || !pieces.length) {
+          document.getElementById('films-state').textContent =
+            'The reel is being cut. Ask me about motion work in the meantime.';
+          return;
+        }
+        renderFilms(pieces);
+      })
+      .catch(function () {
+        document.getElementById('films-state').textContent = 'The reel could not be loaded.';
+      });
+
+    window.gf.loadAlbums()
+      .then(renderStills)
+      .catch(function () {
+        document.getElementById('stills-state').textContent = 'The stills could not be loaded.';
+      });
+
+    initLightbox();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', boot);
+  } else {
+    boot();
+  }
+})();
+</script>
+
+</body>
+</html>

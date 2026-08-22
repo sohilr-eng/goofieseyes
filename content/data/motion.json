@@ -1,3 +1,53 @@
 {
-  "pieces": []
+  "_note": "The film portfolio. index.html reads title/format/runtime for the Video section; professional.html reads the whole record. Titles and clients were read off the footage itself (title cards, product labels, source filenames) — correct them here and both pages follow.",
+  "pieces": [
+    {
+      "slug": "film-01",
+      "title": "Fade Into a Smile",
+      "client": "Kingsman Studio",
+      "format": "Brand film",
+      "runtime": "1:11",
+      "seconds": 71,
+      "year": "2026",
+      "orientation": "landscape",
+      "blurb": "A barbershop from the first clipper pass to the mirror at the end. Shot handheld on the floor of the studio, cut to the rhythm of the room rather than a voiceover.",
+      "poster": "/assets/film/film-01-poster.jpg",
+      "sources": {
+        "hd": "/assets/film/film-01-1080.mp4",
+        "sd": "/assets/film/film-01-720.mp4"
+      }
+    },
+    {
+      "slug": "film-02",
+      "title": "Protecting Me",
+      "client": "Self-initiated",
+      "format": "Narrative short",
+      "runtime": "0:33",
+      "seconds": 33,
+      "year": "2026",
+      "orientation": "landscape",
+      "blurb": "Two mirrors carried onto an empty beach and left standing in the sand. Graded high and open, so the sea and the sky sit almost on the same white.",
+      "poster": "/assets/film/film-02-poster.jpg",
+      "sources": {
+        "hd": "/assets/film/film-02-1080.mp4",
+        "sd": "/assets/film/film-02-720.mp4"
+      }
+    },
+    {
+      "slug": "film-03",
+      "title": "Social Cut",
+      "client": "Kingsman Studio",
+      "format": "Vertical spot",
+      "runtime": "0:36",
+      "seconds": 36,
+      "year": "2026",
+      "orientation": "portrait",
+      "blurb": "The same chair, cut for a phone. Tight on the hands and the product, built to hold a thumb for thirty seconds.",
+      "poster": "/assets/film/film-03-poster.jpg",
+      "sources": {
+        "hd": "/assets/film/film-03-1080.mp4",
+        "sd": "/assets/film/film-03-720.mp4"
+      }
+    }
+  ]
 }

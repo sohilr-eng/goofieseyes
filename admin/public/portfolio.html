@@ -579,7 +579,9 @@
       <div class="photo-card" data-filename="${photo.filename}">
         <div class="drag-handle">⠿</div>
         <button class="select-btn" aria-pressed="${photo.selected ? 'true' : 'false'}"
-                title="${photo.selected ? 'Remove from Selects' : 'Add to Selects'}"
+                title="${photo.selected
+                  ? 'Starred — showing on the Portfolio page and Selects. Click to remove.'
+                  : 'Star this frame to put it on the Portfolio page (and Selects).'}"
                 onclick="toggleSelect('${photo.filename}')">${photo.selected ? '★' : '☆'}</button>
         ${photo.filename === port.cover ? '<div class="cover-badge">Cover</div>' : ''}
         <img src="/content/photos/${photo.filename}" alt="${photo.alt || photo.filename}" loading="lazy" onerror="this.style.background='rgba(255,255,255,0.05)';this.style.height='90px'" />

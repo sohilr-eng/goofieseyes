@@ -13,7 +13,16 @@
       ]
     },
     {
-      "source": "/assets/((?!video/).*)",
+      "source": "/assets/film/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=31536000, immutable"
+        }
+      ]
+    },
+    {
+      "source": "/assets/((?!video/)(?!film/).*)",
       "headers": [
         {
           "key": "Cache-Control",
