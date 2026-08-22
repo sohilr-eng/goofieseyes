@@ -32,8 +32,8 @@
    *   my-model      golden backlit portrait
    *   smoky-mountains  black bears in spring grass
    *   new-york-city cherry blossom canopy
-   *   tiger         amber tiger against near-black stone
-   *   rutgers-graduation-2026  golden retriever on summer park green
+   *   tiger         cool slate enclosure, the amber cat low in the frame
+   *   rutgers-graduation-2026  scarlet regalia in hard light on black
    *   fender-stratocaster  cream body, cool blue-grey wall, teal cable
    *   wedding       amber and deep red glasses on a dark bar
    *   paria-trinidad  green cliff scrub over dark rock
@@ -50,8 +50,12 @@
     'my-model': 'sakura',
     'smoky-mountains': 'chartreuse',
     'new-york-city': 'sakura',
-    'tiger': 'coral',
-    'rutgers-graduation-2026': 'chartreuse',
+    /* Rutgers' cover changed from a golden retriever on park green to scarlet
+       regalia, which wants coral — but tiger sits next to it in the rail and was
+       already coral. Tiger moves to teal: its frame is mostly cool slate wall,
+       with the warm cat low and small, so teal is the honest read of it anyway. */
+    'tiger': 'teal',
+    'rutgers-graduation-2026': 'coral',
     'fender-stratocaster': 'teal',
     'wedding': 'coral',
     'paria-trinidad': 'chartreuse',
