@@ -474,7 +474,44 @@ app.get('/api/git-status', (req, res) => {
     if (code !== 0 && errOutput) {
       return res.json({ status: `Error: ${errOutput}`, hasChanges: false });
     }
-    res.json({ status: output || 'Working tree clean', hasChanges: output.trim().length > 0 });
+
+    /* Saved-but-unpublished work is two different things and the editor needs
+     * both: files written to disk and not yet committed, and commits made and
+     * not yet pushed. Either one means the live site is behind what is here.
+     *
+     * origin/master is read from the local ref rather than fetched — a fetch on
+     * every poll would put the network in the way of a status badge, and the
+     * ref is updated by our own pushes, which is the only thing that moves it
+     * in this workflow. */
+    const lines = output.split('\n').map((l) => l.trim()).filter(Boolean);
+    let ahead = 0;
+    try {
+      ahead = parseInt(
+        execSync('git rev-list --count origin/master..HEAD', {
+          cwd: repoRoot, shell: true, stdio: ['pipe', 'pipe', 'pipe']
+        }).toString().trim(),
+        10
+      ) || 0;
+    } catch (err) {
+      ahead = 0;   // no upstream ref yet; the dirty count still stands
+    }
+
+    /* Only content edits are interesting here. A change to the site's own code
+     * is not something the photographer publishes from this screen. */
+    const contentFiles = lines
+      .map((l) => l.replace(/^\S+\s+/, ''))
+      .filter((f) => f.startsWith('content/'));
+
+    res.json({
+      status: output || 'Working tree clean',
+      hasChanges: lines.length > 0,
+      unpublished: {
+        dirty: lines.length,
+        contentFiles,
+        ahead,
+        total: lines.length + ahead
+      }
+    });
   });
 
   proc.on('error', (err) => {
@@ -510,6 +547,27 @@ app.post('/api/publish', (req, res) => {
   send(`[publish] Starting at ${timestamp}`);
 
   try {
+    // ── disc crops ───────────────────────────────────────────────────────────
+    // The crate renders each collection as a circle, and the circle is fed by a
+    // square pre-crop in content/discs/, not by the cover photograph itself.
+    // Nothing generated those on upload, so changing a cover in the portal used
+    // to leave the old crop in place — or, for a new collection, no crop at all,
+    // which made every record 404 and then download a 1200x1800 photograph to
+    // fill a 320px circle.
+    //
+    // Running it here means a cover is never published without its crop. The
+    // script skips anything already up to date, so this is nearly free on a
+    // publish that changed no covers. A failure is reported and does not stop
+    // the publish: stale crops are worse than nothing, but not worse than not
+    // shipping the edit at all.
+    send('\n[publish] Running: node scripts/make-discs.js');
+    const discResult = run('node scripts/make-discs.js');
+    if (discResult.output) send(discResult.output);
+    if (discResult.code !== 0) {
+      send('\n[publish] ⚠ Disc crops failed — publishing anyway. ' +
+           'Covers changed in this publish may show the previous crop.');
+    }
+
     // ── git add ──────────────────────────────────────────────────────────────
     send('\n[publish] Running: git add .');
     const addResult = run('git add .');

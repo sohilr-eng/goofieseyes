@@ -387,6 +387,134 @@
     .save-state[data-state="saved"]  { color: var(--success); }
     .save-state[data-state="error"]  { color: var(--danger); font-weight: 600; }
 
+    /* ── Saved but not published ── */
+    .unpublished {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      background: rgba(230,168,23,0.10);
+      border: 1px solid rgba(230,168,23,0.35);
+      border-radius: 10px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+    }
+
+    .unpublished[hidden] { display: none; }
+    .unpublished-text { font-size: 13px; line-height: 1.4; }
+    .unpublished-text b { color: var(--warning); display: block; }
+    .unpublished-text span { color: var(--text-muted); font-size: 12px; }
+
+    .publish-log {
+      background: #0b0b0f;
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-bottom: 16px;
+      font-family: ui-monospace, Menlo, Consolas, monospace;
+      font-size: 11px;
+      line-height: 1.5;
+      color: var(--text-muted);
+      max-height: 220px;
+      overflow: auto;
+      white-space: pre-wrap;
+    }
+
+    .publish-log[hidden] { display: none; }
+
+    /* ── Cover field ── */
+    .cover-field {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border-card);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .cover-field img {
+      width: 56px;
+      height: 56px;
+      object-fit: cover;
+      border-radius: 6px;
+      background: rgba(255,255,255,0.06);
+      flex-shrink: 0;
+    }
+
+    .cover-meta { flex: 1; min-width: 0; }
+    #cover-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    #cover-note { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+
+    /* ── Cover picker modal ── */
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 200;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .modal[hidden] { display: none; }
+
+    .modal-box {
+      background: var(--bg-main);
+      border: 1px solid var(--border-card);
+      border-radius: 12px;
+      width: min(900px, 100%);
+      max-height: 82vh;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 22px;
+    }
+
+    .modal-head { display: flex; align-items: center; justify-content: space-between; }
+    .modal-head h3 { font-size: 16px; font-weight: 700; }
+    .modal-note { font-size: 12px; color: var(--text-muted); margin-top: 6px; }
+
+    .modal-close {
+      background: none; border: none; color: var(--text-muted);
+      font-size: 16px; cursor: pointer; min-width: 32px; min-height: 32px;
+    }
+    .modal-close:hover { color: #fff; }
+
+    .cover-choices {
+      margin-top: 14px;
+      overflow-y: auto;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+      gap: 10px;
+    }
+
+    .cover-choice {
+      border: 2px solid transparent;
+      border-radius: 8px;
+      overflow: hidden;
+      cursor: pointer;
+      padding: 0;
+      background: none;
+      position: relative;
+      line-height: 0;
+    }
+
+    .cover-choice img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+    .cover-choice:hover { border-color: var(--accent); }
+    .cover-choice[aria-current="true"] { border-color: var(--success); }
+
+    .cover-choice[aria-current="true"]::after {
+      content: "Current";
+      position: absolute;
+      left: 6px; bottom: 6px;
+      background: var(--success);
+      color: #06210f;
+      font-size: 9px; font-weight: 700;
+      padding: 2px 6px; border-radius: 10px;
+      line-height: 1.4;
+    }
+
     .set-cover-btn {
       display: block;
       width: 100%;
@@ -497,6 +625,18 @@
     <div class="new-portfolio-btn" onclick="openNewModal()">+ New Portfolio</div>
   </div>
 
+  <!-- Cover picker -->
+  <div class="modal" id="cover-modal" hidden>
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Choose a cover</h3>
+        <button class="modal-close" onclick="closeCoverPicker()" aria-label="Close">&#10005;</button>
+      </div>
+      <p class="modal-note">This frame becomes the spinning record for this collection in the crate. Its square crop is regenerated when you publish.</p>
+      <div class="cover-choices" id="cover-choices"></div>
+    </div>
+  </div>
+
   <!-- Editor panel -->
   <div class="panel-right" id="panel-right">
     <div class="empty-panel" id="empty-panel">
@@ -506,6 +646,17 @@
     </div>
 
     <div id="editor-panel" style="display:none">
+      <!-- Saved and not yet published. Publish lives on the Dashboard, which is
+           how a whole session of picks got made, saved and never shipped. -->
+      <div class="unpublished" id="unpublished" hidden>
+        <div class="unpublished-text">
+          <b id="unpublished-count"></b>
+          <span id="unpublished-detail"></span>
+        </div>
+        <button class="btn btn-primary btn-sm" id="banner-publish" onclick="publishFromHere()">Publish now</button>
+      </div>
+      <pre class="publish-log" id="publish-log" hidden></pre>
+
       <!-- Meta editor -->
       <div class="meta-card">
         <div class="meta-card-header">
@@ -528,6 +679,21 @@
           <div class="form-field" style="grid-column:1/-1">
             <label>Description</label>
             <textarea id="port-description" placeholder="A short description for this portfolio…"></textarea>
+          </div>
+          <!-- The cover is what the crate renders as the spinning record, so it
+               deserves to be visible here rather than only findable by hunting
+               the grid for a small badge. -->
+          <div class="form-field" style="grid-column:1/-1">
+            <label>Cover — the record face in the crate</label>
+            <div class="cover-field">
+              <img id="cover-thumb" alt="" />
+              <div class="cover-meta">
+                <div id="cover-name">—</div>
+                <div id="cover-note"></div>
+              </div>
+              <button class="btn btn-secondary btn-sm" onclick="openCoverPicker()">Change cover</button>
+              <button class="btn btn-secondary btn-sm" id="cover-clear" onclick="clearCover()">Use first photo</button>
+            </div>
           </div>
         </div>
       </div>
@@ -603,6 +769,7 @@
       allPhotos = photoData.photos || [];
       renderPortfolioList();
       renderPortfolioTally();
+      refreshUnpublished();
     } catch (e) {
       showToast('Failed to load data', 'error');
     }
@@ -642,6 +809,7 @@
     document.getElementById('port-slug').value = port.slug || '';
     document.getElementById('port-description').value = port.description || '';
 
+    renderCoverField(port);
     renderPhotoGrid(port);
   }
 
@@ -747,6 +915,7 @@
         if (!res.ok) throw new Error('save failed');
         persistPending = false;
         setSaveState('saved', label);
+        refreshUnpublished();
       } catch (e) {
         persistPending = false;
         setSaveState('error');
@@ -770,11 +939,151 @@
     e.returnValue = '';
   });
 
+  /* ── Cover picker ───────────────────────────────────────────────────────
+     "Set as cover" under each thumbnail still works, but finding the frame you
+     want meant scrolling a grid of up to eighty and reading a small badge to
+     see which one was already chosen. This shows the current cover up front and
+     opens one square grid to swap it. */
+  function renderCoverField(port) {
+    const thumb = document.getElementById('cover-thumb');
+    const name = document.getElementById('cover-name');
+    const note = document.getElementById('cover-note');
+    const clear = document.getElementById('cover-clear');
+    if (!thumb) return;
+
+    const photos = port.photos || [];
+    const explicit = port.cover && photos.some(p => p.filename === port.cover);
+    const effective = explicit ? port.cover : (photos[0] || {}).filename || '';
+
+    if (effective) {
+      thumb.src = '/content/photos/' + effective;
+      thumb.hidden = false;
+    } else {
+      thumb.removeAttribute('src');
+      thumb.hidden = true;
+    }
+
+    name.textContent = effective || 'No photos in this collection yet';
+    /* An unset cover is not the same as no cover: the site falls through to the
+       first photograph, so say which one is actually showing. */
+    note.textContent = explicit
+      ? 'Chosen for this collection'
+      : (effective ? 'Not set — the site is using the first photo by order' : '');
+    clear.hidden = !explicit;
+  }
+
+  function openCoverPicker() {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    const photos = port.photos || [];
+    if (!photos.length) { showToast('No photos to choose from', 'error'); return; }
+
+    const current = port.cover || (photos[0] || {}).filename;
+    document.getElementById('cover-choices').innerHTML = photos.map(ph => `
+      <button class="cover-choice" aria-current="${ph.filename === current ? 'true' : 'false'}"
+              title="${ph.title || ph.filename}"
+              onclick="chooseCover('${ph.filename}')">
+        <img src="/content/photos/${ph.filename}" alt="${ph.alt || ph.filename}" loading="lazy" />
+      </button>`).join('');
+    document.getElementById('cover-modal').hidden = false;
+  }
+
+  function closeCoverPicker() {
+    document.getElementById('cover-modal').hidden = true;
+  }
+
+  function chooseCover(filename) {
+    setCover(filename);
+    closeCoverPicker();
+  }
+
+  function clearCover() {
+    const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
+    if (!port) return;
+    port.cover = '';
+    renderPhotoGrid(port);
+    renderCoverField(port);
+    renderPortfolioList();
+    persistPortfolios('cover cleared');
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !document.getElementById('cover-modal').hidden) closeCoverPicker();
+  });
+
+  document.getElementById('cover-modal').addEventListener('click', (e) => {
+    if (e.target.id === 'cover-modal') closeCoverPicker();
+  });
+
+  /* ── Saved but not published ────────────────────────────────────────────
+     Publish lives on the Dashboard. Picks are made here. Nothing on this page
+     said the two were different, so a full session of edits was saved to disk,
+     never pushed, and looked for all the world like it had failed. */
+  async function refreshUnpublished() {
+    const banner = document.getElementById('unpublished');
+    if (!banner) return;
+    try {
+      const data = await fetch('/api/git-status', { cache: 'no-store' }).then(r => r.json());
+      const u = data.unpublished || { total: 0 };
+      if (!u.total) { banner.hidden = true; return; }
+
+      const bits = [];
+      if (u.dirty) bits.push(`${u.dirty} saved change${u.dirty === 1 ? '' : 's'}`);
+      if (u.ahead) bits.push(`${u.ahead} commit${u.ahead === 1 ? '' : 's'} not pushed`);
+      document.getElementById('unpublished-count').textContent =
+        bits.join(' · ') + ' — not on the site yet';
+      document.getElementById('unpublished-detail').textContent =
+        (u.contentFiles || []).length
+          ? 'Saving keeps changes on this machine. Publishing is what puts them live.'
+          : 'Publishing pushes these to the live site.';
+      banner.hidden = false;
+    } catch (e) {
+      banner.hidden = true;   // never block editing on a status check
+    }
+  }
+
+  async function publishFromHere() {
+    const btn = document.getElementById('banner-publish');
+    const log = document.getElementById('publish-log');
+    btn.disabled = true;
+    btn.textContent = 'Publishing…';
+    log.textContent = '';
+    log.hidden = false;
+
+    try {
+      const res = await fetch('/api/publish', { method: 'POST' });
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let out = '';
+      for (;;) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value);
+        out += chunk;
+        log.textContent += chunk;
+        log.scrollTop = log.scrollHeight;
+      }
+      if (out.includes('✅ SUCCESS') || out.includes('SUCCESS')) {
+        showToast('Published — live in about a minute', 'success');
+      } else {
+        showToast('Publish failed — see the log', 'error');
+      }
+    } catch (e) {
+      log.textContent += '\nPublish request failed: ' + e.message;
+      showToast('Publish failed', 'error');
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Publish now';
+    refreshUnpublished();
+  }
+
   function setCover(filename) {
     const port = portfoliosData.portfolios.find(p => p.id === activePortfolioId);
     if (!port) return;
     port.cover = filename;
     renderPhotoGrid(port);
+    renderCoverField(port);
     renderPortfolioList();
     persistPortfolios('cover set');
   }
@@ -854,7 +1163,9 @@
         body: JSON.stringify(portfoliosData)
       });
       renderPortfolioList();
+      renderCoverField(port);
       showToast('Portfolio saved!', 'success');
+      refreshUnpublished();
     } catch (e) {
       showToast('Save failed', 'error');
     }
