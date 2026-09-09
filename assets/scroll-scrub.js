@@ -222,10 +222,41 @@
             }
           }, { once: true });
 
+          /* Not { once: true }: the blob fallback below re-points this same
+           * element at a second source, and that attempt needs the handler
+           * still attached to be able to fail. */
+          var triedDirectSource = false;
           video.addEventListener('error', function () {
             if (state.video !== video) return;
+
+            /* WebKit — which is every browser on iOS, Chrome and Firefox
+             * included — refuses a blob: URL as a video source, failing with
+             * MEDIA_ERR_SRC_NOT_SUPPORTED (code 4) the moment it is set. The
+             * blob exists to make seeking instant: the whole clip is in
+             * memory, so scrubbing never waits on a range request. That is a
+             * real win where it works, and total failure where it does not —
+             * the hero sat frozen on its poster for the entire life of the
+             * page on every iPhone.
+             *
+             * So fall back to the file's own URL and let the browser range-
+             * request it. Scrubbing is less immediate than from memory, but
+             * it works. The bytes are already in the HTTP cache from the
+             * fetch that built the blob, so this costs no second download.
+             *
+             * Detected by failure rather than by sniffing the UA: engines
+             * change, and a browser that gains blob video support keeps the
+             * fast path automatically. */
+            if (!triedDirectSource && video.src.indexOf('blob:') === 0) {
+              triedDirectSource = true;
+              URL.revokeObjectURL(objectUrl);
+              state.objectUrl = null;
+              video.src = source;
+              video.load();
+              return;
+            }
+
             video.remove();
-            URL.revokeObjectURL(objectUrl);
+            if (state.objectUrl) URL.revokeObjectURL(objectUrl);
             state.video = null;
             state.objectUrl = null;
             state.failed = true;
@@ -233,7 +264,7 @@
             state.ready = false;
             delete layer.dataset.videoPainted;
             layer.dataset.videoFailed = 'true';
-          }, { once: true });
+          });
 
           /* Lift the poster on the first frame the compositor actually shows.
            * `seeked` fires when the element's internal seek finishes, which in

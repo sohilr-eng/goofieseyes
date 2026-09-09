@@ -549,6 +549,55 @@ body.gf-body {
   white-space: nowrap;
 }
 
+/* ---------- the crate on a phone ----------
+ * The rail is a horizontal flex row that cannot be scrolled: .gf-crate is
+ * overflow:hidden and the rail itself is overflow-x:visible. On a desktop
+ * three or four records fit across and the sideways drift reads as a shelf.
+ * On a 390px phone a rail is about 1500px wide, so exactly one record is
+ * fully visible, the second is sliced in half by the screen edge — which is
+ * what makes the covers read as odd shapes rather than records — and the
+ * rest are unreachable. Measured on a live iPhone viewport: 2 of 7 and 2 of
+ * 6 records even partly on screen.
+ *
+ * Below 700px the crate becomes two columns instead. Every pressing is
+ * reachable and every cover is a whole circle. The shelf rules stay, so it
+ * still reads as a stack of shelves rather than a plain grid.
+ *
+ * The drift is left to gfInitRails: it clamps travel to the real overflow,
+ * which is zero for a grid, so it already writes translate3d(0,0,0) here.
+ * The reset is belt-and-braces against a stale inline transform left over
+ * from a resize across the breakpoint. */
+@media (max-width: 699px) {
+  .gf-rail {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(1.4rem, 5vw, 2.2rem) clamp(1rem, 4vw, 1.6rem);
+    transform: none !important;
+  }
+
+  .gf-record {
+    width: 100%;
+  }
+
+  .gf-rail + .gf-rail {
+    margin-top: clamp(1.4rem, 5vw, 2.2rem);
+  }
+
+  /* A record title wraps to two or three lines at this width; letting the
+     catalogue number sit on the same row squeezes it to nothing. */
+  .gf-record-meta {
+    gap: 0.5rem;
+  }
+
+  .gf-record-meta h3 {
+    font-size: 1.15rem;
+  }
+
+  .gf-record-cat {
+    align-self: flex-start;
+  }
+}
+
 /* ---------- disc rotation, switchable ----------
  * [data-gf-spin] on <html> chooses the mode:
  *   "label" (default) — photographs stay still, only the pigment label turns.
