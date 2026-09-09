@@ -223,10 +223,21 @@
         product = (data.prints || []).find(function (p) { return p.filename === productId; });
         if (!product) { window.location.href = 'prints.html'; return; }
 
+        /* Named the same way the shop names it — a buyer who picked
+           "Macaws · Plate 3850" must not land on "IMG_3850" here. Guarded
+           because vercel.json caches /assets/* for an hour: for that long
+           after a deploy this page can meet a site.js without the helpers,
+           and an unguarded call would break the checkout itself. */
+        var named = window.gf && window.gf.printName
+          ? window.gf.printName(product)
+          : { heading: product.title || product.filename, sub: '' };
         var img = document.getElementById('summary-img');
         img.src = '/content/photos/' + product.filename;
-        img.alt = product.title || '';
-        document.getElementById('summary-name').textContent = product.title || product.filename;
+        img.alt = window.gf && window.gf.printAlt
+          ? window.gf.printAlt(product)
+          : (product.alt || product.title || '');
+        document.getElementById('summary-name').textContent =
+          named.heading + (named.sub ? ' · ' + named.sub : '');
 
         buildSizes();
         updateSummary();

@@ -198,9 +198,23 @@
   gap: clamp(2rem, 4vw, 3rem);
 }
 
+/* The card is a container, not a link: a print sells two ways (a framed print
+ * and a file) and a nested <a> is not legal markup, so the actions live in
+ * .gf-print-buys below. `color`/`text-decoration` are still declared here —
+ * the namespace contract at the top of site.css forbids a bare `a` selector,
+ * so anything that might hold a link states its own. Without that the browser
+ * default wins and the whole card renders as blue underlined link text. */
 .gf-print {
   display: flex;
   flex-direction: column;
+  color: inherit;
+  text-decoration: none;
+}
+
+.gf-print-link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
 }
 
 .gf-print-img {
@@ -246,8 +260,54 @@
   margin: 0.4rem 0 1.1rem;
 }
 
-.gf-print-buy {
+/* Both ways to buy one photograph, stacked at the foot of the card so the
+ * rows line up across a row of cards whatever the title wraps to. Reads as a
+ * short price list rather than two competing buttons. */
+.gf-print-buys {
   margin-top: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.gf-print-opt {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.8rem;
+  padding: 0.65rem 0;
+  border-top: 1px solid var(--gf-line);
+  font-family: var(--gf-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.gf-print-opt:hover {
+  color: var(--gf-coral);
+}
+
+.gf-print-opt-price {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  color: var(--gf-ink-soft);
+  transition: color 0.3s ease;
+}
+
+.gf-print-opt:hover .gf-print-opt-price {
+  color: var(--gf-coral);
+}
+
+.gf-print-opt svg {
+  transition: transform 0.45s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+
+.gf-print-opt:hover svg {
+  transform: translateX(0.35rem);
 }
 
 .gf-section-label {

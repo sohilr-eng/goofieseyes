@@ -944,8 +944,16 @@ body.gf-body {
   align-items: flex-end;
 }
 
+/* The underline comes back on hover: nothing else in the footer marks these
+ * as links, so removing it outright would leave them unfindable. */
 .gf-foot a {
   color: inherit;
+  text-decoration: none;
+}
+
+.gf-foot a:hover {
+  text-decoration: underline;
+  text-underline-offset: 0.25em;
 }
 
 .gf-foot-mark {

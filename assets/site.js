@@ -105,6 +105,41 @@
     });
   }
 
+  /* A photograph that has not been named in the admin portal arrives with its
+     camera filename as the title. "IMG_4221" as the heading of a print — or on
+     the order summary a buyer reads at the moment they pay — is the one thing
+     in the shop that looks unfinished, so a raw name is demoted to a plate
+     number under the series it came from, the same series/number pairing the
+     crate uses on the records. A real title is used as-is, with the series
+     dropping underneath it.
+
+     Shared so the shop and the checkout always name a print identically: a
+     buyer who picks "Macaws · Plate 3850" must not land on "IMG_3850". */
+  var GF_RAW_FILENAME = /^(?:img|dsc|dscf|dscn|_mg|_dsc|pxl|gopr)[-_ ]?(\d+)$/i;
+
+  function gfPrintName(print) {
+    var title = String((print && print.title) || '').trim();
+    var series = String((print && print.portfolioName) || '').trim();
+    var raw = title.match(GF_RAW_FILENAME);
+
+    if (raw) {
+      return { heading: series || 'Fine art print', sub: 'Plate ' + raw[1] };
+    }
+    return { heading: title || series || 'Fine art print', sub: series };
+  }
+
+  /* Never ship a camera filename as alt text. This substitute names the series
+     rather than the picture, which is thin — but it beats reading "IMG_4221"
+     aloud to someone on a screen reader. Real descriptions belong in the
+     portal's alt field. */
+  function gfPrintAlt(print) {
+    var alt = String((print && print.alt) || '').trim();
+    if (alt && !GF_RAW_FILENAME.test(alt)) return alt;
+    var name = gfPrintName(print);
+    return name.heading + (name.sub ? ', ' + name.sub : '') +
+      ' — fine art photograph by GoofiesEyes';
+  }
+
   /**
    * Turn raw portfolios.json into the album shape the record-crate design wants.
    * Everything is derived — nothing here is stored in the JSON, so adding a
@@ -383,6 +418,8 @@
     loadAlbums: gfLoadAlbums,
     recordHTML: gfRecordHTML,
     escape: gfEscape,
+    printName: gfPrintName,
+    printAlt: gfPrintAlt,
     initRails: gfInitRails,
     PIGMENTS: GF_PIGMENTS
   };

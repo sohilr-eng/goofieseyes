@@ -73,14 +73,9 @@
         </p>
       </div>
 
-      <div id="physical-section">
-        <p class="gf-section-label">Fine art prints</p>
-        <div class="gf-shop-grid" id="physical-grid"></div>
-      </div>
-
-      <div id="digital-section">
-        <p class="gf-section-label">Digital files</p>
-        <div class="gf-shop-grid" id="digital-grid"></div>
+      <div id="prints-section">
+        <p class="gf-section-label">The catalogue</p>
+        <div class="gf-shop-grid" id="prints-grid"></div>
       </div>
 
       <p class="gf-state" id="prints-empty" hidden>
@@ -110,32 +105,71 @@
 (function () {
   'use strict';
 
-  function card(print, type) {
-    var esc = window.gf.escape;
-    var price = type === 'digital'
-      ? (print.digitalPrice != null ? print.digitalPrice : (print.price || 0))
-      : (print.physicalPrice != null ? print.physicalPrice : (print.price || 0));
-    var label = type === 'digital' ? '$' + price : 'From $' + price;
-    var sub = type === 'digital'
-      ? 'Full-resolution file' + (print.portfolioName ? ' · ' + esc(print.portfolioName) : '')
-      : (print.portfolioName ? esc(print.portfolioName) : 'Archival print');
+  var esc = function (s) { return window.gf.escape(s); };
+
+  /* naming() and altFor() live in assets/site.js so the shop and the checkout
+     name a print identically — see the note there on camera filenames.
+     Reached through a wrapper, not aliased: site.js is deferred, so it has not
+     run yet while this inline script is being parsed.
+
+     The fallback matters on the hour after a deploy. vercel.json caches
+     /assets/* for 3600s, so a returning visitor can pair this fresh page with
+     a site.js old enough to lack these helpers. Falling back to the plain
+     title costs the plate-number formatting for that hour; calling straight
+     through would cost them the entire shop. */
+  function naming(print) {
+    if (window.gf && window.gf.printName) return window.gf.printName(print);
+    var title = String(print.title || '').trim();
+    var series = String(print.portfolioName || '').trim();
+    return { heading: title || series || 'Fine art print', sub: series };
+  }
+
+  function altFor(print) {
+    if (window.gf && window.gf.printAlt) return window.gf.printAlt(print);
+    return String(print.alt || print.title || '').trim();
+  }
+
+  var ARROW =
+    '<svg aria-hidden="true" viewBox="0 0 24 12" width="20" height="10" fill="none">' +
+    '<path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/></svg>';
+
+  function href(print, type) {
+    return 'print-checkout.html?product=' +
+      encodeURIComponent(print.filename) + '&amp;type=' + type;
+  }
+
+  function option(print, type, label, price) {
+    return '<a class="gf-print-opt" href="' + href(print, type) + '">' +
+      '<span>' + label + '</span>' +
+      '<span class="gf-print-opt-price">' + price + ARROW + '</span>' +
+      '</a>';
+  }
+
+  /* One card per photograph, carrying both ways to buy it. The page used to
+     run the whole catalogue twice — once under "Fine art prints" and again
+     under "Digital files" — so ten photographs read as twenty products. */
+  function card(print) {
+    var name = naming(print);
+    var sizes = print.sizes && print.sizes.length;
+    var physical = print.physicalPrice != null ? print.physicalPrice : (print.price || 0);
+    var digital = print.digitalPrice != null ? print.digitalPrice : (print.price || 0);
+
+    var opts = '';
+    if (sizes) opts += option(print, 'physical', 'Fine art print', 'From $' + physical);
+    opts += option(print, 'digital', 'Digital file', '$' + digital);
 
     return '' +
-      '<a class="gf-print" href="print-checkout.html?product=' +
-      encodeURIComponent(print.filename) + '&type=' + type + '">' +
+      '<article class="gf-print">' +
+      '<a class="gf-print-link" href="' + href(print, sizes ? 'physical' : 'digital') + '">' +
       '<div class="gf-print-img">' +
       '<img src="/content/photos/' + esc(print.filename) + '" alt="' +
-      esc(print.alt || print.title || '') + '" loading="lazy" decoding="async">' +
-      '</div>' +
+      esc(altFor(print)) + '" loading="lazy" decoding="async">' +
+      '</div></a>' +
       '<div class="gf-print-body">' +
-      '<h3>' + esc(print.title || print.filename) + '</h3>' +
-      '<p class="gf-print-price">' + sub + ' · ' + label + '</p>' +
-      '<span class="gf-cta-tab gf-print-buy">' +
-      (type === 'digital' ? 'Get the file' : 'Select a size') +
-      '<svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">' +
-      '<path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/></svg>' +
-      '</span>' +
-      '</div></a>';
+      '<h3>' + esc(name.heading) + '</h3>' +
+      (name.sub ? '<p class="gf-print-price">' + esc(name.sub) + '</p>' : '') +
+      '<div class="gf-print-buys">' + opts + '</div>' +
+      '</div></article>';
   }
 
   function boot() {
@@ -147,29 +181,15 @@
       .then(function (data) {
         var prints = data.prints || [];
         if (!prints.length) {
-          document.getElementById('physical-section').hidden = true;
-          document.getElementById('digital-section').hidden = true;
+          document.getElementById('prints-section').hidden = true;
           document.getElementById('prints-empty').hidden = false;
           return;
         }
-
-        /* Only prints with sizes can be sold physically; every print is
-           available as a digital file. Same rule as before the rebrand. */
-        var physical = prints.filter(function (p) { return p.sizes && p.sizes.length; });
-
-        if (!physical.length) {
-          document.getElementById('physical-section').hidden = true;
-        } else {
-          document.getElementById('physical-grid').innerHTML =
-            physical.map(function (p) { return card(p, 'physical'); }).join('');
-        }
-
-        document.getElementById('digital-grid').innerHTML =
-          prints.map(function (p) { return card(p, 'digital'); }).join('');
+        document.getElementById('prints-grid').innerHTML =
+          prints.map(card).join('');
       })
       .catch(function (err) {
-        document.getElementById('physical-section').hidden = true;
-        document.getElementById('digital-section').hidden = true;
+        document.getElementById('prints-section').hidden = true;
         var empty = document.getElementById('prints-empty');
         empty.textContent = 'The prints could not be loaded.';
         empty.hidden = false;
