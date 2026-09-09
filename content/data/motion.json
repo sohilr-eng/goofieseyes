@@ -48,6 +48,22 @@
         "hd": "/assets/film/film-03-1080.mp4",
         "sd": "/assets/film/film-03-720.mp4"
       }
+    },
+    {
+      "slug": "film-04",
+      "title": "Both Chairs",
+      "client": "Kingsman Studio",
+      "format": "Brand film",
+      "runtime": "0:31",
+      "seconds": 31,
+      "year": "2026",
+      "orientation": "landscape",
+      "blurb": "Two barber chairs carried out onto a neighbourhood court, with the same man waiting in both of them. The wides run against close work on the clippers indoors, graded warm and green so the fence line reads as a set.",
+      "poster": "/assets/film/film-04-poster.jpg",
+      "sources": {
+        "hd": "/assets/film/film-04-1080.mp4",
+        "sd": "/assets/film/film-04-720.mp4"
+      }
     }
   ]
 }
