@@ -1,5 +1,29 @@
-const fs   = require('fs');
-const path = require('path');
+/**
+ * Checkout for prints — physical fine art prints and digital downloads.
+ *
+ * Unlike request-pressing.js, this endpoint uses the Stripe SDK rather than
+ * raw fetch. Two reasons: the sibling webhook needs the SDK's vetted signature
+ * verification, and the nested params for tax and shipping are unreadable as
+ * hand-built URLSearchParams.
+ *
+ * Env vars:
+ *   STRIPE_SECRET_KEY  (required) — restricted key (rk_), not a secret key.
+ *                                   Needs write on Checkout Sessions only.
+ *   STRIPE_PRINT_TAX_CODE      (optional) — product tax code for physical prints
+ *   STRIPE_DIGITAL_TAX_CODE    (optional) — product tax code for digital files
+ *                                Both fall back to the account preset tax code
+ *                                set in Dashboard -> Tax -> Settings.
+ */
+
+const fs     = require('fs');
+const path   = require('path');
+const Stripe = require('stripe');
+
+// Tags these sessions in the Dashboard so this flow can be compared against
+// any other checkout surface added later.
+const INTEGRATION_IDENTIFIER = 'goofieseyes_prints_kqmxbtwz';
+
+const SHIPPING_COUNTRIES = ['US', 'CA', 'GB', 'AU', 'NZ', 'TT'];
 
 module.exports = async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -35,6 +59,8 @@ module.exports = async function handler(req, res) {
   const key = process.env.STRIPE_SECRET_KEY;
   if (!key) return res.status(500).json({ error: 'Stripe is not configured' });
 
+  const stripe = new Stripe(key, { apiVersion: '2026-08-26.dahlia' });
+
   const protocol = req.headers['x-forwarded-proto'] || 'https';
   const host     = req.headers['x-forwarded-host'] || req.headers.host;
   const origin   = `${protocol}://${host}`;
@@ -55,54 +81,65 @@ module.exports = async function handler(req, res) {
 
   const imageUrl = `${origin}/content/photos/${print.filename}`;
 
-  const params = new URLSearchParams({
-    'payment_method_types[]': 'card',
-    'line_items[0][price_data][currency]': 'usd',
-    'line_items[0][price_data][product_data][name]': productName,
-    'line_items[0][price_data][product_data][description]': lineItemDescription,
-    'line_items[0][price_data][product_data][images][0]': imageUrl,
-    'line_items[0][price_data][unit_amount]': String(unitAmount),
-    'line_items[0][quantity]': '1',
-    'mode': 'payment',
-    'metadata[product_id]': productId,
-    'metadata[type]': type || 'physical',
-    'metadata[customer_name]': shippingName || '',
-    'success_url': `${origin}/order-success.html?session_id={CHECKOUT_SESSION_ID}&type=${isDigital ? 'digital' : 'physical'}`,
-    'cancel_url': `${origin}/print-checkout.html?product=${encodeURIComponent(productId)}&type=${isDigital ? 'digital' : 'physical'}`
-  });
+  // A physical print and a digital file are taxed differently in most US
+  // states, so they carry separate codes. Unset falls back to the account
+  // preset; neither is guessed here.
+  const taxCode = isDigital
+    ? process.env.STRIPE_DIGITAL_TAX_CODE
+    : process.env.STRIPE_PRINT_TAX_CODE;
 
-  if (customerEmail) params.set('customer_email', customerEmail);
+  const productData = {
+    name: productName,
+    description: lineItemDescription,
+    images: [imageUrl]
+  };
+  if (taxCode) productData.tax_code = taxCode;
 
-  if (!isDigital) {
-    params.append('shipping_address_collection[allowed_countries][0]', 'US');
-    params.append('shipping_address_collection[allowed_countries][1]', 'CA');
-    params.append('shipping_address_collection[allowed_countries][2]', 'GB');
-    params.append('shipping_address_collection[allowed_countries][3]', 'AU');
-    params.append('shipping_address_collection[allowed_countries][4]', 'NZ');
-    params.append('shipping_address_collection[allowed_countries][5]', 'TT');
-    params.set('metadata[size]', size);
+  const params = {
+    // payment_method_types is deliberately omitted: that enables dynamic
+    // payment methods, so Link, wallets and buy-now-pay-later show up based on
+    // the buyer's country and cart, configured from the Dashboard with no
+    // code change here.
+    mode: 'payment',
+    line_items: [{
+      price_data: {
+        currency: 'usd',
+        product_data: productData,
+        unit_amount: unitAmount,
+        // Sales tax is added on top of the listed price rather than carved out
+        // of it. Switch to 'inclusive' if prices are ever advertised tax-in.
+        tax_behavior: 'exclusive'
+      },
+      quantity: 1
+    }],
+    automatic_tax: { enabled: true },
+    integration_identifier: INTEGRATION_IDENTIFIER,
+    metadata: {
+      product_id: productId,
+      type: type || 'physical',
+      customer_name: shippingName || ''
+    },
+    success_url: `${origin}/order-success.html?session_id={CHECKOUT_SESSION_ID}&type=${isDigital ? 'digital' : 'physical'}`,
+    cancel_url: `${origin}/print-checkout.html?product=${encodeURIComponent(productId)}&type=${isDigital ? 'digital' : 'physical'}`
+  };
+
+  if (customerEmail) params.customer_email = customerEmail;
+
+  if (isDigital) {
+    // No shipping address to tax against, so Checkout needs a billing address
+    // to place the buyer in a jurisdiction.
+    params.billing_address_collection = 'required';
+  } else {
+    params.shipping_address_collection = { allowed_countries: SHIPPING_COUNTRIES };
+    params.metadata.size = size;
   }
 
   try {
-    const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${key}`,
-        'Content-Type': 'application/x-www-form-urlencoded'
-      },
-      body: params.toString()
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error('Stripe API error:', data.error);
-      return res.status(502).json({ error: data.error?.message || 'Stripe error' });
-    }
-
-    res.status(200).json({ url: data.url });
+    const session = await stripe.checkout.sessions.create(params);
+    res.status(200).json({ url: session.url });
   } catch (err) {
-    console.error('Fetch error:', err.message);
-    res.status(500).json({ error: 'Failed to connect to Stripe: ' + err.message });
+    console.error('Stripe error:', err.message);
+    const status = err.statusCode && err.statusCode < 500 ? 400 : 502;
+    res.status(status).json({ error: err.message || 'Stripe error' });
   }
 };
