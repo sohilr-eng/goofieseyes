@@ -40,21 +40,40 @@ recovered.
 | `STRIPE_WEBHOOK_SECRET` | Signing secret (`whsec_…`) for the webhook endpoint | Stripe → Developers → Webhooks → the endpoint → Signing secret (roll it to get a new one) |
 | `RESEND_API_KEY` | Resend API key, shared with the contact form | resend.com → API Keys |
 
-To replace one, copy the new value, then in PowerShell from the repo folder:
+To replace one, paste this into PowerShell from the repo folder and press Enter.
+It **pauses**; then go copy the new value, come back, and press Enter. Change
+the variable name and the expected prefix (`rk_live_`, `whsec_`, `re_`) to suit:
 
 ```powershell
-vercel env add STRIPE_SECRET_KEY production --sensitive --force --value (Get-Clipboard -Raw).Trim()
+$s = Read-Host 'Copy the secret, come back, press Enter' -AsSecureString; $v = [Runtime.InteropServices.Marshal]::PtrToStringAuto([Runtime.InteropServices.Marshal]::SecureStringToBSTR($s)); if (-not $v) { $v = Get-Clipboard -Raw }; if ($v) { $v = $v.Trim() }; if ($v -like 'rk_live_*') { vercel env add STRIPE_SECRET_KEY production --sensitive --force --value $v; Set-Clipboard -Value $null } else { Write-Host 'Clipboard did not hold the secret. Run this again.' }; Remove-Variable s, v
 ```
 
-```powershell
-Set-Clipboard -Value $null
+Why it is shaped like this — both failures happened on 2026-09-21:
+
+- **The pause and the prefix check.** A plain
+  `--value (Get-Clipboard -Raw).Trim()` reads the clipboard the moment it runs.
+  But copying the command from wherever you read it replaces the clipboard, so
+  the command stored **its own text** as `STRIPE_SECRET_KEY`. Stripe answered
+  `Invalid API Key provided: vercelen…im()` and checkout was down until it was
+  re-entered. Sensitive values can't be read back, so nothing flags this until
+  a real API call fails.
+- **Not `Get-Clipboard | vercel env add`.** Piping skips the CLI's confirmation
+  prompts and stores the line break PowerShell appends.
+
+Then redeploy, because running deployments keep the value they were built with.
+The project's team must be named explicitly, or the CLI answers "Deployment
+belongs to a different team":
+
+```bash
+vercel redeploy <current production deployment URL> --target production --scope sohilr-engs-projects
 ```
 
-Use `--value (Get-Clipboard -Raw).Trim()`, not `Get-Clipboard | vercel env add`.
-Piping skips the CLI's confirmation prompts and stores the line break PowerShell
-appends, so Stripe rejects the key. Then redeploy (any push to master), because
-running deployments keep the value they were built with. Finally, delete the old
-key in Stripe.
+Finally, delete the old key in Stripe.
+
+**After any key change, prove it works.** Start one unpaid checkout on the live
+site and look it up in the new account. `POST /api/create-checkout-session` with
+a real `productId` and `size` from `content/data/prints.json` returns a
+`cs_live_…` URL, and nothing is charged. It expires by itself in 24 hours.
 
 To check a variable really is sensitive, don't trust `vercel env ls`: its table
 prints "Encrypted" for every hidden variable, sensitive or not. The JSON output
