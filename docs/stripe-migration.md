@@ -26,6 +26,36 @@ which has to happen in the Dashboard, plus one cutover.
 
 ---
 
+## Where the secrets live
+
+Every secret is a **sensitive** Vercel environment variable on the goofieseyes
+project (Settings → Environment Variables), Production only. Sensitive means
+write-only: no one can read a value back, including you. That is intended.
+There is no copy anywhere else, so a lost or leaked secret is **replaced**, never
+recovered.
+
+| Variable | What it is | Where a new one comes from |
+| --- | --- | --- |
+| `STRIPE_SECRET_KEY` | Restricted key (`rk_live_…`) on the new account | Stripe → Developers → API keys → Create restricted key |
+| `STRIPE_WEBHOOK_SECRET` | Signing secret (`whsec_…`) for the webhook endpoint | Stripe → Developers → Webhooks → the endpoint → Signing secret (roll it to get a new one) |
+| `RESEND_API_KEY` | Resend API key, shared with the contact form | resend.com → API Keys |
+
+To replace one, copy the new value, then in PowerShell from the repo folder:
+
+```powershell
+vercel env add STRIPE_SECRET_KEY production --sensitive --force --value (Get-Clipboard -Raw).Trim()
+```
+
+```powershell
+Set-Clipboard -Value $null
+```
+
+Use `--value (Get-Clipboard -Raw).Trim()`, not `Get-Clipboard | vercel env add`.
+Piping skips the CLI's confirmation prompts and stores the line break PowerShell
+appends, so Stripe rejects the key. Then redeploy (any push to master), because
+running deployments keep the value they were built with. Finally, delete the old
+key in Stripe.
+
 ## What does and does not carry over
 
 | Thing | Carries over? | Notes |
