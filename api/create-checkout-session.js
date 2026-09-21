@@ -76,7 +76,7 @@ module.exports = async function handler(req, res) {
 
   const productName = print.title || print.filename;
   const lineItemDescription = isDigital
-    ? 'High-Resolution Digital File · Delivered to your email'
+    ? 'High-Resolution Digital File · Emailed within 24 hours'
     : `${size} · Limited Edition Fine Art Print${print.portfolioName ? ' · ' + print.portfolioName : ''}`;
 
   const imageUrl = `${origin}/content/photos/${print.filename}`;
@@ -116,6 +116,7 @@ module.exports = async function handler(req, res) {
     integration_identifier: INTEGRATION_IDENTIFIER,
     metadata: {
       product_id: productId,
+      product_title: productName,
       type: type || 'physical',
       customer_name: shippingName || ''
     },

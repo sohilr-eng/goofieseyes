@@ -12,8 +12,11 @@
  *   STRIPE_WEBHOOK_SECRET        (required) — whsec_… signing secret
  *   RESEND_API_KEY               (required) — reused from request-pressing.js
  *   PRESSING_TO / PRESSING_FROM  (optional) — same defaults as request-pressing.js
- *   DOWNLOAD_BASE_URL            (optional) — where hi-res originals are served
- *                                             from; defaults to the site origin
+ *
+ * Digital files are sent by hand, not linked. The site only holds the 1200px
+ * web copies the admin portal makes on upload, not the originals a buyer pays
+ * for, so the buyer gets a confirmation with a 24-hour promise and the owner
+ * notice says which original to send — replying to it reaches the buyer.
  */
 
 const Stripe = require('stripe');
@@ -85,10 +88,9 @@ async function sendEmail({ to, replyTo, subject, html, text }) {
 
 /* ── Fulfilment ─────────────────────────────────────────────────────────── */
 
-async function fulfilDigital(session, origin) {
-  const productId = session.metadata && session.metadata.product_id;
-  const base = process.env.DOWNLOAD_BASE_URL || `${origin}/content/photos`;
-  const downloadUrl = `${base.replace(/\/$/, '')}/${productId}`;
+async function confirmDigital(session) {
+  const meta = session.metadata || {};
+  const title = meta.product_title || meta.product_id;
   const buyer = (session.customer_details && session.customer_details.email) || session.customer_email;
 
   if (!buyer) {
@@ -97,14 +99,25 @@ async function fulfilDigital(session, origin) {
   }
 
   const html = `
-    <h2 style="font-family:Georgia,serif">Your file is ready</h2>
-    <p>Thank you for buying <strong>${escapeHtml(productId)}</strong>.</p>
-    <p><a href="${escapeHtml(downloadUrl)}">Download your high-resolution file</a></p>
+    <h2 style="font-family:Georgia,serif">Thank you for your order</h2>
+    <p>You bought the full-resolution digital file of <strong>${escapeHtml(title)}</strong>.</p>
+    <p>It will be emailed to this address within 24 hours. Any questions in the
+       meantime, just reply to this email.</p>
     <p style="color:#666">Order ref: ${escapeHtml(orderRef(session.id))}</p>
   `;
-  const text = `Your file is ready.\n\n${downloadUrl}\n\nOrder ref: ${orderRef(session.id)}\n`;
+  const text = `Thank you for your order.\n\nYou bought the full-resolution digital file of ${title}.\n` +
+    `It will be emailed to this address within 24 hours. Any questions, just reply to this email.\n\n` +
+    `Order ref: ${orderRef(session.id)}\n`;
 
-  await sendEmail({ to: buyer, subject: 'Your GoofiesEyes download', html, text });
+  // orders@goofieseyes.live has no inbox (the domain has no MX record), so
+  // replies are pointed at the owner.
+  await sendEmail({
+    to: buyer,
+    replyTo: process.env.PRESSING_TO || DEFAULT_TO,
+    subject: 'Your GoofiesEyes order',
+    html,
+    text
+  });
 }
 
 async function notifyOwner(session, kind) {
@@ -115,9 +128,19 @@ async function notifyOwner(session, kind) {
 
   const meta = session.metadata || {};
   const totals = session.total_details || {};
+  const isDigital = kind === 'digital';
+
+  // Replying goes to the buyer (reply_to below), so for a digital order the
+  // whole job is: hit reply, attach the original, send.
+  const todo = isDigital
+    ? `<p style="background:#FFF4D6;padding:10px 12px"><strong>To do:</strong> send the
+         full-resolution original of <strong>${escapeHtml(meta.product_id)}</strong> within
+         24 hours. Reply to this email with it attached — the reply goes to the buyer.</p>`
+    : '';
 
   const html = `
     <h2 style="font-family:Georgia,serif">New ${escapeHtml(kind)} order</h2>
+    ${todo}
     <p><strong>Item:</strong> ${escapeHtml(meta.product_id)}${meta.size ? ' · ' + escapeHtml(meta.size) : ''}</p>
     <p><strong>Paid:</strong> ${escapeHtml(money(session.amount_total, session.currency))}
        (tax ${escapeHtml(money(totals.amount_tax, session.currency))})</p>
@@ -130,7 +153,9 @@ async function notifyOwner(session, kind) {
   await sendEmail({
     to: process.env.PRESSING_TO || DEFAULT_TO,
     replyTo: details.email || undefined,
-    subject: `New ${kind} order — ${meta.product_id || 'print'}`,
+    subject: isDigital
+      ? `Send file: ${meta.product_title || meta.product_id} — new digital order`
+      : `New print order — ${meta.product_id || 'print'}`,
     html,
     text: html.replace(/<[^>]+>/g, ' ')
   });
@@ -160,10 +185,6 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: `Webhook Error: ${err.message}` });
   }
 
-  const protocol = req.headers['x-forwarded-proto'] || 'https';
-  const host     = req.headers['x-forwarded-host'] || req.headers.host;
-  const origin   = `${protocol}://${host}`;
-
   try {
     switch (event.type) {
       // `completed` fires as soon as checkout finishes, which for a delayed
@@ -180,7 +201,7 @@ module.exports = async function handler(req, res) {
         }
 
         const isDigital = session.metadata && session.metadata.type === 'digital';
-        if (isDigital) await fulfilDigital(session, origin);
+        if (isDigital) await confirmDigital(session);
         await notifyOwner(session, isDigital ? 'digital' : 'print');
         break;
       }

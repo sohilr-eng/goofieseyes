@@ -200,36 +200,42 @@ stripe listen --forward-to localhost:3000/api/stripe-webhook
 stripe trigger checkout.session.completed
 ```
 
-## Step 5 — Digital delivery source
+## Step 5 — Digital delivery (sent by hand)
 
-`fulfilDigital()` emails a link to `DOWNLOAD_BASE_URL`, defaulting to
-`/content/photos/<filename>` — which is the **web-optimised .webp**, not a
-high-resolution original. Buyers are paying $20–25 for a "high-resolution
-digital file", so point this at real masters before selling another one:
+Decided 2026-09-21: digital files are emailed **by hand**, within 24 hours. The
+site only holds the 1200px web copies the admin portal makes on upload
+(`admin/server.js`, sharp resize), not the originals a buyer is paying $20–25
+for, and prints are not the main line of business yet.
 
-```bash
-vercel env add DOWNLOAD_BASE_URL production
-```
+How an order runs:
 
-Two options, in order of preference:
+1. The buyer gets a confirmation promising the file within 24 hours. Replies go
+   to goofiesfotos@gmail.com, because `orders@goofieseyes.live` has no inbox.
+2. You get an email titled **"Send file: <photo> — new digital order"** naming
+   the file. **Reply to it with the original attached.** The reply goes
+   straight to the buyer.
 
-- **Expiring signed URLs** from object storage (S3, R2, Supabase Storage — you
-  already have a Supabase project). Best: the link cannot be shared indefinitely.
-- A static path on the site holding the full-resolution exports. Simpler, but the
-  URL is guessable and permanent.
+The checkout line item, the checkout summary ("Email · within 24 hours") and
+the success page all say 24 hours, not instant.
 
-**The email sender has to be verified too, or no buyer gets their file.** Both
+If this becomes a chore, the automatic version is: upload originals to private
+storage (Supabase Storage, which is already connected) and email an expiring
+signed link from `confirmDigital()` in `api/stripe-webhook.js`.
+
+**The email sender has to be verified, or no email goes out at all.** Both
 the webhook and the contact form fall back to `onboarding@resend.dev`, Resend's
-test sender, which only delivers to the Resend account owner. That was fine
-while the only recipient was goofiesfotos@gmail.com. A buyer's address is
-refused. Verify `goofieseyes.live` as a sending domain in Resend (it adds a
-few DNS records), then:
+test sender, which only delivers to the Resend account owner — and the Resend
+account belongs to sohil.r@outlook.com, so even owner notices to
+goofiesfotos@gmail.com are refused. Verify `goofieseyes.live` as a sending
+domain in Resend. Its DNS records (DKIM, plus MX and SPF on `send.`) were live
+on 2026-09-21. `PRESSING_FROM` is set to
+`GoofiesEyes <orders@goofieseyes.live>`.
 
-```bash
-vercel env add PRESSING_FROM production
-```
+Setting a value containing `<` or `>` from Git Bash with `--value` hangs,
+because Windows' `vercel.cmd` wrapper reads them as redirection. Pipe it in
+instead: `printf '%s' 'GoofiesEyes <orders@goofieseyes.live>' | vercel env add PRESSING_FROM production --force`.
 
-with a value like `GoofiesEyes <orders@goofieseyes.live>`. The webhook returns
+The webhook returns
 500 when Resend refuses a message, so Stripe retries for up to three days, and
 the failures show up under the endpoint in the Stripe Dashboard. They are no
 longer silent, but an order still won't go through until this is set.
