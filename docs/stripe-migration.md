@@ -56,6 +56,14 @@ appends, so Stripe rejects the key. Then redeploy (any push to master), because
 running deployments keep the value they were built with. Finally, delete the old
 key in Stripe.
 
+To check a variable really is sensitive, don't trust `vercel env ls`: its table
+prints "Encrypted" for every hidden variable, sensitive or not. The JSON output
+carries the real `type`:
+
+```powershell
+vercel env ls production --format json
+```
+
 ## What does and does not carry over
 
 | Thing | Carries over? | Notes |
