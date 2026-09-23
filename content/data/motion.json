@@ -64,6 +64,22 @@
         "hd": "/assets/film/film-04-1080.mp4",
         "sd": "/assets/film/film-04-720.mp4"
       }
+    },
+    {
+      "slug": "film-05",
+      "title": "Close, By Design",
+      "client": "Evie",
+      "format": "Brand identity film",
+      "runtime": "2:02",
+      "seconds": 122,
+      "year": "2026",
+      "orientation": "portrait",
+      "blurb": "Made to show what the chair actually holds — closeness, trust, a community that comes back for each other as much as for the cut. Shot tight and unhurried, staying on the hands and the quiet between two people who know each other well.",
+      "poster": "/assets/film/film-05-poster.jpg",
+      "sources": {
+        "hd": "/assets/film/film-05-1080.mp4",
+        "sd": "/assets/film/film-05-720.mp4"
+      }
     }
   ]
 }
