@@ -2,7 +2,7 @@
   "name": "goofieseyes",
   "version": "1.0.0",
   "engines": {
-    "node": "20.x"
+    "node": "24.x"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
