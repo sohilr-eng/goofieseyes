@@ -74,6 +74,7 @@
    * bug. These widen or classify instead. A collection with no entry falls back
    * to the frame count alone, so new portfolios need no code change. */
   var GF_REGIONS = {
+    'new-york-fashion-week': 'New York',
     'tobago': 'Caribbean',
     'trinidad-s-northern-range': 'Trinidad',
     'caroni-swamp': 'Trinidad',

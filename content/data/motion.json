@@ -80,6 +80,23 @@
         "hd": "/assets/film/film-05-1080.mp4",
         "sd": "/assets/film/film-05-720.mp4"
       }
+    },
+    {
+      "slug": "nyfw",
+      "title": "New York Fashion Week",
+      "client": "",
+      "format": "Fashion film",
+      "runtime": "0:47",
+      "seconds": 47,
+      "year": "",
+      "orientation": "landscape",
+      "aspectRatio": "4 / 3",
+      "blurb": "New York Fashion Week in motion — sculptural looks, vivid colour and details in a 4:3 frame.",
+      "poster": "/assets/film/nyfw-poster.jpg",
+      "sources": {
+        "hd": "/assets/film/nyfw-1080.mp4",
+        "sd": "/assets/film/nyfw-720.mp4"
+      }
     }
   ]
 }

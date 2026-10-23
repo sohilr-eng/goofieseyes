@@ -340,7 +340,8 @@
       var tag = [p.client, p.format, p.year].filter(Boolean).join(' · ');
       return '' +
         '<article class="gf-film gf-film--' + (portrait ? 'portrait' : 'landscape') + '">' +
-          '<figure class="gf-film-frame" data-film="' + i + '">' +
+          '<figure class="gf-film-frame" data-film="' + i + '"' +
+            (p.aspectRatio === '4 / 3' ? ' style="aspect-ratio: 4 / 3"' : '') + '>' +
             '<video id="film-v-' + i + '" preload="none" playsinline muted loop ' +
                    'poster="' + esc(p.poster) + '"></video>' +
             '<button class="gf-film-cover" type="button" data-play="' + i + '" ' +
