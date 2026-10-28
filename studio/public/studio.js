@@ -20,6 +20,8 @@ const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '
 const state = {
   media: [],        // { id, kind, name, source, jpeg, preview, url, pathname, width, height, fit, duration }
   editingId: null,
+  source: null,     // { type: 'instagram', id, permalink, timestamp } when brought over from Instagram
+  batch: [],        // drafts for the several-at-once view
   posts: [],
   status: null,
 };
@@ -227,11 +229,11 @@ function captionFor(platform) {
 const hashtagCount = (t) => (t.match(/(^|\s)#[^\s#]+/g) || []).length;
 
 // Mirrors validatePost() in lib/publish.js, plus the shape check only the
-// browser can do (the server never sees pixel sizes it can trust).
-function problems() {
+// browser can do (the server never sees pixel sizes it can trust). Takes a
+// plain draft so the composer and the Instagram batch view share it.
+function draftProblems({ platforms, media, caption, captions: own = {} }) {
   const out = [];
-  const platforms = selectedPlatforms();
-  const media = state.media;
+  const captionFor = (p) => own[p] || caption || '';
   const images = media.filter((m) => m.kind === 'image');
   const videos = media.filter((m) => m.kind === 'video');
   if (!platforms.length) out.push('Pick at least one platform.');
@@ -250,9 +252,14 @@ function problems() {
   if (platforms.includes('threads')) {
     const t = captionFor('threads');
     if (!t.trim() && !media.length) out.push('Threads: add text or some media.');
-    if (t.length > LIMITS.threads.text) out.push(`Threads: text is ${t.length} characters (max ${LIMITS.threads.text}). Give Threads its own caption below.`);
+    if (t.length > LIMITS.threads.text) out.push(`Threads: text is ${t.length} characters (max ${LIMITS.threads.text}). Give Threads its own caption.`);
     if (media.length > LIMITS.threads.media) out.push(`Threads: at most ${LIMITS.threads.media} items.`);
   }
+  return out;
+}
+
+function problems() {
+  const out = draftProblems({ platforms: selectedPlatforms(), media: state.media, caption: $('#caption').value, captions: captions() });
   if (laterSelected()) {
     const at = scheduledAt();
     if (!at) out.push('Pick a date and time.');
@@ -314,8 +321,13 @@ function renderComposer() {
   $('#submit-note').textContent = later && at
     ? new Date(at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
     : '';
-  $('#reset').hidden = !state.editingId && !state.media.length && !$('#caption').value;
+  $('#reset').hidden = !state.editingId && !state.source && !state.media.length && !$('#caption').value;
   $('#composer-title').textContent = state.editingId ? 'Edit scheduled post' : 'New post';
+  const src = $('#composer-source');
+  src.hidden = !state.source;
+  if (state.source) {
+    src.innerHTML = `From your Instagram post of ${esc(fmtDay(state.source.timestamp))}${state.source.permalink ? ` · <a href="${esc(state.source.permalink)}" target="_blank" rel="noopener">view ↗</a>` : ''}`;
+  }
 }
 
 for (const el of [$('#caption'), ...$$('[data-cap]'), $('#scheduled-at')]) el.addEventListener('input', renderComposer);
@@ -325,6 +337,7 @@ function resetComposer() {
   for (const m of state.media) if (m.preview) URL.revokeObjectURL(m.preview);
   state.media = [];
   state.editingId = null;
+  state.source = null;
   $('#caption').value = '';
   for (const ta of $$('[data-cap]')) ta.value = '';
   $('#custom').open = false;
@@ -386,6 +399,7 @@ $('#composer').addEventListener('submit', async (e) => {
       captions: captions(),
       platforms: selectedPlatforms(),
       media: state.media.map((m) => ({ url: m.url, pathname: m.pathname, type: m.kind, width: m.width, height: m.height })),
+      source: state.source,
       ...(laterSelected() ? { scheduledAt: new Date(scheduledAt()).toISOString() } : { publishNow: true }),
     };
     const { post } = state.editingId
@@ -481,6 +495,237 @@ $('#site-add').addEventListener('click', async () => {
   renderComposer();
 });
 
+// ─── From Instagram ──────────────────────────────────────────────────────────
+// Pick existing Instagram posts; each becomes its own Facebook + Threads post.
+// One pick opens in the composer, several open the batch view.
+
+const igSheet = $('#ig-sheet');
+const ig = { items: [], next: null, picked: [] };
+const IG_KIND = { carousel: (n) => `⧉ ${n}`, reel: () => '▶ Reel', video: () => '▶ Video', photo: () => '' };
+
+function fmtDay(ts) {
+  return ts ? new Date(ts).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+}
+
+function sharedLabel(shared) {
+  if (!shared) return '';
+  return { scheduled: 'Scheduled', publishing: 'Posting', published: 'Shared', partial: 'Shared', failed: 'Failed' }[shared.status] || '';
+}
+
+function renderIgGrid() {
+  $('#ig-grid').innerHTML = ig.items.map((it) => {
+    const n = ig.picked.indexOf(it.id);
+    const badge = IG_KIND[it.kind](it.count);
+    const shared = sharedLabel(it.shared);
+    return `<button class="pick ${shared ? 'is-shared' : ''}" type="button" data-ig="${esc(it.id)}" aria-pressed="${n >= 0}" data-order="${n + 1}"
+        title="${esc(fmtDay(it.timestamp))} — ${esc(it.caption.slice(0, 120))}">
+      <img src="${esc(it.thumb || '')}" alt="" loading="lazy" referrerpolicy="no-referrer">
+      ${badge ? `<span class="badge">${esc(badge)}</span>` : ''}
+      ${shared ? `<span class="shared">${shared}</span>` : ''}</button>`;
+  }).join('') || '<p class="empty">No Instagram posts found.</p>';
+  $('#ig-more').hidden = !ig.next;
+  $('#ig-add').hidden = ig.picked.length === 0;
+  $('#ig-add').textContent = `Add ${ig.picked.length}`;
+}
+
+async function loadIg(more = false) {
+  if (!more) { ig.items = []; ig.next = null; ig.picked = []; $('#ig-grid').innerHTML = '<p class="empty">Loading your posts…</p>'; }
+  try {
+    const page = await api(`/api/instagram${more && ig.next ? `?after=${encodeURIComponent(ig.next)}` : ''}`);
+    ig.items.push(...page.items);
+    ig.next = page.next;
+    renderIgGrid();
+  } catch (err) {
+    $('#ig-grid').innerHTML = `<p class="empty">${esc(err.message)}</p>`;
+  }
+}
+
+$('#open-ig').addEventListener('click', () => { igSheet.showModal(); loadIg(); });
+$('#ig-close').addEventListener('click', () => igSheet.close());
+$('#ig-more').addEventListener('click', () => loadIg(true));
+$('#ig-grid').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-ig]');
+  if (!btn) return;
+  const id = btn.dataset.ig;
+  ig.picked = ig.picked.includes(id) ? ig.picked.filter((p) => p !== id) : [...ig.picked, id];
+  renderIgGrid();
+});
+
+$('#ig-add').addEventListener('click', async () => {
+  const ids = [...ig.picked];
+  const already = ig.items.filter((it) => ids.includes(it.id) && it.shared);
+  if (already.length && !confirm(`${already.length === 1 ? 'One of these has' : `${already.length} of these have`} already been brought over (${already.map((a) => sharedLabel(a.shared).toLowerCase()).join(', ')}). Add again anyway?`)) return;
+  igSheet.close();
+
+  const drafts = [];
+  for (const [i, id] of ids.entries()) {
+    toast(`Copying ${i + 1} of ${ids.length} from Instagram…`, 60000);
+    try {
+      drafts.push((await api('/api/instagram', { method: 'POST', body: { id } })).draft);
+    } catch (err) {
+      toast(err.message, 6000);
+    }
+  }
+  $('#toast').hidden = true;
+  if (drafts.length === 1) openDraftInComposer(drafts[0]);
+  else if (drafts.length > 1) openBatch(drafts);
+});
+
+function mediaFromDraft(draft) {
+  return draft.media.map((m) => ({
+    id: nextId++, kind: m.type, name: m.pathname || 'instagram', source: null,
+    url: m.url, pathname: m.pathname, width: null, height: null, fit: 'original', preview: null,
+  }));
+}
+
+function openDraftInComposer(draft) {
+  resetComposer();
+  state.media = mediaFromDraft(draft);
+  state.source = draft.source;
+  $('#caption').value = draft.caption;
+  for (const ta of $$('[data-cap]')) ta.value = draft.captions[ta.dataset.cap] || '';
+  $('#custom').open = Object.keys(draft.captions).length > 0;
+  for (const el of $$('input[name="platform"]')) el.checked = el.value !== 'instagram';
+  showTab('compose');
+  renderComposer();
+}
+
+// ─── Batch view ──
+
+const batchPlatforms = () => $$('input[name="batch-platform"]:checked').map((i) => i.value);
+const batchSpread = () => $('input[name="batch-when"]:checked').value === 'spread';
+
+function batchTimes() {
+  if (!batchSpread()) return state.batch.map(() => null);
+  const start = $('#batch-start').value ? new Date($('#batch-start').value).getTime() : NaN;
+  const every = Number($('#batch-every').value) * 3600e3;
+  return state.batch.map((_, i) => start + i * every);
+}
+
+function batchDraftProblems(d) {
+  return draftProblems({ platforms: batchPlatforms(), media: d.media.map((m) => ({ kind: m.type })), caption: d.caption, captions: d.captions });
+}
+
+function openBatch(drafts) {
+  state.batch = drafts;
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  tomorrow.setHours(18, 0, 0, 0);
+  $('#batch-start').value = toLocalInput(tomorrow.getTime());
+  $('#batch-start').min = toLocalInput(Date.now());
+  $('#composer').hidden = true;
+  $('#batch').hidden = false;
+  showTab('compose');
+  renderBatch();
+}
+
+function closeBatch() {
+  state.batch = [];
+  $('#batch').hidden = true;
+  $('#composer').hidden = false;
+}
+
+function renderBatch() {
+  const times = batchTimes();
+  const platforms = batchPlatforms();
+  $('#batch-title').textContent = `${state.batch.length} posts from Instagram`;
+  $('#batch-spread').hidden = !batchSpread();
+  $('#batch-items').innerHTML = state.batch.map((d, i) => {
+    const first = d.media[0];
+    const cover = first.type === 'video'
+      ? `<video class="cover" src="${esc(first.url)}" muted playsinline preload="metadata"></video>`
+      : `<img class="cover" src="${esc(first.url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
+    const when = times[i] ? fmtTime(times[i]) : 'Now';
+    const probs = batchDraftProblems(d);
+    const threads = platforms.includes('threads')
+      ? `<label class="label" for="bt-${i}">Threads${d.captions.threads ? ' (shortened)' : ''} · <span data-bcount="${i}">${(d.captions.threads || d.caption).length}</span>/500</label>
+         <textarea id="bt-${i}" data-bi="${i}" data-bfield="threads" placeholder="uses the caption above when empty">${esc(d.captions.threads || '')}</textarea>`
+      : '';
+    return `<div class="bitem">
+      ${cover}
+      <div>
+        <div class="when-line">${esc(when)} <span class="label">· from ${esc(fmtDay(d.source.timestamp))}${d.media.length > 1 ? ` · ${d.media.length} items` : ''}</span></div>
+        <label class="label" for="bc-${i}">Caption</label>
+        <textarea id="bc-${i}" data-bi="${i}" data-bfield="caption">${esc(d.caption)}</textarea>
+        ${threads}
+        <ul class="problems">${probs.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
+        <div class="row"><button type="button" class="btn small ghost danger" data-bremove="${i}">Leave this one out</button></div>
+      </div></div>`;
+  }).join('');
+  updateBatchSubmit();
+}
+
+function updateBatchSubmit() {
+  const times = batchTimes();
+  const bad = state.batch.some((d) => batchDraftProblems(d).length)
+    || !batchPlatforms().length
+    || (batchSpread() && (Number.isNaN(times[0]) || times[0] < Date.now() - 60e3));
+  $('#batch-submit').disabled = bad || state.batch.length === 0;
+  $('#batch-submit').textContent = batchSpread() ? `Schedule ${state.batch.length}` : `Post ${state.batch.length} now`;
+  const last = times[times.length - 1];
+  $('#batch-note').textContent = batchSpread() && last && !Number.isNaN(last) ? `Last one ${fmtTime(last)}` : '';
+}
+
+// Typing only refreshes counters and problems; re-rendering would steal focus.
+$('#batch-items').addEventListener('input', (e) => {
+  const ta = e.target.closest('[data-bi]');
+  if (!ta) return;
+  const d = state.batch[Number(ta.dataset.bi)];
+  if (ta.dataset.bfield === 'caption') d.caption = ta.value;
+  else if (ta.value.trim()) d.captions.threads = ta.value;
+  else delete d.captions.threads;
+  const count = $(`[data-bcount="${ta.dataset.bi}"]`);
+  if (count) count.textContent = (d.captions.threads || d.caption).length;
+  const item = ta.closest('.bitem');
+  item.querySelector('.problems').innerHTML = batchDraftProblems(d).map((p) => `<li>${esc(p)}</li>`).join('');
+  updateBatchSubmit();
+});
+$('#batch-items').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-bremove]');
+  if (!btn) return;
+  state.batch.splice(Number(btn.dataset.bremove), 1);
+  if (state.batch.length === 0) closeBatch(); else renderBatch();
+});
+for (const el of [...$$('input[name="batch-platform"]'), ...$$('input[name="batch-when"]'), $('#batch-start'), $('#batch-every')]) {
+  el.addEventListener('change', renderBatch);
+}
+$('#batch-discard').addEventListener('click', () => { if (confirm('Discard these drafts?')) closeBatch(); });
+
+$('#batch').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const times = batchTimes();
+  const platforms = batchPlatforms();
+  const submit = $('#batch-submit');
+  submit.disabled = true;
+  let done = 0;
+  try {
+    for (const [i, d] of state.batch.entries()) {
+      submit.textContent = `Saving ${i + 1}/${state.batch.length}…`;
+      await api('/api/posts', {
+        method: 'POST',
+        body: {
+          caption: d.caption,
+          captions: platforms.includes('threads') ? d.captions : {},
+          media: d.media,
+          platforms,
+          source: d.source,
+          ...(times[i] ? { scheduledAt: new Date(times[i]).toISOString() } : { publishNow: true }),
+        },
+      });
+      done += 1;
+    }
+    toast(batchSpread() ? `Scheduled ${done} posts` : `Posting ${done} now — watch them in Queue`);
+    closeBatch();
+    showTab('queue');
+  } catch (err) {
+    // Keep only what didn't go through, so pressing the button again doesn't double-post.
+    state.batch.splice(0, done);
+    if (batchSpread() && done) $('#batch-start').value = toLocalInput(times[done]);
+    toast(`${done ? `${done} saved. ` : ''}${err.message}`, 7000);
+    renderBatch();
+  }
+});
+
 // ─── Queue ───────────────────────────────────────────────────────────────────
 
 const TARGET_LABEL = { pending: 'Waiting', processing: 'Processing…', published: 'Live', failed: 'Failed' };
@@ -518,6 +763,7 @@ function postCard(p) {
       <div class="status ${p.status}">${p.status}</div>
       <div class="when">${when}</div>
       <p class="caption">${esc(p.caption || Object.values(p.captions || {})[0] || '')}</p>
+      ${p.source?.permalink ? `<p class="from-ig" style="margin:0 0 8px">From <a href="${esc(p.source.permalink)}" target="_blank" rel="noopener">Instagram ↗</a></p>` : ''}
       <div class="targets">${targets}</div>
       <div class="btn-row">${actions.join('')}</div>
     </div>
@@ -572,6 +818,7 @@ $('#queue').addEventListener('click', async (e) => {
 function editPost(post) {
   resetComposer();
   state.editingId = post.id;
+  state.source = post.source || null;
   state.media = (post.media || []).map((m) => ({
     id: nextId++, kind: m.type, name: m.pathname || 'media', source: null, url: m.url, pathname: m.pathname,
     width: m.width, height: m.height, fit: 'original', preview: null,

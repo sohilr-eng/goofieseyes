@@ -84,7 +84,7 @@ describing it as an internal tool for your own accounts.
      the photos from these links. Each link is random and unguessable, and the file is deleted two
      days after it's posted.
    - **Marketplace → Upstash → Redis** (free plan) → connect to this project.
-   - **Marketplace → Upstash → QStash** (free plan, 1,000 messages a day) → connect to this project.
+   - **Marketplace → Upstash → QStash** (free plan, 500 messages a day; a post uses 1–5) → connect to this project.
 
    Connecting each one adds its environment variables automatically.
 
@@ -124,6 +124,12 @@ Then **Deployments → ⋯ → Redeploy**. Environment variable changes only app
   **Border 4:5** (white borders) on each one. The same file goes to all three platforms.
 - **Video**: MP4 or MOV, up to 300 MB. On Instagram a single video becomes a Reel. Facebook can't mix
   photos and a video in one post.
+- **From Instagram**: Compose → "From Instagram" lists your posts. Pick one to open it in the
+  composer, or several to schedule them one after another (e.g. one a day at 6 pm). Media is
+  copied, so scheduled ones still work days later, and long captions get a shorter Threads version
+  with the hashtags dropped. Posts already brought over are badged. They go out as new posts, not
+  back-dated. Reels with licensed music from Instagram's library may be muted or rejected on
+  Facebook and Threads, so use your own audio for anything you plan to cross-post.
 - **Captions**: write one, or open "Different caption per platform". Threads allows 500 characters;
   Instagram allows 2,200 characters and 30 hashtags.
 - **Scheduling**: QStash's free plan only holds messages up to about 7 days ahead. Posts further

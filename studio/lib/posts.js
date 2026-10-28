@@ -6,6 +6,7 @@
  *     caption, captions: { facebook?, instagram?, threads? },
  *     media: [{ url, pathname, type: 'image'|'video', width?, height? }],
  *     platforms: ['facebook', 'instagram', 'threads'],
+ *     source?: { type: 'instagram', id, permalink } — set when it was brought over from an Instagram post,
  *     targets: { <platform>: { state, containerId?, children?, mediaId?, permalink?, error?, attempts } } }
  *
  * Status: scheduled → publishing → published | partial | failed, or cancelled.
@@ -18,6 +19,7 @@ const { getStore } = require('./store');
 const { enqueue } = require('./queue');
 const { validatePost, advancePost, resetFailed, PLATFORMS } = require('./publish');
 const { httpError } = require('./http');
+const { markShared, releaseShared } = require('./instagram');
 
 const INDEX = 'posts';
 const key = (id) => `post:${id}`;
@@ -40,6 +42,12 @@ function clean(input) {
     })),
     platforms: (Array.isArray(input.platforms) ? input.platforms : []).filter((p) => PLATFORMS.includes(p)),
   };
+}
+
+function cleanSource(source) {
+  if (!source || source.type !== 'instagram' || !/^\d+$/.test(String(source.id))) return null;
+  const permalink = /^https:\/\/(www\.)?instagram\.com\//.test(source.permalink || '') ? source.permalink : null;
+  return { type: 'instagram', id: String(source.id), permalink };
 }
 
 function parseWhen(input, now) {
@@ -76,6 +84,7 @@ async function createPost(input, now = Date.now()) {
     createdAt: now,
     updatedAt: now,
     ...clean(input),
+    source: cleanSource(input.source),
     scheduledAt: parseWhen(input, now),
     status: 'scheduled',
     targets: {},
@@ -85,6 +94,7 @@ async function createPost(input, now = Date.now()) {
 
   await savePost(post);
   await getStore().zadd(INDEX, { score: post.createdAt, member: post.id });
+  if (post.source) await markShared(post.source.id, post.id);
   await schedule(post);
   await savePost(post);
   return post;
@@ -112,6 +122,7 @@ async function cancelPost(id) {
   post.status = 'cancelled';
   post.rev += 1; // strands the queued message
   await savePost(post);
+  if (post.source) await releaseShared(post.source.id, post.id);
   return post;
 }
 
@@ -121,6 +132,7 @@ async function deletePost(id) {
   if (post.status === 'publishing') throw httpError(409, 'This post is publishing right now.');
   await getStore().del(key(id));
   await getStore().zrem(INDEX, id);
+  if (post.source) await releaseShared(post.source.id, post.id);
 }
 
 async function retryPost(id, now = Date.now()) {

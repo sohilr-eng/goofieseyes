@@ -33,7 +33,7 @@ async function call(route, opts) {
 test.beforeEach(() => resetStoreForTests());
 
 test('the API is closed until you sign in', async () => {
-  for (const route of ['posts', 'status', 'site', 'blob-upload']) {
+  for (const route of ['posts', 'status', 'site', 'blob-upload', 'instagram']) {
     const r = await call(route, { method: route === 'blob-upload' ? 'POST' : 'GET', body: route === 'blob-upload' ? {} : undefined });
     assert.equal(r.status, 401, route);
   }

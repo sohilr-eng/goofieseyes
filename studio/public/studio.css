@@ -301,3 +301,30 @@ dialog.sheet::backdrop { background: rgba(31, 29, 27, 0.5); }
 .login form { width: min(360px, 100%); display: grid; gap: 14px; }
 .login input[type="password"] { min-height: 48px; border: 1px solid var(--line); border-radius: 10px; padding: 0 14px; background: var(--card); }
 .login .error { color: var(--bad); min-height: 1.5em; margin: 0; font-size: 14px; }
+
+/* ── From Instagram ────────────────────────────────────────────────────── */
+.from-ig { margin: -6px 0 14px; font-size: 14px; color: var(--muted); }
+.hint { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
+.when.spread { margin-top: 10px; }
+.when select {
+  min-height: 44px; border: 1px solid var(--line); border-radius: 10px;
+  padding: 0 12px; background: var(--paper);
+}
+.pick .badge {
+  position: absolute; left: 4px; bottom: 4px;
+  font-size: 11px; font-weight: 600; padding: 1px 6px; border-radius: 999px;
+  background: rgba(31, 29, 27, 0.75); color: #fff;
+}
+.pick .shared {
+  position: absolute; inset: auto 4px 4px auto;
+  font-size: 10px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase;
+  padding: 1px 6px; border-radius: 999px; background: var(--lens); color: var(--lens-ink);
+}
+.pick.is-shared img { opacity: 0.45; }
+.bitem { display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 14px 0; border-top: 1px solid var(--line); }
+.bitem:first-child { margin-top: 16px; }
+.bitem .cover { width: 84px; height: 105px; object-fit: cover; border-radius: 8px; background: var(--sand); }
+.bitem .when-line { font-weight: 600; font-size: 14px; }
+.bitem textarea { min-height: 84px; margin-top: 6px; }
+.bitem .problems { margin-top: 6px; }
+.bitem .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }

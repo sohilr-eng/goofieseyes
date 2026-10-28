@@ -9,6 +9,17 @@
  * error.
  */
 
+// A small Instagram back catalogue for the picker. Media links point at real
+// photos on the live site so `npm run dev` shows thumbnails.
+const PHOTO = (f) => `https://goofieseyes.live/content/photos/${f}`;
+const LONG = 'Three days in the Caroni swamp before sunrise, waiting on the scarlet ibis to come home. '.repeat(6).trim();
+const IG_LIBRARY = [
+  { id: '17900000000000001', media_type: 'IMAGE', media_product_type: 'FEED', media_url: PHOTO('img-2428.webp'), caption: 'tobago, late light. #tobago #caribbean #photography', permalink: 'https://www.instagram.com/p/AAA1/', timestamp: '2026-10-20T18:00:00+0000' },
+  { id: '17900000000000002', media_type: 'CAROUSEL_ALBUM', media_product_type: 'FEED', media_url: PHOTO('img-2438.webp'), caption: `${LONG} #caroni #scarletibis #trinidad #birdphotography`, permalink: 'https://www.instagram.com/p/AAA2/', timestamp: '2026-10-12T18:00:00+0000',
+    children: { data: [{ id: '17900000000000021', media_type: 'IMAGE', media_url: PHOTO('img-2438.webp') }, { id: '17900000000000022', media_type: 'IMAGE', media_url: PHOTO('img-2428.webp') }] } },
+  { id: '17900000000000003', media_type: 'VIDEO', media_product_type: 'REELS', media_url: 'https://goofieseyes.live/assets/film/hero.mp4', thumbnail_url: PHOTO('img-2428.webp'), caption: 'nyfw, backstage in motion.', permalink: 'https://www.instagram.com/reel/AAA3/', timestamp: '2026-09-15T18:00:00+0000' },
+];
+
 function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
   const calls = [];
   const containers = new Map();
@@ -45,6 +56,16 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
     }
     if (path === '/me' && url.hostname === 'graph.threads.net') return json(200, { id: 'TH1', username: 'goofieseyes' });
     if (path === '/refresh_access_token') return json(200, { access_token: 'THREADS_REFRESHED', token_type: 'bearer', expires_in: 5184000 });
+
+    // ── Instagram media library ──
+    if (path === '/IG1/media' && method === 'GET') {
+      const start = params.after ? Number(params.after) : 0;
+      const page = IG_LIBRARY.slice(start, start + Number(params.limit || 24));
+      const more = start + page.length < IG_LIBRARY.length;
+      return json(200, { data: page, paging: more ? { cursors: { after: String(start + page.length) }, next: 'more' } : { cursors: {} } });
+    }
+    const libraryItem = method === 'GET' && IG_LIBRARY.find((m) => `/${m.id}` === path);
+    if (libraryItem) return json(200, libraryItem);
 
     // ── Facebook ──
     if (/^\/PAGE1\/(feed|photos|videos)$/.test(path) && method === 'POST') {

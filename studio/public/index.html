@@ -30,6 +30,7 @@
     <div data-panel="compose">
       <form id="composer" class="card" novalidate>
         <h2 id="composer-title">New post</h2>
+        <p class="from-ig" id="composer-source" hidden></p>
 
         <div class="field-head"><span class="label">Photos &amp; video</span><span class="label" id="media-count"></span></div>
         <div class="tray" id="tray"></div>
@@ -40,6 +41,7 @@
               <input type="file" id="files" accept="image/*,video/mp4,video/quicktime" multiple hidden>
             </label>
             <button class="btn" type="button" id="open-site">From goofieseyes.live</button>
+            <button class="btn" type="button" id="open-ig">From Instagram</button>
           </div>
           <p style="margin:10px 0 0;font-size:14px">or drop files here. Photos are converted to JPEG for Instagram.</p>
         </div>
@@ -87,6 +89,44 @@
         </div>
         <div class="progress" id="progress" hidden><div></div></div>
       </form>
+
+      <!-- Several Instagram posts at once: one card each, shared timing. -->
+      <form id="batch" class="card" novalidate hidden>
+        <h2 id="batch-title">From Instagram</h2>
+
+        <div class="field-head"><span class="label">Post to</span></div>
+        <div class="platforms">
+          <label class="platform"><input type="checkbox" name="batch-platform" value="facebook" checked> Facebook</label>
+          <label class="platform"><input type="checkbox" name="batch-platform" value="threads" checked> Threads</label>
+        </div>
+
+        <div class="field-head" style="margin-top:18px"><span class="label">When</span></div>
+        <div class="when">
+          <label class="platform"><input type="radio" name="batch-when" value="now"> All now</label>
+          <label class="platform"><input type="radio" name="batch-when" value="spread" checked> Spread out</label>
+        </div>
+        <div class="when spread" id="batch-spread">
+          <label class="label" for="batch-start">First one</label>
+          <input type="datetime-local" id="batch-start">
+          <label class="label" for="batch-every">then every</label>
+          <select id="batch-every">
+            <option value="3">3 hours</option>
+            <option value="12">12 hours</option>
+            <option value="24" selected>day</option>
+            <option value="48">2 days</option>
+            <option value="72">3 days</option>
+            <option value="168">week</option>
+          </select>
+        </div>
+
+        <div id="batch-items"></div>
+
+        <div class="submit-bar">
+          <div class="note" id="batch-note"></div>
+          <button class="btn ghost" type="button" id="batch-discard">Discard</button>
+          <button class="btn primary" type="submit" id="batch-submit">Queue</button>
+        </div>
+      </form>
     </div>
 
     <!-- ── Queue ───────────────────────────────────────────────────────── -->
@@ -115,6 +155,19 @@
       <button class="btn ghost small" type="button" id="site-close">Close</button>
     </div>
     <div class="sheet-body" id="site-body"></div>
+  </dialog>
+
+  <dialog class="sheet" id="ig-sheet">
+    <div class="sheet-head">
+      <h2>Your Instagram</h2>
+      <button class="btn primary small" type="button" id="ig-add" hidden>Add</button>
+      <button class="btn ghost small" type="button" id="ig-close">Close</button>
+    </div>
+    <div class="sheet-body">
+      <p class="hint">Tap the posts to bring over. Each becomes its own Facebook and Threads post, with the photos copied so scheduled ones still work later.</p>
+      <div class="photos" id="ig-grid"></div>
+      <div style="text-align:center;margin-top:12px"><button class="btn small" type="button" id="ig-more" hidden>Load older posts</button></div>
+    </div>
   </dialog>
 
   <div class="toast" id="toast" role="status" hidden></div>
