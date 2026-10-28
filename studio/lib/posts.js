@@ -7,6 +7,9 @@
  *     media: [{ url, pathname, type: 'image'|'video', width?, height? }],
  *     platforms: ['facebook', 'instagram', 'threads'],
  *     source?: { type: 'instagram', id, permalink } — set when it was brought over from an Instagram post,
+ *     needsCaptions — the caption desk (/captions in Claude Code) should write them,
+ *     held?: 'captions' — its time came while it still needed captions, so it waited,
+ *     captionsBy?: 'claude', captionsAt — set when the desk wrote them, so the Queue can flag them for review,
  *     targets: { <platform>: { state, containerId?, children?, mediaId?, permalink?, error?, attempts } } }
  *
  * Status: scheduled → publishing → published | partial | failed, or cancelled.
@@ -41,6 +44,7 @@ function clean(input) {
       height: Number(m.height) || null,
     })),
     platforms: (Array.isArray(input.platforms) ? input.platforms : []).filter((p) => PLATFORMS.includes(p)),
+    needsCaptions: Boolean(input.needsCaptions),
   };
 }
 
@@ -105,7 +109,7 @@ async function updatePost(id, input, now = Date.now()) {
   if (!post) throw httpError(404, 'No such post');
   if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}; only scheduled posts can be edited.`);
 
-  Object.assign(post, clean(input), { scheduledAt: parseWhen(input, now), rev: post.rev + 1, updatedAt: now });
+  Object.assign(post, clean(input), { scheduledAt: parseWhen(input, now), rev: post.rev + 1, updatedAt: now, held: null, captionsBy: null });
   const errors = validatePost(post);
   if (errors.length) throw httpError(400, errors.join(' '));
 
@@ -148,6 +152,48 @@ async function retryPost(id, now = Date.now()) {
   return post;
 }
 
+// Sends a held post out now, or a waiting one at its original time.
+async function requeue(post, now) {
+  post.rev += 1;
+  post.updatedAt = now;
+  if (post.held) {
+    post.held = null;
+    post.scheduledAt = Math.max(post.scheduledAt, now);
+  }
+  await savePost(post);
+  await schedule(post);
+  await savePost(post);
+  return post;
+}
+
+// "Post as is": drop the caption-desk request and go with what's there.
+async function releasePost(id, now = Date.now()) {
+  const post = await getPost(id);
+  if (!post) throw httpError(404, 'No such post');
+  if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}.`);
+  const errors = validatePost(post);
+  if (errors.length) throw httpError(400, errors.join(' '));
+  post.needsCaptions = false;
+  return requeue(post, now);
+}
+
+// The caption desk hands back captions. Only the platforms it wrote for
+// change; anything the owner typed for another platform is kept.
+async function applyCaptions(id, captions, now = Date.now()) {
+  const post = await getPost(id);
+  if (!post) throw httpError(404, 'No such post');
+  if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}; captions can only be written for scheduled posts.`);
+  for (const p of PLATFORMS) {
+    if (typeof captions?.[p] === 'string' && captions[p].trim() && post.platforms.includes(p)) post.captions[p] = captions[p].trim();
+  }
+  const errors = validatePost(post);
+  if (errors.length) throw httpError(400, errors.join(' '));
+  post.needsCaptions = false;
+  post.captionsBy = 'claude';
+  post.captionsAt = now;
+  return requeue(post, now);
+}
+
 /**
  * One worker delivery. A lock keeps two deliveries of the same post (QStash
  * retries, a check racing a retry) from publishing twice.
@@ -158,6 +204,15 @@ async function runPost({ postId, rev, kind }, now = Date.now()) {
   if (!post) return { skipped: 'missing' };
   if (post.rev !== rev) return { skipped: 'stale' };
   if (kind === 'run' && post.status !== 'scheduled') return { skipped: post.status };
+  // Never publish a post that's still waiting on the caption desk with
+  // whatever placeholder caption it has. It waits; writing the captions or
+  // pressing "Post as is" in the Queue sends it on (releasePost below).
+  if (kind === 'run' && post.needsCaptions) {
+    post.held = 'captions';
+    post.updatedAt = now;
+    await savePost(post);
+    return { skipped: 'needs-captions' };
+  }
   if (kind === 'check' && post.status !== 'publishing') return { skipped: post.status };
 
   const lock = `lock:${postId}`;
@@ -190,4 +245,4 @@ async function queueDuePosts() {
   return queued;
 }
 
-module.exports = { createPost, updatePost, cancelPost, deletePost, retryPost, getPost, listPosts, runPost, queueDuePosts };
+module.exports = { createPost, updatePost, cancelPost, deletePost, retryPost, releasePost, applyCaptions, getPost, listPosts, runPost, queueDuePosts };

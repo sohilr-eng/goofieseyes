@@ -328,3 +328,7 @@ dialog.sheet::backdrop { background: rgba(31, 29, 27, 0.5); }
 .bitem textarea { min-height: 84px; margin-top: 6px; }
 .bitem .problems { margin-top: 6px; }
 .bitem .row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; margin-top: 6px; }
+.clash { margin: 4px 0 0; font-size: 13px; color: var(--warn); }
+.desk-opt { display: flex; gap: 8px; align-items: center; margin-top: 14px; font-size: 15px; cursor: pointer; }
+.desk-opt input { accent-color: var(--lens); width: 18px; height: 18px; flex: none; }
+.chip.desk { color: var(--lens); border-color: currentColor; background: none; }

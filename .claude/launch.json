@@ -4,14 +4,23 @@
     {
       "name": "static",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "4173"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "4173"
+      ],
       "port": 4173
     },
     {
       "name": "studio",
       "runtimeExecutable": "node",
-      "runtimeArgs": ["studio/dev-server.js"],
-      "env": { "STUDIO_FAKE_META": "1" },
+      "runtimeArgs": [
+        "studio/dev-server.js"
+      ],
+      "env": {
+        "STUDIO_FAKE_META": "1",
+        "STUDIO_AGENT_TOKEN": "dev-agent-token"
+      },
       "port": 3100
     }
   ]

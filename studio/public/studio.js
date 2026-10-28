@@ -338,6 +338,7 @@ function resetComposer() {
   state.media = [];
   state.editingId = null;
   state.source = null;
+  $('#needs-captions').checked = false;
   $('#caption').value = '';
   for (const ta of $$('[data-cap]')) ta.value = '';
   $('#custom').open = false;
@@ -400,6 +401,7 @@ $('#composer').addEventListener('submit', async (e) => {
       platforms: selectedPlatforms(),
       media: state.media.map((m) => ({ url: m.url, pathname: m.pathname, type: m.kind, width: m.width, height: m.height })),
       source: state.source,
+      needsCaptions: $('#needs-captions').checked,
       ...(laterSelected() ? { scheduledAt: new Date(scheduledAt()).toISOString() } : { publishNow: true }),
     };
     const { post } = state.editingId
@@ -595,23 +597,49 @@ function openDraftInComposer(draft) {
 const batchPlatforms = () => $$('input[name="batch-platform"]:checked').map((i) => i.value);
 const batchSpread = () => $('input[name="batch-when"]:checked').value === 'spread';
 
+// Whole-day intervals step by calendar day, so "6 pm every day" stays 6 pm
+// across a daylight-saving change instead of drifting to 5 or 7.
+function addHours(ms, hours) {
+  if (hours % 24 !== 0) return ms + hours * 3600e3;
+  const d = new Date(ms);
+  d.setDate(d.getDate() + hours / 24);
+  return d.getTime();
+}
+
 function batchTimes() {
   if (!batchSpread()) return state.batch.map(() => null);
   const start = $('#batch-start').value ? new Date($('#batch-start').value).getTime() : NaN;
-  const every = Number($('#batch-every').value) * 3600e3;
-  return state.batch.map((_, i) => start + i * every);
+  const every = Number($('#batch-every').value);
+  return state.batch.map((_, i) => (Number.isNaN(start) ? NaN : addHours(start, i * every)));
 }
 
 function batchDraftProblems(d) {
   return draftProblems({ platforms: batchPlatforms(), media: d.media.map((m) => ({ kind: m.type })), caption: d.caption, captions: d.captions });
 }
 
-function openBatch(drafts) {
-  state.batch = drafts;
+// New batches carry on from the last post already scheduled, one interval
+// later, so separate batches chain into one steady rhythm instead of
+// doubling up or leaving gaps. Nothing scheduled: tomorrow at 6 pm.
+function defaultBatchStart() {
+  const every = Number($('#batch-every').value);
+  const last = Math.max(0, ...state.posts.filter((p) => p.status === 'scheduled').map((p) => p.scheduledAt));
+  if (last && addHours(last, every) > Date.now()) return addHours(last, every);
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(18, 0, 0, 0);
-  $('#batch-start').value = toLocalInput(tomorrow.getTime());
+  return tomorrow.getTime();
+}
+
+const sameDay = (a, b) => new Date(a).toDateString() === new Date(b).toDateString();
+function clashFor(at) {
+  return state.posts.find((p) => p.status === 'scheduled' && sameDay(p.scheduledAt, at));
+}
+
+async function openBatch(drafts) {
+  state.batch = drafts;
+  state.batchStartTouched = false;
+  try { state.posts = (await api('/api/posts')).posts; } catch { /* the default just won't chain */ }
+  $('#batch-start').value = toLocalInput(defaultBatchStart());
   $('#batch-start').min = toLocalInput(Date.now());
   $('#composer').hidden = true;
   $('#batch').hidden = false;
@@ -636,6 +664,7 @@ function renderBatch() {
       ? `<video class="cover" src="${esc(first.url)}" muted playsinline preload="metadata"></video>`
       : `<img class="cover" src="${esc(first.url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
     const when = times[i] ? fmtTime(times[i]) : 'Now';
+    const clash = times[i] && clashFor(times[i]);
     const probs = batchDraftProblems(d);
     const threads = platforms.includes('threads')
       ? `<label class="label" for="bt-${i}">Threads${d.captions.threads ? ' (shortened)' : ''} · <span data-bcount="${i}">${(d.captions.threads || d.caption).length}</span>/500</label>
@@ -645,6 +674,7 @@ function renderBatch() {
       ${cover}
       <div>
         <div class="when-line">${esc(when)} <span class="label">· from ${esc(fmtDay(d.source.timestamp))}${d.media.length > 1 ? ` · ${d.media.length} items` : ''}</span></div>
+        ${clash ? `<p class="clash">Another post already goes out that day, at ${esc(new Date(clash.scheduledAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }))}.</p>` : ''}
         <label class="label" for="bc-${i}">Caption</label>
         <textarea id="bc-${i}" data-bi="${i}" data-bfield="caption">${esc(d.caption)}</textarea>
         ${threads}
@@ -689,6 +719,11 @@ $('#batch-items').addEventListener('click', (e) => {
 for (const el of [...$$('input[name="batch-platform"]'), ...$$('input[name="batch-when"]'), $('#batch-start'), $('#batch-every')]) {
   el.addEventListener('change', renderBatch);
 }
+$('#batch-start').addEventListener('input', () => { state.batchStartTouched = true; });
+// Changing the interval moves the chained start too, unless it was picked by hand.
+$('#batch-every').addEventListener('change', () => {
+  if (!state.batchStartTouched) { $('#batch-start').value = toLocalInput(defaultBatchStart()); renderBatch(); }
+});
 $('#batch-discard').addEventListener('click', () => { if (confirm('Discard these drafts?')) closeBatch(); });
 
 $('#batch').addEventListener('submit', async (e) => {
@@ -709,6 +744,7 @@ $('#batch').addEventListener('submit', async (e) => {
           media: d.media,
           platforms,
           source: d.source,
+          needsCaptions: $('#batch-needs-captions').checked,
           ...(times[i] ? { scheduledAt: new Date(times[i]).toISOString() } : { publishNow: true }),
         },
       });
@@ -749,6 +785,9 @@ function postCard(p) {
     return `<div class="target"><span class="name">${NAMES[pl]}</span><span>${state}${link}</span>${err}</div>`;
   }).join('');
   const actions = [];
+  if (p.status === 'scheduled' && p.needsCaptions) {
+    actions.push(`<button class="btn small" data-act="release" data-id="${p.id}">Post as is</button>`);
+  }
   if (p.status === 'scheduled') {
     actions.push(`<button class="btn small" data-act="edit" data-id="${p.id}">Edit</button>`);
     actions.push(`<button class="btn small danger" data-act="cancel" data-id="${p.id}">Cancel</button>`);
@@ -756,13 +795,19 @@ function postCard(p) {
   if (p.status === 'failed' || p.status === 'partial') actions.push(`<button class="btn small" data-act="retry" data-id="${p.id}">Retry failed</button>`);
   if (['published', 'failed', 'partial', 'cancelled'].includes(p.status)) actions.push(`<button class="btn small ghost" data-act="remove" data-id="${p.id}">Remove from list</button>`);
   const when = p.status === 'scheduled' ? `Goes out ${fmtTime(p.scheduledAt)}` : fmtTime(p.scheduledAt);
+  const desk = p.status !== 'scheduled' ? ''
+    : p.held ? '<p class="clash">Held: its time came before the caption desk ran. Run /captions, or post it as is.</p>'
+    : p.needsCaptions ? '<p class="from-ig" style="margin:0 0 8px"><span class="chip desk">Waiting for the caption desk</span></p>'
+    : p.captionsBy === 'claude' ? '<p class="from-ig" style="margin:0 0 8px"><span class="chip desk">Captions by Claude: review</span></p>'
+    : '';
 
   return `<article class="card post">
     ${cover}
     <div>
       <div class="status ${p.status}">${p.status}</div>
       <div class="when">${when}</div>
-      <p class="caption">${esc(p.caption || Object.values(p.captions || {})[0] || '')}</p>
+      ${desk}
+      <p class="caption">${esc(p.captions?.facebook || p.captions?.threads || p.caption || '')}</p>
       ${p.source?.permalink ? `<p class="from-ig" style="margin:0 0 8px">From <a href="${esc(p.source.permalink)}" target="_blank" rel="noopener">Instagram ↗</a></p>` : ''}
       <div class="targets">${targets}</div>
       <div class="btn-row">${actions.join('')}</div>
@@ -807,6 +852,7 @@ $('#queue').addEventListener('click', async (e) => {
     btn.disabled = true;
     if (act === 'cancel') await api(`/api/posts?id=${id}&action=cancel`, { method: 'POST' });
     if (act === 'retry') await api(`/api/posts?id=${id}&action=retry`, { method: 'POST' });
+    if (act === 'release') await api(`/api/posts?id=${id}&action=release`, { method: 'POST' });
     if (act === 'remove') await api(`/api/posts?id=${id}`, { method: 'DELETE' });
     loadQueue();
   } catch (err) {
@@ -819,6 +865,7 @@ function editPost(post) {
   resetComposer();
   state.editingId = post.id;
   state.source = post.source || null;
+  $('#needs-captions').checked = Boolean(post.needsCaptions);
   state.media = (post.media || []).map((m) => ({
     id: nextId++, kind: m.type, name: m.pathname || 'media', source: null, url: m.url, pathname: m.pathname,
     width: m.width, height: m.height, fit: 'original', preview: null,
