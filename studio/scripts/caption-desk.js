@@ -13,8 +13,10 @@
  *     "threads": "...", "instagram": "..." } }]. Each one is checked first (Threads
  *     under 500 characters, no hashtags) and anything that fails is reported and skipped.
  *
- * Needs the studio's agent token: STUDIO_AGENT_TOKEN in the environment, or a
- * file at ~/.goofieseyes-studio/agent-token. STUDIO_URL overrides the address.
+ * Needs the studio's agent token, from STUDIO_AGENT_TOKEN, a file at
+ * ~/.goofieseyes-studio/agent-token, or (in a Claude Code cloud session) a
+ * network secret for studio.goofieseyes.live, which Anthropic's proxy adds to
+ * the request so the session never holds the token. STUDIO_URL overrides the address.
  */
 
 const fs = require('fs');
@@ -26,21 +28,26 @@ const BASE = (process.env.STUDIO_URL || 'https://studio.goofieseyes.live').repla
 const WORK = path.join(os.tmpdir(), 'caption-desk');
 const THREADS_LIMIT = 500;
 
+const TOKEN_FILE = path.join(os.homedir(), '.goofieseyes-studio', 'agent-token');
+
+// null means "send no header and let a cloud network secret add it".
 function token() {
   if (process.env.STUDIO_AGENT_TOKEN) return process.env.STUDIO_AGENT_TOKEN.trim();
-  const file = path.join(os.homedir(), '.goofieseyes-studio', 'agent-token');
-  if (fs.existsSync(file)) return fs.readFileSync(file, 'utf8').trim();
-  console.error(`No agent token. Set STUDIO_AGENT_TOKEN or put it in ${file}.`);
-  process.exit(2);
+  if (fs.existsSync(TOKEN_FILE)) return fs.readFileSync(TOKEN_FILE, 'utf8').trim();
+  return null;
 }
 
 async function call(method, route, body) {
+  const t = token();
   const res = await fetch(`${BASE}${route}`, {
     method,
-    headers: { Authorization: `Bearer ${token()}`, ...(body ? { 'Content-Type': 'application/json' } : {}) },
+    headers: { ...(t ? { Authorization: `Bearer ${t}` } : {}), ...(body ? { 'Content-Type': 'application/json' } : {}) },
     body: body ? JSON.stringify(body) : undefined,
   });
   const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && !t) {
+    throw new Error(`The studio refused: no agent token. Set STUDIO_AGENT_TOKEN, put it in ${TOKEN_FILE}, or (in a cloud session) add a network secret for studio.goofieseyes.live.`);
+  }
   if (!res.ok) throw new Error(data.error || `Studio answered HTTP ${res.status}`);
   return data;
 }
@@ -51,9 +58,16 @@ async function download(url, file) {
   fs.writeFileSync(file, Buffer.from(await res.arrayBuffer()));
 }
 
+const HAS_FFMPEG = spawnSync('ffmpeg', ['-version'], { timeout: 10000 }).status === 0;
+
+// A frame one second in (past any fade from black). Returns null on success,
+// or why it couldn't, so the desk knows whether to write from the notes.
 function videoFrame(url, file) {
+  if (!HAS_FFMPEG) return 'ffmpeg is not installed';
   const r = spawnSync('ffmpeg', ['-y', '-loglevel', 'error', '-ss', '1', '-i', url, '-frames:v', '1', '-vf', 'scale=1280:-2', file], { timeout: 60000 });
-  return r.status === 0 && fs.existsSync(file);
+  if (r.status === 0 && fs.existsSync(file)) return null;
+  const lastLine = String(r.stderr || '').trim().split(/\r?\n/).pop();
+  return `ffmpeg couldn't read it (${lastLine || 'no output'})`;
 }
 
 async function pull() {
@@ -68,9 +82,9 @@ async function pull() {
     for (const [i, m] of post.media.entries()) {
       const file = path.join(dir, `${i + 1}.jpg`);
       try {
-        if (m.type === 'image') { await download(m.url, file); post.images.push(file); }
-        else if (videoFrame(m.url, file)) post.images.push(file);
-        else post.images.push(`(video ${i + 1}: no frame, ffmpeg not available; write from the notes)`);
+        if (m.type === 'image') { await download(m.url, file); post.images.push(file); continue; }
+        const failed = videoFrame(m.url, file);
+        post.images.push(failed ? `(video ${i + 1}: no frame, ${failed}; write from the notes)` : file);
       } catch (err) {
         post.images.push(`(item ${i + 1} failed to download: ${err.message})`);
       }
@@ -129,4 +143,4 @@ async function push(file) {
 
 const [cmd, arg] = process.argv.slice(2);
 (cmd === 'pull' ? pull() : cmd === 'push' ? push(arg) : Promise.reject(new Error('Use: pull | push <captions.json>')))
-  .catch((err) => { console.error(err.message); process.exit(1); });
+  .catch((err) => { console.error(err.message); process.exitCode = 1; });

@@ -7,8 +7,11 @@ your voice or offer changes; nothing else needs updating.
 - **goofieseyes**: one lowercase word, always. A photographer and creative director.
 - What's on offer: **creative direction** (the main thing), **brand films and shoots**, **portraits
   and events**, and **fine art prints**.
-- Based in: _fill this in, e.g. "New Jersey, often shooting in Trinidad & Tobago"._ Until it's
-  filled in, the desk only names places it can see in the post's notes or Instagram caption.
+- Based in **Trinidad and New York**, and works **internationally**. Use this when it helps
+  someone searching, e.g. "a creative director working between Trinidad and New York", or "available
+  for shoots in Trinidad & Tobago, New York and wherever the work is". Don't tack it onto every
+  caption. And it's never a reason to claim a post was shot somewhere: the location of a
+  specific photo still comes only from its notes, Instagram caption, or what's clearly visible.
 
 ## The two audiences
 - **Instagram is the art.** If the desk writes an Instagram caption (only for posts that aren't

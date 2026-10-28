@@ -17,7 +17,7 @@ const IG_LIBRARY = [
   { id: '17900000000000001', media_type: 'IMAGE', media_product_type: 'FEED', media_url: PHOTO('img-2428.webp'), caption: 'tobago, late light. #tobago #caribbean #photography', permalink: 'https://www.instagram.com/p/AAA1/', timestamp: '2026-10-20T18:00:00+0000' },
   { id: '17900000000000002', media_type: 'CAROUSEL_ALBUM', media_product_type: 'FEED', media_url: PHOTO('img-2438.webp'), caption: `${LONG} #caroni #scarletibis #trinidad #birdphotography`, permalink: 'https://www.instagram.com/p/AAA2/', timestamp: '2026-10-12T18:00:00+0000',
     children: { data: [{ id: '17900000000000021', media_type: 'IMAGE', media_url: PHOTO('img-2438.webp') }, { id: '17900000000000022', media_type: 'IMAGE', media_url: PHOTO('img-2428.webp') }] } },
-  { id: '17900000000000003', media_type: 'VIDEO', media_product_type: 'REELS', media_url: 'https://goofieseyes.live/assets/film/hero.mp4', thumbnail_url: PHOTO('img-2428.webp'), caption: 'nyfw, backstage in motion.', permalink: 'https://www.instagram.com/reel/AAA3/', timestamp: '2026-09-15T18:00:00+0000' },
+  { id: '17900000000000003', media_type: 'VIDEO', media_product_type: 'REELS', media_url: 'https://goofieseyes.live/assets/film/film-01-720.mp4', thumbnail_url: PHOTO('img-2428.webp'), caption: 'nyfw, backstage in motion.', permalink: 'https://www.instagram.com/reel/AAA3/', timestamp: '2026-09-15T18:00:00+0000' },
 ];
 
 function installFakeMeta({ passthrough = globalThis.fetch } = {}) {

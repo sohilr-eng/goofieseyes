@@ -17,8 +17,12 @@ guide wins.
 ## 2. Pull the posts
 Run `node studio/scripts/caption-desk.js pull` from the repo root.
 - "Nothing waiting for captions": tell the owner and stop.
-- An auth error: the agent token is missing. Say so. It goes in `STUDIO_AGENT_TOKEN` or
-  `~/.goofieseyes-studio/agent-token`. Never ask for it to be pasted into chat.
+- An auth error: the agent token is missing. Say so. On the owner's computer it lives in
+  `~/.goofieseyes-studio/agent-token`. In a cloud session it's a network secret for
+  `studio.goofieseyes.live` on the environment. Never ask for it to be pasted into chat.
+- A photo that fails to download in a cloud session usually means the environment's network
+  access doesn't allow `*.public.blob.vercel-storage.com`. Say so and write that post from its
+  notes.
 - Posts marked **HELD** go out the moment their captions land, so do those first.
 
 ## 3. Write each post
