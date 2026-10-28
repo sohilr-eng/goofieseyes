@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#F5E9D8">
+  <title>goofieseyes studio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,900&family=Figtree:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="studio.css">
+</head>
+<body>
+  <header class="top">
+    <div class="mark" aria-hidden="true"></div>
+    <h1 class="wordmark">goofieseyes<span>studio</span></h1>
+    <div class="spacer"></div>
+    <button class="btn ghost small" id="logout" type="button">Sign out</button>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab" role="tab" data-tab="compose" aria-selected="true">Compose</button>
+    <button class="tab" role="tab" data-tab="queue" aria-selected="false">Queue<span class="count" id="queue-count"></span></button>
+    <button class="tab" role="tab" data-tab="connections" aria-selected="false">Connections</button>
+  </nav>
+
+  <main>
+    <!-- ── Compose ─────────────────────────────────────────────────────── -->
+    <div data-panel="compose">
+      <form id="composer" class="card" novalidate>
+        <h2 id="composer-title">New post</h2>
+
+        <div class="field-head"><span class="label">Photos &amp; video</span><span class="label" id="media-count"></span></div>
+        <div class="tray" id="tray"></div>
+        <div class="drop" id="drop">
+          <div class="btn-row" style="justify-content:center">
+            <label class="btn">
+              Add from device
+              <input type="file" id="files" accept="image/*,video/mp4,video/quicktime" multiple hidden>
+            </label>
+            <button class="btn" type="button" id="open-site">From goofieseyes.live</button>
+          </div>
+          <p style="margin:10px 0 0;font-size:14px">or drop files here. Photos are converted to JPEG for Instagram.</p>
+        </div>
+
+        <div class="field-head" style="margin-top:18px"><span class="label">Post to</span></div>
+        <div class="platforms">
+          <label class="platform"><input type="checkbox" name="platform" value="facebook" checked> Facebook</label>
+          <label class="platform"><input type="checkbox" name="platform" value="instagram" checked> Instagram</label>
+          <label class="platform"><input type="checkbox" name="platform" value="threads" checked> Threads</label>
+        </div>
+
+        <div class="field-head" style="margin-top:18px"><label class="label" for="caption">Caption</label></div>
+        <textarea id="caption" placeholder="write it once — it goes everywhere you've ticked"></textarea>
+        <div class="counters" id="counters"></div>
+
+        <details class="custom" id="custom">
+          <summary>Different caption per platform</summary>
+          <div class="field" data-platform="facebook">
+            <div class="field-head"><label class="label" for="cap-facebook">Facebook</label><span class="label" data-count="facebook"></span></div>
+            <textarea id="cap-facebook" data-cap="facebook" placeholder="uses the main caption when empty"></textarea>
+          </div>
+          <div class="field" data-platform="instagram">
+            <div class="field-head"><label class="label" for="cap-instagram">Instagram</label><span class="label" data-count="instagram"></span></div>
+            <textarea id="cap-instagram" data-cap="instagram" placeholder="uses the main caption when empty"></textarea>
+          </div>
+          <div class="field" data-platform="threads">
+            <div class="field-head"><label class="label" for="cap-threads">Threads</label><span class="label" data-count="threads"></span></div>
+            <textarea id="cap-threads" data-cap="threads" placeholder="uses the main caption when empty — 500 characters max"></textarea>
+          </div>
+        </details>
+
+        <div class="field-head" style="margin-top:18px"><span class="label">When</span></div>
+        <div class="when">
+          <label class="platform"><input type="radio" name="when" value="now" checked> Now</label>
+          <label class="platform"><input type="radio" name="when" value="later"> Schedule</label>
+          <input type="datetime-local" id="scheduled-at" hidden>
+        </div>
+
+        <ul class="problems" id="problems"></ul>
+
+        <div class="submit-bar">
+          <div class="note" id="submit-note"></div>
+          <button class="btn ghost" type="button" id="reset" hidden>Discard</button>
+          <button class="btn primary" type="submit" id="submit">Post now</button>
+        </div>
+        <div class="progress" id="progress" hidden><div></div></div>
+      </form>
+    </div>
+
+    <!-- ── Queue ───────────────────────────────────────────────────────── -->
+    <div data-panel="queue" hidden>
+      <div id="queue"></div>
+    </div>
+
+    <!-- ── Connections ─────────────────────────────────────────────────── -->
+    <div data-panel="connections" hidden>
+      <div class="card">
+        <h2>Accounts</h2>
+        <div id="connections"><p class="empty">Checking…</p></div>
+      </div>
+      <div class="card">
+        <h2>Setup</h2>
+        <p style="margin:0">Tokens live in Vercel → Settings → Environment Variables, never in this page. The step-by-step guide is <code>docs/studio-setup.md</code> in the site repo.</p>
+      </div>
+    </div>
+  </main>
+
+  <dialog class="sheet" id="site-sheet">
+    <div class="sheet-head">
+      <button class="btn ghost small" type="button" id="site-back" hidden>‹ Back</button>
+      <h2 id="site-title">From goofieseyes.live</h2>
+      <button class="btn primary small" type="button" id="site-add" hidden>Add</button>
+      <button class="btn ghost small" type="button" id="site-close">Close</button>
+    </div>
+    <div class="sheet-body" id="site-body"></div>
+  </dialog>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+
+  <script type="module" src="studio.js"></script>
+</body>
+</html>

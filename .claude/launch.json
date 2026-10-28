@@ -6,6 +6,13 @@
       "runtimeExecutable": "python",
       "runtimeArgs": ["-m", "http.server", "4173"],
       "port": 4173
+    },
+    {
+      "name": "studio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["studio/dev-server.js"],
+      "env": { "STUDIO_FAKE_META": "1" },
+      "port": 3100
     }
   ]
 }
