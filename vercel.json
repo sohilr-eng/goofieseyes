@@ -2,6 +2,13 @@
   "buildCommand": null,
   "outputDirectory": ".",
   "framework": null,
+  "redirects": [
+    { "source": "/studio", "destination": "/", "permanent": false },
+    { "source": "/studio/:path*", "destination": "/", "permanent": false }
+  ],
+  "rewrites": [
+    { "source": "/privacy", "destination": "/privacy.html" }
+  ],
   "headers": [
     {
       "source": "/assets/video/(.*)",

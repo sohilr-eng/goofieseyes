@@ -507,6 +507,43 @@
   margin: 2rem 0;
 }
 
+/* Headed prose (privacy.html). Journal posts never emit these. */
+.gf-post-body h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(1.7rem, 3.2vw, 2.3rem);
+  line-height: 1.05;
+  margin: 3rem 0 1rem;
+  padding-top: 1.4rem;
+  border-top: 1px solid var(--gf-line);
+}
+
+.gf-post-body h3 {
+  font-family: var(--gf-mono);
+  font-weight: 500;
+  font-size: 0.78rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  margin: 2rem 0 0.7rem;
+}
+
+.gf-post-body ul {
+  margin: 0 0 1.4rem;
+  padding-left: 1.2rem;
+}
+
+.gf-post-body li {
+  font-size: clamp(1rem, 1.5vw, 1.1rem);
+  line-height: 1.65;
+  margin-bottom: 0.6rem;
+}
+
+.gf-post-body a {
+  color: inherit;
+  text-decoration-color: var(--gf-coral);
+  text-underline-offset: 0.2em;
+}
+
 /* ---------- order success ---------- */
 .gf-success {
   max-width: 640px;
