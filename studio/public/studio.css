@@ -306,6 +306,9 @@ dialog.sheet::backdrop { background: rgba(31, 29, 27, 0.5); }
 .from-ig { margin: -6px 0 14px; font-size: 14px; color: var(--muted); }
 .hint { margin: 0 0 12px; font-size: 14px; color: var(--muted); }
 .when.spread { margin-top: 10px; }
+.when-hint { margin: 8px 0 0; }
+.fit-all { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; font-size: 14px; color: var(--warn); }
+.fit-all span { flex-basis: 100%; }
 .when select {
   min-height: 44px; border: 1px solid var(--line); border-radius: 10px;
   padding: 0 12px; background: var(--paper);

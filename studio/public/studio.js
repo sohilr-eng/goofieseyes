@@ -141,13 +141,15 @@ async function addSource(source, name) {
 }
 
 async function addFiles(files) {
-  for (const file of files) {
+  for (const [i, file] of files.entries()) {
+    if (files.length > 1) toast(`Reading ${i + 1} of ${files.length}…`, 60000);
     try {
       await addSource(file, file.name);
     } catch (err) {
       toast(err.message, 5000);
     }
   }
+  if (files.length > 1) $('#toast').hidden = true;
   renderComposer();
 }
 
@@ -157,7 +159,11 @@ async function refit(item, fit) {
   URL.revokeObjectURL(item.preview);
   item.preview = URL.createObjectURL(item.jpeg);
   item.url = null; // the uploaded copy (if any) is the old shape
-  renderComposer();
+  if (state.batch.length) renderBatch(); else renderComposer();
+}
+
+function fitButtons(m) {
+  return `<div class="row">${['original', 'crop', 'pad'].map((f) => `<button type="button" class="mini" data-fit="${f}" data-id="${m.id}" aria-pressed="${m.fit === f}">${{ original: 'As is', crop: 'Crop 4:5', pad: 'Border 4:5' }[f]}</button>`).join('')}</div>`;
 }
 
 $('#files').addEventListener('change', (e) => { addFiles([...e.target.files]); e.target.value = ''; });
@@ -182,7 +188,7 @@ function renderTray() {
     if (m.width) chips.push(`<span class="chip">${m.width}×${m.height}</span>`);
     if (ig && ratioBad) chips.push('<span class="chip warn">Too tall/wide for Instagram</span>');
     const fitControls = m.kind === 'image' && m.source && (ratioBad || m.fit !== 'original')
-      ? `<div class="row">${['original', 'crop', 'pad'].map((f) => `<button type="button" class="mini" data-fit="${f}" data-id="${m.id}" aria-pressed="${m.fit === f}">${{ original: 'As is', crop: 'Crop 4:5', pad: 'Border 4:5' }[f]}</button>`).join('')}</div>`
+      ? fitButtons(m)
       : '';
     const move = state.media.length > 1
       ? `<div class="row"><button type="button" class="mini" data-move="-1" data-id="${m.id}" ${i === 0 ? 'disabled' : ''} aria-label="Move earlier">←</button><button type="button" class="mini" data-move="1" data-id="${m.id}" ${i === state.media.length - 1 ? 'disabled' : ''} aria-label="Move later">→</button></div>`
@@ -244,7 +250,7 @@ function draftProblems({ platforms, media, caption, captions: own = {} }) {
   if (platforms.includes('instagram')) {
     const t = captionFor('instagram');
     if (!media.length) out.push('Instagram: needs at least one photo or video.');
-    if (media.length > LIMITS.instagram.media) out.push(`Instagram: at most ${LIMITS.instagram.media} items in a carousel.`);
+    if (media.length > LIMITS.instagram.media) out.push(`Instagram: at most ${LIMITS.instagram.media} items in one post. Choose Spread out to make each its own post.`);
     if (t.length > LIMITS.instagram.caption) out.push(`Instagram: caption is ${t.length} characters (max ${LIMITS.instagram.caption}).`);
     if (hashtagCount(t) > LIMITS.instagram.hashtags) out.push(`Instagram: at most ${LIMITS.instagram.hashtags} hashtags.`);
     if (images.some((m) => m.width && !igRatioOk(m.width, m.height))) out.push('Instagram: some photos are taller than 4:5 or wider than 1.91:1. Pick Crop or Border on them.');
@@ -301,6 +307,11 @@ function toLocalInput(ms) {
 }
 for (const r of $$('input[name="when"]')) {
   r.addEventListener('change', () => {
+    if (r.value === 'spread') {
+      $('input[name="when"][value="now"]').checked = true;
+      spreadComposerMedia();
+      return;
+    }
     const later = laterSelected();
     $('#scheduled-at').hidden = !later;
     if (later && !$('#scheduled-at').value) $('#scheduled-at').value = toLocalInput(Date.now() + 3600e3);
@@ -322,6 +333,10 @@ function renderComposer() {
     ? new Date(at).toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })
     : '';
   $('#reset').hidden = !state.editingId && !state.source && !state.media.length && !$('#caption').value;
+  const canSpread = state.media.length > 1 && !state.editingId && !state.source;
+  $('#when-spread').hidden = !canSpread;
+  $('#when-hint').hidden = !canSpread;
+  $('#when-hint').textContent = canSpread ? `Now and Schedule put all ${state.media.length} in one post. Spread out makes each its own post, on a schedule.` : '';
   $('#composer-title').textContent = state.editingId ? 'Edit scheduled post' : 'New post';
   const src = $('#composer-source');
   src.hidden = !state.source;
@@ -614,8 +629,21 @@ function batchTimes() {
 }
 
 function batchDraftProblems(d) {
-  return draftProblems({ platforms: batchPlatforms(), media: d.media.map((m) => ({ kind: m.type })), caption: d.caption, captions: d.captions });
+  return draftProblems({ platforms: batchPlatforms(), media: d.media.map((m) => ({ kind: m.type, width: m.width, height: m.height })), caption: d.caption, captions: d.captions });
 }
+
+// Everything in the composer becomes its own post, keeping the caption typed so far.
+function spreadComposerMedia() {
+  const captionsSoFar = captions();
+  openBatch(state.media.map((m) => ({
+    caption: $('#caption').value,
+    captions: { ...captionsSoFar },
+    media: [Object.assign(m, { type: m.kind })],
+    source: null,
+  })));
+}
+
+const tooTall = (m) => m.type === 'image' && m.source && m.width && !igRatioOk(m.width, m.height);
 
 // New batches carry on from the last post already scheduled, one interval
 // later, so separate batches chain into one steady rhythm instead of
@@ -638,6 +666,10 @@ function clashFor(at) {
 async function openBatch(drafts) {
   state.batch = drafts;
   state.batchStartTouched = false;
+  state.batchLocal = !drafts[0].source;
+  $('#batch-instagram').hidden = !state.batchLocal;
+  $('#batch-instagram input').checked = state.batchLocal;
+  $('#batch-back').hidden = !state.batchLocal;
   try { state.posts = (await api('/api/posts')).posts; } catch { /* the default just won't chain */ }
   $('#batch-start').value = toLocalInput(defaultBatchStart());
   $('#batch-start').min = toLocalInput(Date.now());
@@ -651,21 +683,28 @@ function closeBatch() {
   state.batch = [];
   $('#batch').hidden = true;
   $('#composer').hidden = false;
+  if (state.batchLocal) resetComposer();
 }
 
 function renderBatch() {
   const times = batchTimes();
   const platforms = batchPlatforms();
-  $('#batch-title').textContent = `${state.batch.length} posts from Instagram`;
+  $('#batch-title').textContent = state.batchLocal ? `${state.batch.length} separate posts` : `${state.batch.length} posts from Instagram`;
   $('#batch-spread').hidden = !batchSpread();
+  const tall = platforms.includes('instagram') ? state.batch.filter((d) => tooTall(d.media[0])).length : 0;
+  $('#batch-fit').hidden = !tall;
+  $('#batch-fit-note').textContent = `${tall} ${tall === 1 ? 'photo is' : 'photos are'} too tall or wide for Instagram.`;
   $('#batch-items').innerHTML = state.batch.map((d, i) => {
     const first = d.media[0];
+    const src = first.preview || first.url;
     const cover = first.type === 'video'
-      ? `<video class="cover" src="${esc(first.url)}" muted playsinline preload="metadata"></video>`
-      : `<img class="cover" src="${esc(first.url)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
+      ? `<video class="cover" src="${esc(src)}" muted playsinline preload="metadata"></video>`
+      : `<img class="cover" src="${esc(src)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
     const when = times[i] ? fmtTime(times[i]) : 'Now';
     const clash = times[i] && clashFor(times[i]);
     const probs = batchDraftProblems(d);
+    const from = d.source ? `· from ${fmtDay(d.source.timestamp)}` : '';
+    const fit = platforms.includes('instagram') && (tooTall(first) || (first.source && first.fit !== 'original')) ? fitButtons(first) : '';
     const threads = platforms.includes('threads')
       ? `<label class="label" for="bt-${i}">Threads${d.captions.threads ? ' (shortened)' : ''} · <span data-bcount="${i}">${(d.captions.threads || d.caption).length}</span>/500</label>
          <textarea id="bt-${i}" data-bi="${i}" data-bfield="threads" placeholder="uses the caption above when empty">${esc(d.captions.threads || '')}</textarea>`
@@ -673,11 +712,12 @@ function renderBatch() {
     return `<div class="bitem">
       ${cover}
       <div>
-        <div class="when-line">${esc(when)} <span class="label">· from ${esc(fmtDay(d.source.timestamp))}${d.media.length > 1 ? ` · ${d.media.length} items` : ''}</span></div>
+        <div class="when-line">${esc(when)} <span class="label">${esc(from)}${d.media.length > 1 ? ` · ${d.media.length} items` : ''}</span></div>
         ${clash ? `<p class="clash">Another post already goes out that day, at ${esc(new Date(clash.scheduledAt).toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' }))}.</p>` : ''}
         <label class="label" for="bc-${i}">Caption</label>
         <textarea id="bc-${i}" data-bi="${i}" data-bfield="caption">${esc(d.caption)}</textarea>
         ${threads}
+        ${fit}
         <ul class="problems">${probs.map((p) => `<li>${esc(p)}</li>`).join('')}</ul>
         <div class="row"><button type="button" class="btn small ghost danger" data-bremove="${i}">Leave this one out</button></div>
       </div></div>`;
@@ -711,10 +751,32 @@ $('#batch-items').addEventListener('input', (e) => {
   updateBatchSubmit();
 });
 $('#batch-items').addEventListener('click', (e) => {
+  const fit = e.target.closest('[data-fit]');
+  if (fit) {
+    const item = state.batch.flatMap((d) => d.media).find((m) => m.id === Number(fit.dataset.id));
+    if (item) refit(item, fit.dataset.fit);
+    return;
+  }
   const btn = e.target.closest('[data-bremove]');
   if (!btn) return;
   state.batch.splice(Number(btn.dataset.bremove), 1);
   if (state.batch.length === 0) closeBatch(); else renderBatch();
+});
+$('#batch-fit').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-fit-all]');
+  if (!btn) return;
+  const tall = state.batch.flatMap((d) => d.media).filter(tooTall);
+  for (const [i, m] of tall.entries()) {
+    toast(`Fitting ${i + 1} of ${tall.length}…`, 60000);
+    await refit(m, btn.dataset.fitAll);
+  }
+  $('#toast').hidden = true;
+});
+$('#batch-back').addEventListener('click', () => {
+  state.media = state.batch.flatMap((d) => d.media);
+  state.batchLocal = false; // the composer keeps these photos and its caption
+  closeBatch();
+  renderComposer();
 });
 for (const el of [...$$('input[name="batch-platform"]'), ...$$('input[name="batch-when"]'), $('#batch-start'), $('#batch-every')]) {
   el.addEventListener('change', renderBatch);
@@ -736,12 +798,13 @@ $('#batch').addEventListener('submit', async (e) => {
   try {
     for (const [i, d] of state.batch.entries()) {
       submit.textContent = `Saving ${i + 1}/${state.batch.length}…`;
+      for (const m of d.media) if (!m.url) Object.assign(m, await uploadOne(m, () => {}));
       await api('/api/posts', {
         method: 'POST',
         body: {
           caption: d.caption,
-          captions: platforms.includes('threads') ? d.captions : {},
-          media: d.media,
+          captions: platforms.includes('threads') || state.batchLocal ? d.captions : {},
+          media: d.media.map(({ url, pathname, type, width, height }) => ({ url, pathname, type, width, height })),
           platforms,
           source: d.source,
           needsCaptions: $('#batch-needs-captions').checked,

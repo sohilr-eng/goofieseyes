@@ -79,8 +79,10 @@
         <div class="when">
           <label class="platform"><input type="radio" name="when" value="now" checked> Now</label>
           <label class="platform"><input type="radio" name="when" value="later"> Schedule</label>
+          <label class="platform" id="when-spread" hidden><input type="radio" name="when" value="spread"> Spread out</label>
           <input type="datetime-local" id="scheduled-at" hidden>
         </div>
+        <p class="hint when-hint" id="when-hint" hidden></p>
 
         <ul class="problems" id="problems"></ul>
 
@@ -92,14 +94,20 @@
         <div class="progress" id="progress" hidden><div></div></div>
       </form>
 
-      <!-- Several Instagram posts at once: one card each, shared timing. -->
+      <!-- Several posts at once: one card each, shared timing. -->
       <form id="batch" class="card" novalidate hidden>
-        <h2 id="batch-title">From Instagram</h2>
+        <h2 id="batch-title">Separate posts</h2>
 
         <div class="field-head"><span class="label">Post to</span></div>
         <div class="platforms">
           <label class="platform"><input type="checkbox" name="batch-platform" value="facebook" checked> Facebook</label>
+          <label class="platform" id="batch-instagram"><input type="checkbox" name="batch-platform" value="instagram"> Instagram</label>
           <label class="platform"><input type="checkbox" name="batch-platform" value="threads" checked> Threads</label>
+        </div>
+        <div class="fit-all" id="batch-fit" hidden>
+          <span id="batch-fit-note"></span>
+          <button class="btn small" type="button" data-fit-all="crop">Crop all 4:5</button>
+          <button class="btn small" type="button" data-fit-all="pad">Border all 4:5</button>
         </div>
 
         <label class="desk-opt"><input type="checkbox" id="batch-needs-captions" checked> Let the caption desk write the Facebook &amp; Threads captions <span class="label">(runs in Claude Code)</span></label>
@@ -127,6 +135,7 @@
 
         <div class="submit-bar">
           <div class="note" id="batch-note"></div>
+          <button class="btn ghost" type="button" id="batch-back" hidden>One post instead</button>
           <button class="btn ghost" type="button" id="batch-discard">Discard</button>
           <button class="btn primary" type="submit" id="batch-submit">Queue</button>
         </div>
