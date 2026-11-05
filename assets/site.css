@@ -468,9 +468,13 @@ body.gf-body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  /* The disc's round overflow clip doesn't hold on Android Chrome once the
-   * photo spins on its own compositor layer: the square photo shows through
-   * as an octagon. Clipping the photo itself to a circle keeps it round there. */
+  /* On an iPhone the disc's round overflow clip doesn't reach the photo once
+   * it spins on its own GPU layer, so the square photo shows through as an
+   * octagon (the rotating square cut by the disc's square box). The photo
+   * rounds its own corners instead: a layer's own border-radius is applied by
+   * the GPU with it, where an ancestor's clip can be dropped. clip-path is a
+   * second guard for engines that honour it. */
+  border-radius: 50%;
   clip-path: circle(50%);
 }
 
@@ -686,7 +690,8 @@ body.gf-body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  clip-path: circle(50%); /* same Android Chrome fix as .gf-record-disc img */
+  border-radius: 50%; /* same iPhone fix as .gf-record-disc img */
+  clip-path: circle(50%);
 }
 
 .gf-now-label {
