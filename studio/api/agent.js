@@ -14,18 +14,9 @@
  * login password so it can be rotated without signing every device out.
  */
 
-const crypto = require('crypto');
 const { handler, readJson, send, query, httpError } = require('../lib/http');
+const { requireAgent } = require('../lib/auth');
 const { listPosts, applyCaptions } = require('../lib/posts');
-
-function requireAgent(req) {
-  const expected = process.env.STUDIO_AGENT_TOKEN;
-  if (!expected) throw httpError(503, 'STUDIO_AGENT_TOKEN is not set.');
-  const given = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
-  const a = Buffer.from(given);
-  const b = Buffer.from(expected);
-  if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) throw httpError(401, 'Bad agent token');
-}
 
 // The last paragraph of a caption is where the invitation lives.
 function ending(text) {

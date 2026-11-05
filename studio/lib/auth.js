@@ -99,4 +99,22 @@ function logout(res) {
   res.setHeader('Set-Cookie', `${COOKIE}=${cookieAttrs(0)}`);
 }
 
-module.exports = { requireAuth, isAuthed, login, logout };
+// The desks in Claude Code (captions, growth) sign in with STUDIO_AGENT_TOKEN
+// as `Authorization: Bearer …`. Separate from the login password so it can be
+// rotated without signing every device out.
+function requireAgent(req) {
+  const expected = process.env.STUDIO_AGENT_TOKEN;
+  if (!expected) throw httpError(503, 'STUDIO_AGENT_TOKEN is not set.');
+  const given = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!safeEqual(given, expected)) throw httpError(401, 'Bad agent token');
+}
+
+// Routes both the studio page and the desks use (leads, lookup): a request that
+// carries a Bearer token is a desk and must have the right one; anything else
+// must be signed in.
+function requireOwnerOrAgent(req) {
+  if (req.headers.authorization) return requireAgent(req);
+  return requireAuth(req);
+}
+
+module.exports = { requireAuth, requireAgent, requireOwnerOrAgent, isAuthed, login, logout, clientIp };

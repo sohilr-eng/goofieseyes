@@ -85,10 +85,12 @@ a { color: var(--lens); }
 
 .tabs {
   display: flex; gap: 4px;
+  overflow-x: auto; scrollbar-width: none;
   padding: 10px 16px 0;
   max-width: 760px; margin: 0 auto;
 }
 .tab {
+  flex: none;
   border: 0; background: none; cursor: pointer;
   padding: 10px 14px;
   border-radius: 999px;
@@ -335,3 +337,56 @@ dialog.sheet::backdrop { background: rgba(31, 29, 27, 0.5); }
 .desk-opt { display: flex; gap: 8px; align-items: center; margin-top: 14px; font-size: 15px; cursor: pointer; }
 .desk-opt input { accent-color: var(--lens); width: 18px; height: 18px; flex: none; }
 .chip.desk { color: var(--lens); border-color: currentColor; background: none; }
+
+/* ── Growth ────────────────────────────────────────────────────────────── */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.filters { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 4px; }
+.filters .mini { font-size: 13px; padding: 4px 10px; border-radius: 999px; }
+.lead { padding: 14px 0; border-top: 1px solid var(--line); }
+.lead:first-child { border-top: 0; }
+.lead-head { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.lead h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 900; font-size: 18px; letter-spacing: -0.01em; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.lead .who { font-size: 14px; color: var(--muted); margin: 2px 0 6px; }
+.lead .links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; margin-bottom: 6px; overflow-wrap: anywhere; }
+.lead .goal { margin: 0 0 8px; color: var(--umber); }
+.lead .notes { margin: 0 0 8px; padding-left: 18px; font-size: 14px; color: var(--umber); }
+.lead .notes time { color: var(--muted); font-size: 12px; margin-right: 6px; }
+.lead-actions { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lead-actions select, .lead-actions input, .lookup input {
+  min-height: 40px; border: 1px solid var(--line); border-radius: 10px; padding: 0 12px; background: var(--paper);
+}
+.lead-actions input { flex: 1; min-width: 160px; }
+.chip.st-new { color: var(--lens); border-color: currentColor; background: none; }
+.chip.st-client { color: var(--ok); border-color: currentColor; background: none; }
+.chip.st-closed { color: var(--muted); background: none; }
+.lookup { display: flex; gap: 8px; }
+.lookup input { flex: 1; min-width: 0; min-height: 44px; }
+.profile { margin-top: 14px; border-top: 1px solid var(--line); padding-top: 14px; }
+.profile h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 900; font-size: 19px; margin: 0; }
+.profile .bio { white-space: pre-line; font-size: 14px; color: var(--umber); margin: 6px 0; overflow-wrap: anywhere; }
+.nums { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; margin: 12px 0; }
+.num-box { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 8px 10px; }
+.num-box b { display: block; font-size: 18px; }
+.num-box span { font-size: 12px; color: var(--muted); }
+.top-posts { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.top-posts li { display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 14px; padding: 8px 0; border-top: 1px solid var(--line); }
+.top-posts .eng { font-weight: 700; }
+.top-posts .cap { color: var(--umber); overflow-wrap: anywhere; }
+.top-posts .meta { grid-column: 2; color: var(--muted); font-size: 12px; }
+.lead-note { display: flex; gap: 8px; flex: 1; min-width: 220px; }
+.profile .links { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; overflow-wrap: anywhere; }
+.tip { padding: 14px 0; border-top: 1px solid var(--line); }
+.tip:first-child { border-top: 0; }
+.tip h3 { font-family: 'Fraunces', Georgia, serif; font-weight: 900; font-size: 18px; letter-spacing: -0.01em; margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.tip p { margin: 6px 0; overflow-wrap: anywhere; }
+.tip-idea { color: var(--ink); }
+.tip-why, .tip-result { font-size: 14px; color: var(--umber); }
+.tip .label { margin-right: 6px; }
+.tip-from { color: var(--muted); }
+.tip .lead-actions { margin-top: 10px; }
+.tip .mini { font-size: 13px; padding: 6px 12px; border-radius: 999px; }
+.tip-script { background: var(--paper); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin: 8px 0; font-size: 15px; }
+.tip-script ol { margin: 6px 0 0; padding-left: 20px; }
+.tip-script li + li { margin-top: 4px; }
+.tip-hook { font-weight: 600; margin: 0 !important; }
+.tip-len { font-size: 13px; color: var(--muted); margin: 6px 0 0 !important; }

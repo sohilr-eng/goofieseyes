@@ -56,6 +56,7 @@ function showTab(name) {
   for (const panel of $$('[data-panel]')) panel.hidden = panel.dataset.panel !== name;
   if (name === 'queue') loadQueue();
   if (name === 'connections') loadConnections();
+  if (name === 'growth') { loadLeads(); loadTips(); }
 }
 for (const tab of $$('.tab')) tab.addEventListener('click', () => showTab(tab.dataset.tab));
 
@@ -965,6 +966,299 @@ async function loadConnections() {
     + svc(s.services.scheduler, 'Scheduler (Upstash QStash)');
 }
 
+// ─── Growth ──────────────────────────────────────────────────────────────────
+// Audit requests from goofieseyes.live/audit, and one-off account lookups.
+// The research and drafting happen in Claude Code (/growth); this is the
+// at-a-glance view and the place to move a lead along from your phone.
+
+const LEAD_STATUSES = ['new', 'researched', 'sent', 'call', 'client', 'closed'];
+const LEAD_LABEL = { new: 'New', researched: 'Researched', sent: 'Audit sent', call: 'Call booked', client: 'Client', closed: 'Closed' };
+const growth = { leads: [], filter: 'open' };
+const isOpen = (l) => !['client', 'closed'].includes(l.status);
+
+const fmtDate = (ms) => new Date(ms).toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+const fmtNum = (n) => (n == null ? '–' : n >= 10000 ? `${(n / 1000).toFixed(n >= 100000 ? 0 : 1)}k` : Math.round(n).toLocaleString());
+const igUrl = (u) => `https://www.instagram.com/${encodeURIComponent(u)}/`;
+
+function siteLink(raw) {
+  if (!raw) return '';
+  try {
+    const u = new URL(raw);
+    if (!/^https?:$/.test(u.protocol)) return '';
+    return `<a href="${esc(u.href)}" target="_blank" rel="noopener noreferrer">${esc(u.hostname)} ↗</a>`;
+  } catch {
+    return '';
+  }
+}
+
+function renderLeadFilter() {
+  const counts = { open: growth.leads.filter(isOpen).length, all: growth.leads.length };
+  for (const st of LEAD_STATUSES) counts[st] = growth.leads.filter((l) => l.status === st).length;
+  const opts = [['open', 'Open'], ...LEAD_STATUSES.map((st) => [st, LEAD_LABEL[st]]), ['all', 'All']];
+  $('#lead-filter').innerHTML = opts
+    .filter(([key]) => ['open', 'all', 'new'].includes(key) || counts[key])
+    .map(([key, label]) => `<button type="button" class="mini" data-filter="${key}" aria-pressed="${growth.filter === key}">${label} ${counts[key]}</button>`)
+    .join('');
+}
+
+function leadCard(l) {
+  const id = esc(l.id);
+  const notes = (l.notes || []).map((n) => `<li><time>${fmtDate(n.at)}</time>${esc(n.text)}</li>`).join('');
+  const options = LEAD_STATUSES.map((st) => `<option value="${st}" ${st === l.status ? 'selected' : ''}>${LEAD_LABEL[st]}</option>`).join('');
+  return `<article class="lead" data-id="${id}">
+    <div class="lead-head"><h3>${esc(l.business)}</h3><span class="chip st-${esc(l.status)}">${LEAD_LABEL[l.status] || esc(l.status)}</span></div>
+    <p class="who">${esc(l.name)} · asked ${fmtDate(l.createdAt)}</p>
+    <div class="links">
+      <a href="${igUrl(l.instagram)}" target="_blank" rel="noopener noreferrer">@${esc(l.instagram)} ↗</a>
+      ${siteLink(l.website)}
+      <a href="mailto:${esc(l.email)}">${esc(l.email)}</a>
+    </div>
+    ${l.goal ? `<p class="goal">“${esc(l.goal)}”</p>` : ''}
+    ${notes ? `<ul class="notes">${notes}</ul>` : ''}
+    <div class="lead-actions">
+      <label class="sr" for="st-${id}">Status</label>
+      <select id="st-${id}" data-lead-status>${options}</select>
+      <button class="btn small" type="button" data-lead-lookup="${esc(l.instagram)}">Look up</button>
+      <form class="lead-note" data-lead-note>
+        <label class="sr" for="note-${id}">Note</label>
+        <input id="note-${id}" maxlength="2000" placeholder="Add a note">
+        <button class="btn small" type="submit">Add</button>
+      </form>
+    </div>
+  </article>`;
+}
+
+function renderLeads() {
+  renderLeadFilter();
+  const newCount = growth.leads.filter((l) => l.status === 'new').length;
+  $('#lead-count').textContent = newCount ? String(newCount) : '';
+  const shown = growth.leads.filter((l) => growth.filter === 'all' || (growth.filter === 'open' ? isOpen(l) : l.status === growth.filter));
+  $('#leads').innerHTML = shown.length
+    ? shown.map(leadCard).join('')
+    : `<p class="empty">${growth.leads.length ? 'None here.' : 'No requests yet. Once goofieseyes.live/audit is live and in your bio, they show up here.'}</p>`;
+}
+
+async function loadLeads() {
+  try {
+    growth.leads = (await api('/api/leads')).leads;
+  } catch (err) {
+    $('#leads').innerHTML = `<p class="empty">${esc(err.message)}</p>`;
+    return;
+  }
+  renderLeads();
+}
+
+async function saveLead(id, body) {
+  const { lead } = await api(`/api/leads?id=${encodeURIComponent(id)}`, { method: 'POST', body });
+  growth.leads = growth.leads.map((l) => (l.id === id ? lead : l));
+  renderLeads();
+}
+
+$('#lead-filter').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-filter]');
+  if (!btn) return;
+  growth.filter = btn.dataset.filter;
+  renderLeads();
+});
+
+$('#leads').addEventListener('change', async (e) => {
+  if (!e.target.matches('[data-lead-status]')) return;
+  const id = e.target.closest('.lead').dataset.id;
+  e.target.disabled = true;
+  try {
+    await saveLead(id, { status: e.target.value });
+    toast(`Moved to ${LEAD_LABEL[e.target.value]}`);
+  } catch (err) {
+    toast(err.message, 5000);
+    renderLeads();
+  }
+});
+
+$('#leads').addEventListener('submit', async (e) => {
+  if (!e.target.matches('[data-lead-note]')) return;
+  e.preventDefault();
+  const note = $('input', e.target).value.trim();
+  if (!note) return;
+  try {
+    await saveLead(e.target.closest('.lead').dataset.id, { note });
+  } catch (err) {
+    toast(err.message, 5000);
+  }
+});
+
+$('#leads').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-lead-lookup]');
+  if (!btn) return;
+  $('#lookup-user').value = btn.dataset.leadLookup;
+  $('#lookup-form').requestSubmit();
+  $('#lookup-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+
+// The same reading as scripts/growth-desk.js, kept small: what's typical, how
+// often, which formats, and which posts broke out.
+const median = (xs) => {
+  if (!xs.length) return 0;
+  const s = [...xs].sort((a, b) => a - b);
+  const m = Math.floor(s.length / 2);
+  return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+};
+const firstLine = (c) => ((c || '').split(/\r?\n/).find((l) => l.trim()) || '(no caption)').trim().slice(0, 110);
+const TYPE_NAMES = { reel: 'reels', carousel: 'carousels', video: 'videos', photo: 'photos' };
+
+function profileView(a) {
+  const posts = a.posts || [];
+  const med = median(posts.map((p) => p.engagement));
+  const times = posts.map((p) => Date.parse(p.timestamp)).filter(Number.isFinite);
+  const weeks = times.length > 1 ? (Math.max(...times) - Math.min(...times)) / (7 * 86400e3) : 0;
+  const types = {};
+  for (const p of posts) types[p.type] = (types[p.type] || 0) + 1;
+  const mix = Object.entries(types).sort((x, y) => y[1] - x[1]).map(([t, c]) => `${c} ${TYPE_NAMES[t] || t}`).join(', ');
+  const hidden = posts.filter((p) => p.likes === null).length;
+  const top = [...posts].sort((x, y) => y.engagement - x.engagement).slice(0, 5);
+
+  return `<div class="profile">
+    <h3>${esc(a.name || a.username)}</h3>
+    <div class="links"><a href="${igUrl(a.username)}" target="_blank" rel="noopener noreferrer">@${esc(a.username)} ↗</a>${siteLink(a.website)}</div>
+    ${a.biography ? `<p class="bio">${esc(a.biography)}</p>` : ''}
+    <div class="nums">
+      <div class="num-box"><b>${fmtNum(a.followers)}</b><span>followers</span></div>
+      <div class="num-box"><b>${fmtNum(med)}</b><span>typical likes + comments</span></div>
+      <div class="num-box"><b>${a.followers ? `${((med / a.followers) * 100).toFixed(1)}%` : '–'}</b><span>of followers engage</span></div>
+      <div class="num-box"><b>${weeks ? (posts.length / weeks).toFixed(1) : '–'}</b><span>posts a week</span></div>
+    </div>
+    <p class="hint">Last ${posts.length} posts: ${esc(mix) || 'none'}.${hidden === 1 ? ' One hides its likes, so it counts comments only.' : hidden ? ` ${hidden} hide their likes, so those count comments only.` : ''}</p>
+    ${top.length ? `<p class="label" style="margin:12px 0 4px">Their strongest posts</p>
+    <ol class="top-posts">${top.map((p) => `<li>
+      <span class="eng">${fmtNum(p.engagement)}</span>
+      <span class="cap"><a href="${esc(p.permalink)}" target="_blank" rel="noopener noreferrer">${esc(firstLine(p.caption))}</a></span>
+      <span class="meta">${esc(p.type)} · ${fmtDate(Date.parse(p.timestamp))}${med && p.engagement >= med * 2 ? ' · breakout' : ''}</span>
+    </li>`).join('')}</ol>` : ''}
+  </div>`;
+}
+
+$('#lookup-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const user = $('#lookup-user').value.trim();
+  if (!user) return;
+  const out = $('#lookup-result');
+  const go = $('#lookup-go');
+  go.disabled = true;
+  out.innerHTML = '<p class="empty">Looking…</p>';
+  try {
+    out.innerHTML = profileView(await api(`/api/lookup?username=${encodeURIComponent(user)}&posts=25`));
+  } catch (err) {
+    out.innerHTML = `<p class="empty">${esc(err.message)}</p>`;
+  } finally {
+    go.disabled = false;
+  }
+});
+
+// Tips from the watch list: sent by the growth desk after each /growth run.
+// Marking one here (tried, skip, how it went) is read back by the next run.
+
+const TIP_KIND = { talk: 'Talk to camera', post: 'Post idea', habit: 'Habit', offer: 'The offer', profile: 'Profile' };
+const TIP_LABEL = { 'to-try': 'To try', tried: 'Tried', skip: 'Skipped' };
+const tipsState = { tips: [], report: null, updatedAt: null, filter: 'to-try' };
+
+function tipCard(t) {
+  const id = esc(t.id);
+  const from = (t.from || []).map((f) => (f.permalink
+    ? `<a href="${esc(f.permalink)}" target="_blank" rel="noopener noreferrer">@${esc(f.username)} ↗</a>`
+    : `<a href="${igUrl(f.username)}" target="_blank" rel="noopener noreferrer">@${esc(f.username)}</a>`)).join(', ');
+  const mark = (status, label) => `<button type="button" class="mini" data-tip-status="${status}" aria-pressed="${t.status === status}">${label}</button>`;
+  return `<article class="tip" data-id="${id}">
+    <div class="lead-head"><h3>${esc(t.title)}</h3><span class="chip">${TIP_KIND[t.kind] || 'Tip'}</span></div>
+    <p class="tip-idea">${esc(t.idea)}</p>
+    ${t.script ? `<div class="tip-script">
+      ${t.script.hook ? `<p class="tip-hook"><span class="label">Open with</span> “${esc(t.script.hook)}”</p>` : ''}
+      ${t.script.beats.length ? `<ol>${t.script.beats.map((b) => `<li>${esc(b)}</li>`).join('')}</ol>` : ''}
+      ${t.script.length ? `<p class="tip-len">About ${esc(t.script.length)}</p>` : ''}
+    </div>` : ''}
+    <p class="tip-why"><span class="label">Why</span> ${esc(t.why)}${from ? ` <span class="tip-from">From ${from}</span>` : ''}</p>
+    ${t.result ? `<p class="tip-result"><span class="label">How it went</span> ${esc(t.result)}</p>` : ''}
+    <div class="lead-actions">
+      ${mark('tried', 'Tried it')}${mark('skip', 'Skip')}${t.status !== 'to-try' ? mark('to-try', 'Back to try') : ''}
+      ${t.status === 'tried' ? `<form class="lead-note" data-tip-result>
+        <label class="sr" for="res-${id}">How it went</label>
+        <input id="res-${id}" maxlength="500" placeholder="How did it do?" value="${esc(t.result || '')}">
+        <button class="btn small" type="submit">Save</button>
+      </form>` : ''}
+    </div>
+  </article>`;
+}
+
+function renderTips() {
+  const counts = { all: tipsState.tips.length };
+  for (const st of Object.keys(TIP_LABEL)) counts[st] = tipsState.tips.filter((t) => t.status === st).length;
+  counts.talk = tipsState.tips.filter((t) => t.kind === 'talk' && t.status === 'to-try').length;
+  const tipFilters = [['to-try', 'To try'], ['talk', 'Talk to camera'], ['tried', 'Tried'], ['skip', 'Skipped'], ['all', 'All']];
+  $('#tip-filter').innerHTML = tipsState.tips.length
+    ? tipFilters
+      .filter(([key]) => key === 'to-try' || key === 'all' || counts[key])
+      .map(([key, label]) => `<button type="button" class="mini" data-filter="${key}" aria-pressed="${tipsState.filter === key}">${label} ${counts[key]}</button>`)
+      .join('')
+    : '';
+  if (tipsState.updatedAt) {
+    $('#tips-meta').textContent = `From the ${tipsState.report || fmtDate(tipsState.updatedAt)} growth desk run. Run /growth in Claude Code for fresh ones.`;
+  }
+  const shown = tipsState.tips.filter((t) => tipsState.filter === 'all'
+    || (tipsState.filter === 'talk' ? t.kind === 'talk' && t.status === 'to-try' : t.status === tipsState.filter));
+  $('#tips').innerHTML = shown.length
+    ? shown.map(tipCard).join('')
+    : `<p class="empty">${tipsState.tips.length ? 'Nothing here.' : 'No tips yet. Once the studio changes are live, run /growth in Claude Code and its tips land here.'}</p>`;
+}
+
+async function loadTips() {
+  try {
+    Object.assign(tipsState, await api('/api/tips'));
+  } catch (err) {
+    $('#tips').innerHTML = `<p class="empty">${esc(err.message)}</p>`;
+    return;
+  }
+  renderTips();
+}
+
+async function saveTip(id, body) {
+  const { tip } = await api(`/api/tips?id=${encodeURIComponent(id)}`, { method: 'POST', body });
+  tipsState.tips = tipsState.tips.map((t) => (t.id === id ? tip : t));
+  renderTips();
+}
+
+$('#tip-filter').addEventListener('click', (e) => {
+  const btn = e.target.closest('[data-filter]');
+  if (!btn) return;
+  tipsState.filter = btn.dataset.filter;
+  renderTips();
+});
+
+$('#tips').addEventListener('click', async (e) => {
+  const btn = e.target.closest('[data-tip-status]');
+  if (!btn) return;
+  const id = btn.closest('.tip').dataset.id;
+  const status = btn.dataset.tipStatus;
+  btn.disabled = true;
+  try {
+    // Stay on the current filter, but keep a just-tried tip in view so its
+    // "How did it do?" box is there to fill in.
+    if (status === 'tried' && ['to-try', 'talk'].includes(tipsState.filter)) tipsState.filter = 'tried';
+    await saveTip(id, { status });
+  } catch (err) {
+    toast(err.message, 5000);
+    btn.disabled = false;
+  }
+});
+
+$('#tips').addEventListener('submit', async (e) => {
+  if (!e.target.matches('[data-tip-result]')) return;
+  e.preventDefault();
+  try {
+    await saveTip(e.target.closest('.tip').dataset.id, { result: $('input', e.target).value.trim() });
+    toast('Saved');
+  } catch (err) {
+    toast(err.message, 5000);
+  }
+});
+
 // ─── Boot ────────────────────────────────────────────────────────────────────
 
 (async () => {
@@ -973,4 +1267,5 @@ async function loadConnections() {
   renderComposer();
   loadConnections();
   loadQueue();
+  loadLeads();
 })();

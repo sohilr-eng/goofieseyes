@@ -22,6 +22,7 @@
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="compose" aria-selected="true">Compose</button>
     <button class="tab" role="tab" data-tab="queue" aria-selected="false">Queue<span class="count" id="queue-count"></span></button>
+    <button class="tab" role="tab" data-tab="growth" aria-selected="false">Growth<span class="count" id="lead-count"></span></button>
     <button class="tab" role="tab" data-tab="connections" aria-selected="false">Connections</button>
   </nav>
 
@@ -145,6 +146,39 @@
     <!-- ── Queue ───────────────────────────────────────────────────────── -->
     <div data-panel="queue" hidden>
       <div id="queue"></div>
+    </div>
+
+    <!-- ── Growth ──────────────────────────────────────────────────────── -->
+    <div data-panel="growth" hidden>
+      <div class="card">
+        <h2>Tips from your watch list</h2>
+        <p class="hint" id="tips-meta">What the people you're studying do that works, turned into things to try on goofieseyes. Run <code>/growth</code> in Claude Code for fresh ones.</p>
+        <div class="filters" id="tip-filter" role="group" aria-label="Show"></div>
+        <div id="tips"><p class="empty">Loading…</p></div>
+      </div>
+
+      <div class="card">
+        <h2>Audit requests</h2>
+        <p class="hint">From the form at goofieseyes.live/audit. Run <code>/growth leads</code> in Claude Code to research them and draft the audits.</p>
+        <div class="filters" id="lead-filter" role="group" aria-label="Show"></div>
+        <div id="leads"><p class="empty">Loading…</p></div>
+      </div>
+
+      <div class="card">
+        <h2>Look up an account</h2>
+        <form class="lookup" id="lookup-form" novalidate>
+          <label class="sr" for="lookup-user">Instagram username</label>
+          <input id="lookup-user" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="@username or Instagram link">
+          <button class="btn primary" type="submit" id="lookup-go">Look up</button>
+        </form>
+        <p class="hint" style="margin-top:8px">Business and creator accounts only. Read-only: nothing is followed, liked or messaged.</p>
+        <div id="lookup-result"></div>
+      </div>
+
+      <div class="card">
+        <h2>Watch list and playbook</h2>
+        <p style="margin:0">These live on your computer, in <code>Sorian Systems/goofieseyes growth</code>. Edit <code>watch-list.md</code> to add accounts, then run <code>/growth</code> in Claude Code for a report. The tips above come from the same run, and what you mark here is read back into the playbook next time.</p>
+      </div>
     </div>
 
     <!-- ── Connections ─────────────────────────────────────────────────── -->

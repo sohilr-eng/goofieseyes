@@ -20,6 +20,25 @@ const IG_LIBRARY = [
   { id: '17900000000000003', media_type: 'VIDEO', media_product_type: 'REELS', media_url: 'https://goofieseyes.live/assets/film/film-01-720.mp4', thumbnail_url: PHOTO('img-2428.webp'), caption: 'nyfw, backstage in motion.', permalink: 'https://www.instagram.com/reel/AAA3/', timestamp: '2026-09-15T18:00:00+0000' },
 ];
 
+// Accounts Business Discovery can see. Anything else answers like a personal
+// or missing account does. One reel hides its likes, which Meta allows.
+const DISCOVERY = {
+  'creative.studio': {
+    username: 'creative.studio', name: 'A Creative Studio', biography: 'Creative Director | NJ',
+    website: 'https://example.com', followers_count: 131000, follows_count: 0, media_count: 412,
+    media: Array.from({ length: 30 }, (_, i) => ({
+      id: `D${i}`,
+      caption: i === 3 ? 'start stupid. comment IDEAS for the list' : `day ${i} of making things`,
+      media_type: i % 5 === 0 ? 'IMAGE' : 'VIDEO',
+      media_product_type: i % 5 === 0 ? 'FEED' : 'REELS',
+      ...(i === 7 ? {} : { like_count: i === 3 ? 9000 : 800 + i }),
+      comments_count: i === 3 ? 600 : 20,
+      timestamp: new Date(Date.UTC(2026, 10, 1) - i * 3 * 86400e3).toISOString(),
+      permalink: `https://www.instagram.com/reel/D${i}/`,
+    })),
+  },
+};
+
 function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
   const calls = [];
   const containers = new Map();
@@ -85,6 +104,15 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
       if (!c) return json(400, { error: { message: 'Invalid creation_id', code: 100 } });
       c.published = true;
       return json(200, { id: `M${params.creation_id}` });
+    }
+
+    // ── Business Discovery (growth desk lookups) ──
+    if (path === '/IG1' && method === 'GET' && String(params.fields).startsWith('business_discovery')) {
+      const username = /username\(([^)]+)\)/.exec(params.fields)[1];
+      const limit = Number(/media\.limit\((\d+)\)/.exec(params.fields)?.[1] || 25);
+      const account = DISCOVERY[username];
+      if (!account) return json(400, { error: { message: 'Invalid user id', code: 110, error_subcode: 2207013 } });
+      return json(200, { business_discovery: { ...account, media: { data: account.media.slice(0, limit) } }, id: 'IG1' });
     }
 
     // ── Field reads ──
