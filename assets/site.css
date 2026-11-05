@@ -468,6 +468,10 @@ body.gf-body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  /* The disc's round overflow clip doesn't hold on Android Chrome once the
+   * photo spins on its own compositor layer: the square photo shows through
+   * as an octagon. Clipping the photo itself to a circle keeps it round there. */
+  clip-path: circle(50%);
 }
 
 .gf-record-disc::after {
@@ -614,16 +618,11 @@ body.gf-body {
   to { transform: translate(0, 0) rotate(360deg); }
 }
 
-/* Cover art turns inside a circle exactly as wide as the artwork is square, so
- * the square's four edges are tangent to the circle rather than clear of it.
- * At tangency subpixel antialiasing can flash a hairline of whatever is behind
- * — here the disc's pigment background — once per quarter turn. The 2% overfill
- * puts the edge permanently outside the clip. Invisible at any disc size; only
- * the labels and the 45 keep the plain rotation, because they are already
- * circles and scaling those would just make them bigger. */
+/* Cover art is clipped to its own circle (see .gf-record-disc img), so it
+ * turns without its square corners ever reaching the disc's edge. */
 @keyframes gf-spin-cover {
-  from { transform: rotate(0deg) scale(1.02); }
-  to { transform: rotate(360deg) scale(1.02); }
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 [data-gf-spin="label"] .gf-record-label,
@@ -687,6 +686,7 @@ body.gf-body {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  clip-path: circle(50%); /* same Android Chrome fix as .gf-record-disc img */
 }
 
 .gf-now-label {
