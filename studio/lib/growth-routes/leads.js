@@ -7,9 +7,9 @@
  * Signed-in studio page or the agent token (see lib/auth.js).
  */
 
-const { handler, readJson, send, query, httpError } = require('../lib/http');
-const { requireOwnerOrAgent } = require('../lib/auth');
-const { listLeads, updateLead } = require('../lib/leads');
+const { handler, readJson, send, query, httpError } = require('../http');
+const { requireOwnerOrAgent } = require('../auth');
+const { listLeads, updateLead } = require('../leads');
 
 module.exports = handler(async (req, res) => {
   requireOwnerOrAgent(req);

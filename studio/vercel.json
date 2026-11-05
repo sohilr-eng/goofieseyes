@@ -3,16 +3,42 @@
   "outputDirectory": "public",
   "framework": null,
   "crons": [
-    { "path": "/api/cron-daily", "schedule": "0 9 * * *" }
+    {
+      "path": "/api/cron-daily",
+      "schedule": "0 9 * * *"
+    }
   ],
   "headers": [
     {
       "source": "/(.*)",
       "headers": [
-        { "key": "X-Frame-Options", "value": "DENY" },
-        { "key": "Referrer-Policy", "value": "same-origin" },
-        { "key": "X-Content-Type-Options", "value": "nosniff" }
+        {
+          "key": "X-Frame-Options",
+          "value": "DENY"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "same-origin"
+        },
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        }
       ]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/leads",
+      "destination": "/api/growth?part=leads"
+    },
+    {
+      "source": "/api/lookup",
+      "destination": "/api/growth?part=lookup"
+    },
+    {
+      "source": "/api/tips",
+      "destination": "/api/growth?part=tips"
     }
   ]
 }

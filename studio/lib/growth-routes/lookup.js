@@ -7,9 +7,9 @@
  * Signed-in studio page or the agent token (see lib/auth.js). Read-only: nothing is posted, followed or liked.
  */
 
-const { handler, send, query, httpError } = require('../lib/http');
-const { requireOwnerOrAgent } = require('../lib/auth');
-const { lookupAccount } = require('../lib/discovery');
+const { handler, send, query, httpError } = require('../http');
+const { requireOwnerOrAgent } = require('../auth');
+const { lookupAccount } = require('../discovery');
 
 module.exports = handler(async (req, res) => {
   requireOwnerOrAgent(req);

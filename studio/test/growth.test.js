@@ -28,6 +28,11 @@ async function call(route, { method = 'GET', url = '/', headers = {}, body, ip =
   const res = { statusCode: 200, headers: {}, body: '' };
   res.setHeader = (k, v) => { res.headers[k.toLowerCase()] = v; };
   res.end = (chunk) => { res.body = chunk ? String(chunk) : ''; };
+  // leads, lookup and tips share api/growth.js (rewritten with ?part= on Vercel).
+  if (['leads', 'lookup', 'tips'].includes(route)) {
+    req.url += `${req.url.includes('?') ? '&' : '?'}part=${route}`;
+    route = 'growth';
+  }
   await require(`../api/${route}`)(req, res);
   return { status: res.statusCode, headers: res.headers, json: res.body ? JSON.parse(res.body) : null };
 }

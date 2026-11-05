@@ -54,6 +54,14 @@ http.createServer(async (req, res) => {
     return res.end(file.data);
   }
 
+  // Same rewrites as vercel.json: the Growth tab's routes share one function.
+  const growth = url.pathname.match(/^\/api\/(leads|lookup|tips)$/);
+  if (growth) {
+    url.searchParams.set('part', growth[1]);
+    req.url = `/api/growth?${url.searchParams}`;
+    return require('./api/growth')(req, res);
+  }
+
   const api = url.pathname.match(/^\/api\/([a-z-]+)$/);
   if (api) {
     const file = path.join(__dirname, 'api', `${api[1]}.js`);

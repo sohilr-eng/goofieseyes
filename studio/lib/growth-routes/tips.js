@@ -8,9 +8,9 @@
  * Only the growth desk (agent token) replaces the list; the page marks tips.
  */
 
-const { handler, readJson, send, query, httpError } = require('../lib/http');
-const { requireAgent, requireOwnerOrAgent } = require('../lib/auth');
-const { getTips, publishTips, updateTip } = require('../lib/tips');
+const { handler, readJson, send, query, httpError } = require('../http');
+const { requireAgent, requireOwnerOrAgent } = require('../auth');
+const { getTips, publishTips, updateTip } = require('../tips');
 
 module.exports = handler(async (req, res) => {
   const id = query(req).get('id');
