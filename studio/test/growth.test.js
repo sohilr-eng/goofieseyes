@@ -28,8 +28,8 @@ async function call(route, { method = 'GET', url = '/', headers = {}, body, ip =
   const res = { statusCode: 200, headers: {}, body: '' };
   res.setHeader = (k, v) => { res.headers[k.toLowerCase()] = v; };
   res.end = (chunk) => { res.body = chunk ? String(chunk) : ''; };
-  // leads, lookup and tips share api/growth.js (rewritten with ?part= on Vercel).
-  if (['leads', 'lookup', 'tips'].includes(route)) {
+  // The Growth tab's routes share api/growth.js (rewritten with ?part= on Vercel).
+  if (['leads', 'lookup', 'tips', 'own', 'post-audit'].includes(route)) {
     req.url += `${req.url.includes('?') ? '&' : '?'}part=${route}`;
     route = 'growth';
   }
@@ -213,4 +213,84 @@ test('talk-to-camera tips keep a short outline to film from', async () => {
   assert.equal(r.json.tips[1].script, undefined);
   const long = { ...talk, script: { hook: 'h'.repeat(201) } };
   assert.equal((await call('tips', { method: 'POST', body: { tips: [long] }, headers: AUTH })).status, 400);
+});
+
+test('our own posts come back with insights, each format asked only for its own', async () => {
+  assert.equal((await call('own')).status, 401);
+  const r = await call('own', { url: '/?posts=10', headers: AUTH });
+  assert.equal(r.status, 200);
+  assert.equal(r.json.username, 'goofieseyes');
+  assert.equal(r.json.followers, 5200);
+  assert.equal(r.json.posts.length, 3);
+
+  const [photo, carousel, reel] = r.json.posts;
+  assert.equal(carousel.type, 'carousel');
+  assert.deepEqual(carousel.insights, { reach: 9600, views: 15200, saves: 210, shares: 96, interactions: 638, follows: 41, profileVisits: 380 });
+  assert.equal(photo.insights.follows, 3);
+  assert.equal(reel.type, 'reel');
+  assert.equal(reel.insights.avgWatchMs, 4200);
+  assert.equal(reel.insights.follows, undefined, 'reels have no follows metric');
+  assert.equal(reel.likes, 95);
+
+  const asked = fake.calls.filter((c) => c.path.endsWith('/insights'));
+  assert.equal(asked.length, 3, 'one insights call per post, none retried');
+  assert.ok(fake.calls.every((c) => c.method === 'GET'), 'nothing is posted');
+});
+
+test('a post Meta has no insights for is kept without them; a missing permission is explained', async () => {
+  fake.failNext('17900000000000002/insights', { message: 'Unsupported get request.', code: 100 });
+  fake.failNext('17900000000000002/insights', { message: 'Unsupported get request.', code: 100 });
+  const r = await call('own', { headers: AUTH });
+  assert.equal(r.status, 200);
+  assert.equal(r.json.posts[1].insights, null);
+  assert.equal(r.json.posts[0].insights.reach, 1800);
+
+  fake.failNext('/insights', { message: '(#10) Application does not have permission for this action', code: 10 });
+  const denied = await call('own', { headers: AUTH });
+  assert.equal(denied.status, 503);
+  assert.match(denied.json.error, /instagram_manage_insights/);
+});
+
+const AUDIT = {
+  report: '2026-11-15',
+  sample: '31 posts, 12 Jun to 5 Sep, typical reach 4,100',
+  summary: 'Carousels with a story travel; single frames stay with followers.',
+  findings: [
+    { title: 'Story carousels travel', verdict: 'more', confidence: 'some', evidence: 'Three of the top five by reach are carousels with a long caption.',
+      advice: 'Post the next shoot as a carousel with the story in the caption.',
+      posts: [{ permalink: 'https://www.instagram.com/p/AAA2/', note: '2.3x typical reach' }, { permalink: 'javascript:alert(1)' }, 'https://www.instagram.com/p/AAA1/'] },
+    { title: 'Reach without follows', verdict: 'fix', confidence: 'thin', evidence: 'The reel reached 2,100 and brought none.', advice: 'Pin three posts.' },
+  ],
+};
+
+test('only the desk sends the post audit; the page reads it', async () => {
+  const login = await call('login', { method: 'POST', body: { password: 'pw' } });
+  const cookie = login.headers['set-cookie'].split(';')[0];
+
+  assert.equal((await call('post-audit')).status, 401);
+  assert.deepEqual((await call('post-audit', { headers: { cookie } })).json.findings, [], 'empty before the first audit');
+  assert.equal((await call('post-audit', { method: 'POST', body: AUDIT, headers: { cookie } })).status, 401, 'the page cannot send one');
+
+  const sent = await call('post-audit', { method: 'POST', body: AUDIT, headers: AUTH });
+  assert.equal(sent.status, 200);
+  assert.deepEqual(sent.json.findings[0].posts, [
+    { permalink: 'https://www.instagram.com/p/AAA2/', note: '2.3x typical reach' },
+    { permalink: 'https://www.instagram.com/p/AAA1/' },
+  ], 'non-Instagram links are dropped');
+
+  const read = await call('post-audit', { headers: { cookie } });
+  assert.equal(read.json.report, '2026-11-15');
+  assert.equal(read.json.summary, AUDIT.summary);
+  assert.equal(read.json.findings[1].verdict, 'fix');
+
+  // A new audit replaces the last one whole.
+  const next = await call('post-audit', { method: 'POST', body: { findings: [AUDIT.findings[1]] }, headers: AUTH });
+  assert.equal(next.json.findings.length, 1);
+  assert.equal(next.json.summary, null);
+
+  const bad = (finding) => call('post-audit', { method: 'POST', body: { findings: [finding] }, headers: AUTH });
+  assert.equal((await bad({ ...AUDIT.findings[0], verdict: 'viral' })).status, 400);
+  assert.equal((await bad({ ...AUDIT.findings[0], confidence: 'certain' })).status, 400);
+  assert.equal((await bad({ ...AUDIT.findings[0], evidence: '' })).status, 400, 'a finding needs its evidence');
+  assert.equal((await call('post-audit', { method: 'POST', body: { findings: [] }, headers: AUTH })).status, 400);
 });

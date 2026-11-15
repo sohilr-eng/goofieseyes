@@ -8,6 +8,8 @@
  * Password is `dev` unless STUDIO_PASSWORD is set. With STUDIO_FAKE_META=1,
  * Facebook/Instagram/Threads are simulated (test/fake-meta.js), so nothing
  * real is ever posted; without it, real tokens in the environment are used.
+ * STUDIO_FAKE_WITHHOLD (with fake Meta) names Instagram posts to simulate as
+ * uncopyable.
  */
 
 const http = require('http');
@@ -21,7 +23,10 @@ process.env.SESSION_SECRET = process.env.SESSION_SECRET || crypto.randomBytes(32
 if (process.env.STUDIO_FAKE_META) {
   process.env.META_SYSTEM_USER_TOKEN = process.env.META_SYSTEM_USER_TOKEN || 'fake';
   process.env.THREADS_ACCESS_TOKEN = process.env.THREADS_ACCESS_TOKEN || 'fake';
-  require('./test/fake-meta').installFakeMeta();
+  const fake = require('./test/fake-meta').installFakeMeta();
+  // STUDIO_FAKE_WITHHOLD=<instagram media id>[,…] makes those posts come back
+  // without a file, the way a Reel with licensed music does.
+  for (const id of (process.env.STUDIO_FAKE_WITHHOLD || '').split(',').filter(Boolean)) fake.withholdMedia(id.trim());
 }
 
 const PORT = Number(process.env.PORT) || 3100;
@@ -55,7 +60,7 @@ http.createServer(async (req, res) => {
   }
 
   // Same rewrites as vercel.json: the Growth tab's routes share one function.
-  const growth = url.pathname.match(/^\/api\/(leads|lookup|tips)$/);
+  const growth = url.pathname.match(/^\/api\/(leads|lookup|tips|own|post-audit)$/);
   if (growth) {
     url.searchParams.set('part', growth[1]);
     req.url = `/api/growth?${url.searchParams}`;

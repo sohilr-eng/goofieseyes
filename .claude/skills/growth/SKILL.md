@@ -1,6 +1,6 @@
 ---
 name: growth
-description: Growth desk for goofieseyes. Studies the Instagram accounts on the owner's watch list (creative directors and agencies a step ahead) to learn how they grow and sell without looking like a business, turns that into plays for goofieseyes, and researches audit requests from goofieseyes.live/audit into draft audits. Use when the owner says /growth, "run the growth desk", "check my watch list", "look up @someone", "give me talking-to-camera ideas", or "any audit requests?".
+description: Growth desk for goofieseyes. Studies the Instagram accounts on the owner's watch list (creative directors and agencies a step ahead) to learn how they grow and sell without looking like a business, turns that into plays for goofieseyes, audits goofieseyes's own posts from their insights (reach, shares, saves, follows), and researches audit requests from goofieseyes.live/audit into draft audits. Use when the owner says /growth, "run the growth desk", "check my watch list", "look up @someone", "give me talking-to-camera ideas", "audit my posts", "what's working on my account", "why did this flop", or "any audit requests?".
 ---
 
 # Growth desk
@@ -9,8 +9,12 @@ goofieseyes is a creative director's studio: ideas, shoots and edits for busines
 person whose Instagram is an artist's account first. This desk helps it grow by studying people
 who've done it, and by turning audit requests into clients. It runs only when the owner asks.
 
-The owner sees the desk's work on the studio's **Growth tab** (studio.goofieseyes.live): audit
-requests, account lookups, and the tips this desk sends at the end of each `/growth` run.
+The owner sees the desk's work on the studio's **Growth tab** (studio.goofieseyes.live): the tips
+this desk sends at the end of each `/growth` run, the audit of their own posts ("What your own
+posts say"), audit requests, and account lookups.
+
+Two different things are called an audit here. `/growth audit` is the desk reading goofieseyes's
+**own** numbers. `/growth leads` is audits written **for other businesses** who asked for one.
 
 Everything lives in the **growth folder**, `~/claude-workspace/Sorian Systems/goofieseyes growth/`
 (or `GROWTH_DIR`): `watch-list.md`, `playbook.md`, `funnel.md`, `reports/`, `audits/` and `data/`
@@ -103,6 +107,64 @@ For when the owner wants something to film now.
 4. Add them to the Growth tab: send the current tips plus these together (`tips <file>` replaces
    the list), keeping existing titles unchanged.
 5. In chat, give the five titles and opening lines only.
+
+## /growth audit: what goofieseyes's own posts say
+The watch list shows what works for other people. This is the only evidence of what works for
+goofieseyes. Run it about once a month, or when the owner asks why something did or didn't land.
+
+1. Read `playbook.md` and the newest `reports/audit-*.md`, and run `growth-desk.js tips` to see
+   which plays the owner marked `tried`. Those are the ones this audit can put numbers to.
+2. Run `node studio/scripts/growth-desk.js own` (add `--posts 50` for a longer look). It prints,
+   for the account's own recent posts: typical reach, each format's typical reach, shares and
+   saves, the posts that travelled furthest and least (reach against the account's own typical
+   post), the most passed-on posts, and any that reached new people but brought no follows.
+   - "Meta wouldn't hand over insights": the token is missing a permission. Say what the message
+     says (regenerate the system user token with `instagram_manage_insights`, setup step 3) and
+     stop. The owner does that; never ask for a token in chat.
+   - Posts with no insights are left out and counted. Posts under two days old read low.
+3. Open the raw JSON (path printed as `saved:`) and read the full captions of the top and bottom
+   posts. Put them side by side and look for what separates them, in this order:
+   - **Format:** reel, carousel, photo. Only compare formats with four or more posts each.
+   - **Subject:** personal vs. client work, people vs. places, talking to camera vs. visual only.
+   - **The first line of the caption**, and for reels the average watch time.
+   - **Shares and saves per 1,000 reached.** A share is someone putting their name on it; rank by
+     this before raw reach. A post with modest reach and many shares beat a big one with none.
+   - **Day and time last**, and only if nothing else shows. It is almost never the cause.
+4. Split the two kinds of miss before advising anything. **Reached people but brought no
+   follows** is a profile question (bio, pinned posts, highlights), so say that and don't rewrite
+   the post. **Reached no one** is about the opening: the first frame or first line.
+5. Say how much the sample supports. Under 12 measured posts, describe what happened and call
+   nothing a pattern. A finding seen once is `thin`; seen three or more times across the sample is
+   `some`; `strong` needs it to hold in most of the top posts and be absent from most of the
+   bottom ones. Never invent a pattern to have something to say.
+6. For a retention graph (how long people stayed, second by second), ask the owner to screenshot
+   it from the Instagram app for their best and worst recent reel, and read the screenshots. The
+   API doesn't give it.
+7. Write `reports/audit-<YYYY-MM-DD>.md`: the sample, the ranked posts with links, then the
+   findings. Where a finding is about a play the owner marked `tried`, say how that post did
+   against their typical one, and carry that into `playbook.md`.
+8. Send it to the Growth tab. Write `reports/audit-<YYYY-MM-DD>.json` and run
+   `growth-desk.js audit reports/audit-<YYYY-MM-DD>.json`:
+   ```json
+   { "report": "2026-11-15",
+     "sample": "31 posts, 12 Jun to 5 Sep, typical reach 4,100",
+     "summary": "One or two sentences: the single most useful thing these numbers say.",
+     "findings": [{ "title": "Carousels with the story in the caption travel",
+                    "verdict": "more",
+                    "confidence": "some",
+                    "evidence": "Three of your five furthest-reaching posts are carousels with a long caption; they average 9 shares per 1,000 reached against your usual 2.",
+                    "advice": "Post the next shoot as a carousel and tell the story of the day in the caption.",
+                    "posts": [{ "permalink": "https://www.instagram.com/p/…", "note": "Caroni, 2.3x your usual reach" }] }] }
+   ```
+   - 3–6 findings, 8 at most. It replaces the last audit whole.
+   - `verdict`: `more` (do more of this), `stop`, `fix` (something to change, usually the
+     profile or the opening), `watch` (too early to say; name what would settle it).
+   - `evidence` is the numbers, plainly, with the comparison in it. `advice` is one thing the owner
+     can do, concretely, in their own kind of work. Keep the artist first: no keyword calls to
+     action, no hashtags, nothing that turns the account into an ad feed.
+   - `posts` link the owner's own posts that the finding rests on, with a short `note` each.
+9. Report in chat: the summary, the findings' titles and verdicts, and how many posts it rests on.
+   Don't paste the whole report.
 
 ## /growth lookup @username
 Run `node studio/scripts/growth-desk.js lookup <username>` and give a short read of the account:

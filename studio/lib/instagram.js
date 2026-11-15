@@ -7,6 +7,11 @@
  * working after a while, and a post scheduled for next week would fail when
  * Facebook or Threads finally tried to fetch it.
  *
+ * Meta leaves `media_url` off a post that has licensed music or other
+ * copyrighted material on it, which in practice means Reels using a track from
+ * Instagram's library. There is nothing to copy for those, so the picker marks
+ * them (`copyable: false`) instead of letting the import fail one by one.
+ *
  * Which Instagram posts have already been brought over is kept as
  * `ig-source:<instagram media id>` → studio post id, so the picker can mark
  * them and nobody posts the same frame twice by accident. Cancelling or
@@ -24,6 +29,8 @@ const FIELDS = 'id,caption,media_type,media_product_type,media_url,thumbnail_url
 
 const sourceKey = (igId) => `ig-source:${igId}`;
 
+const NOT_COPYABLE = "Instagram won't hand over this one's file, which it does for Reels with licensed music on them. Upload the original video from your device instead.";
+
 // One entry per photo/video, in carousel order.
 function mediaItems(m) {
   const parts = m.media_type === 'CAROUSEL_ALBUM' ? (m.children?.data || []) : [m];
@@ -39,6 +46,7 @@ function summarise(m) {
     caption: m.caption || '',
     kind: m.media_type === 'CAROUSEL_ALBUM' ? 'carousel' : m.media_product_type === 'REELS' ? 'reel' : m.media_type === 'VIDEO' ? 'video' : 'photo',
     count: items.length,
+    copyable: items.length > 0,
     thumb: m.thumbnail_url || m.media_url || m.children?.data?.[0]?.thumbnail_url || m.children?.data?.[0]?.media_url || null,
     permalink: m.permalink,
     timestamp: m.timestamp,
@@ -108,7 +116,7 @@ async function importInstagram(igId) {
   const { token } = await metaAccount();
   const m = await facebook.get(`/${igId}`, { fields: FIELDS }, token);
   const items = mediaItems(m);
-  if (!items.length) throw httpError(422, 'That Instagram post has no media the API can read.');
+  if (!items.length) throw httpError(422, NOT_COPYABLE);
 
   const media = [];
   for (const [i, item] of items.entries()) media.push(await copyToBlob(item, igId, i));
@@ -133,4 +141,4 @@ async function releaseShared(igId, postId) {
   if ((await store.get(sourceKey(igId))) === postId) await store.del(sourceKey(igId));
 }
 
-module.exports = { listInstagram, importInstagram, threadsCaptionFrom, markShared, releaseShared };
+module.exports = { listInstagram, importInstagram, threadsCaptionFrom, markShared, releaseShared, NOT_COPYABLE };

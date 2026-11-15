@@ -390,3 +390,19 @@ dialog.sheet::backdrop { background: rgba(31, 29, 27, 0.5); }
 .tip-script li + li { margin-top: 4px; }
 .tip-hook { font-weight: 600; margin: 0 !important; }
 .tip-len { font-size: 13px; color: var(--muted); margin: 6px 0 0 !important; }
+.audit-summary { font-size: 17px; line-height: 1.4; margin: 10px 0 12px; padding: 10px 12px; background: var(--paper); border: 1px solid var(--line); border-radius: 10px; overflow-wrap: anywhere; }
+.chip.v-more { color: var(--ok); border-color: currentColor; background: none; }
+.chip.v-stop { color: var(--warn); border-color: currentColor; background: none; }
+.chip.v-fix { color: var(--lens); border-color: currentColor; background: none; }
+.chip.v-watch { color: var(--muted); background: none; }
+.finding-conf { font-size: 13px; color: var(--muted); }
+.finding-conf.c-strong { color: var(--umber); }
+.finding-posts { list-style: none; margin: 6px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 14px; }
+
+/* ── Bringing posts over from Instagram ────────────────────────────────── */
+.pick.no-copy { cursor: not-allowed; }
+.pick.no-copy img { opacity: 0.3; filter: grayscale(1); }
+.pick.no-copy .badge { background: var(--warn); }
+.import-note { border-color: var(--warn); }
+.import-note p { margin: 0 0 8px; overflow-wrap: anywhere; }
+.desk-hint { margin: 6px 0 0 26px; }

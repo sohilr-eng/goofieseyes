@@ -39,6 +39,14 @@
     {
       "source": "/api/tips",
       "destination": "/api/growth?part=tips"
+    },
+    {
+      "source": "/api/own",
+      "destination": "/api/growth?part=own"
+    },
+    {
+      "source": "/api/post-audit",
+      "destination": "/api/growth?part=post-audit"
     }
   ]
 }

@@ -56,7 +56,7 @@ function showTab(name) {
   for (const panel of $$('[data-panel]')) panel.hidden = panel.dataset.panel !== name;
   if (name === 'queue') loadQueue();
   if (name === 'connections') loadConnections();
-  if (name === 'growth') { loadLeads(); loadTips(); }
+  if (name === 'growth') { loadLeads(); loadTips(); loadAudit(); }
 }
 for (const tab of $$('.tab')) tab.addEventListener('click', () => showTab(tab.dataset.tab));
 
@@ -296,6 +296,15 @@ function renderCounters() {
 
 // ─── When ────────────────────────────────────────────────────────────────────
 
+// With the caption desk ticked, whatever caption is already there isn't what
+// gets posted, which isn't obvious from a full caption box.
+function deskHint(box, hint, hasCaption) {
+  hint.hidden = !box.checked;
+  hint.textContent = !box.checked ? ''
+    : hasCaption ? 'The caption that\'s there now is only the desk\'s notes. It writes new Facebook and Threads captions from it and the photos, and nothing goes out until it has (or you press "Post as is" in Queue).'
+      : 'The desk writes the Facebook and Threads captions from the photos. Nothing goes out until it has (or you press "Post as is" in Queue).';
+}
+
 const laterSelected = () => $('input[name="when"]:checked').value === 'later';
 function scheduledAt() {
   const v = $('#scheduled-at').value;
@@ -336,8 +345,12 @@ function renderComposer() {
   $('#reset').hidden = !state.editingId && !state.source && !state.media.length && !$('#caption').value;
   const canSpread = state.media.length > 1 && !state.editingId && !state.source;
   $('#when-spread').hidden = !canSpread;
-  $('#when-hint').hidden = !canSpread;
-  $('#when-hint').textContent = canSpread ? `Now and Schedule put all ${state.media.length} in one post. Spread out makes each its own post, on a schedule.` : '';
+  const couldSpread = !canSpread && !state.editingId && !state.source;
+  $('#when-hint').hidden = !canSpread && !couldSpread;
+  $('#when-hint').textContent = canSpread
+    ? `Now and Schedule put all ${state.media.length} in one post. Spread out makes each its own post, on a schedule.`
+    : couldSpread ? 'To schedule several posts in one go, add two or more photos or videos and "Spread out" appears here. Picking several from Instagram does the same.' : '';
+  deskHint($('#needs-captions'), $('#desk-hint'), Boolean($('#caption').value.trim()));
   $('#composer-title').textContent = state.editingId ? 'Edit scheduled post' : 'New post';
   const src = $('#composer-source');
   src.hidden = !state.source;
@@ -347,6 +360,7 @@ function renderComposer() {
 }
 
 for (const el of [$('#caption'), ...$$('[data-cap]'), $('#scheduled-at')]) el.addEventListener('input', renderComposer);
+$('#needs-captions').addEventListener('change', renderComposer);
 for (const el of $$('input[name="platform"]')) el.addEventListener('change', renderComposer);
 
 function resetComposer() {
@@ -519,6 +533,7 @@ $('#site-add').addEventListener('click', async () => {
 
 const igSheet = $('#ig-sheet');
 const ig = { items: [], next: null, picked: [] };
+const NO_COPY = "Instagram doesn't hand over the file for Reels with licensed music on them. Upload the original video from your device instead.";
 const IG_KIND = { carousel: (n) => `⧉ ${n}`, reel: () => '▶ Reel', video: () => '▶ Video', photo: () => '' };
 
 function fmtDay(ts) {
@@ -535,12 +550,20 @@ function renderIgGrid() {
     const n = ig.picked.indexOf(it.id);
     const badge = IG_KIND[it.kind](it.count);
     const shared = sharedLabel(it.shared);
+    if (it.copyable === false) {
+      return `<button class="pick no-copy" type="button" disabled title="${esc(NO_COPY)}">
+        <img src="${esc(it.thumb || '')}" alt="" loading="lazy" referrerpolicy="no-referrer">
+        <span class="badge">Can't copy</span></button>`;
+    }
     return `<button class="pick ${shared ? 'is-shared' : ''}" type="button" data-ig="${esc(it.id)}" aria-pressed="${n >= 0}" data-order="${n + 1}"
         title="${esc(fmtDay(it.timestamp))} — ${esc(it.caption.slice(0, 120))}">
       <img src="${esc(it.thumb || '')}" alt="" loading="lazy" referrerpolicy="no-referrer">
       ${badge ? `<span class="badge">${esc(badge)}</span>` : ''}
       ${shared ? `<span class="shared">${shared}</span>` : ''}</button>`;
   }).join('') || '<p class="empty">No Instagram posts found.</p>';
+  const blocked = ig.items.filter((it) => it.copyable === false).length;
+  $('#ig-blocked').hidden = !blocked;
+  $('#ig-blocked').textContent = blocked ? `${blocked === 1 ? 'One post is' : `${blocked} posts are`} marked "Can't copy". ${NO_COPY}` : '';
   $('#ig-more').hidden = !ig.next;
   $('#ig-add').hidden = ig.picked.length === 0;
   $('#ig-add').textContent = `Add ${ig.picked.length}`;
@@ -576,18 +599,41 @@ $('#ig-add').addEventListener('click', async () => {
   igSheet.close();
 
   const drafts = [];
+  const failed = [];
+  showImportNote(null);
   for (const [i, id] of ids.entries()) {
     toast(`Copying ${i + 1} of ${ids.length} from Instagram…`, 60000);
     try {
       drafts.push((await api('/api/instagram', { method: 'POST', body: { id } })).draft);
     } catch (err) {
-      toast(err.message, 6000);
+      failed.push({ item: ig.items.find((it) => it.id === id), message: err.message });
     }
   }
   $('#toast').hidden = true;
   if (drafts.length === 1) openDraftInComposer(drafts[0]);
-  else if (drafts.length > 1) openBatch(drafts);
+  else if (drafts.length > 1) await openBatch(drafts);
+  // After the drafts open (opening one clears the composer), so it stays put.
+  showImportNote(failed, ids.length);
 });
+
+// What didn't come over, and why, kept on screen until the next import.
+function showImportNote(failed, total) {
+  const box = $('#import-note');
+  if (!failed || !failed.length) { box.hidden = true; box.innerHTML = ''; return; }
+  const reasons = [...new Set(failed.map((f) => f.message))];
+  const names = failed.map((f) => {
+    const it = f.item;
+    if (!it) return 'a post';
+    const what = it.kind === 'reel' ? 'the Reel' : it.kind === 'video' ? 'the video' : 'the post';
+    return it.permalink ? `<a href="${esc(it.permalink)}" target="_blank" rel="noopener noreferrer">${what} from ${esc(fmtDay(it.timestamp))} ↗</a>` : `${what} from ${esc(fmtDay(it.timestamp))}`;
+  });
+  box.innerHTML = `<p><strong>${failed.length} of ${total} didn't come over:</strong> ${names.join(', ')}.</p>
+    ${reasons.map((r) => `<p>${esc(r)}</p>`).join('')}
+    <button class="btn small ghost" type="button" id="import-note-close">Got it</button>`;
+  box.hidden = false;
+  showTab('compose');
+}
+$('#import-note').addEventListener('click', (e) => { if (e.target.id === 'import-note-close') showImportNote(null); });
 
 function mediaFromDraft(draft) {
   return draft.media.map((m) => ({
@@ -695,6 +741,7 @@ function renderBatch() {
   const tall = platforms.includes('instagram') ? state.batch.filter((d) => tooTall(d.media[0])).length : 0;
   $('#batch-fit').hidden = !tall;
   $('#batch-fit-note').textContent = `${tall} ${tall === 1 ? 'photo is' : 'photos are'} too tall or wide for Instagram.`;
+  deskHint($('#batch-needs-captions'), $('#batch-desk-hint'), state.batch.some((d) => d.caption.trim()));
   $('#batch-items').innerHTML = state.batch.map((d, i) => {
     const first = d.media[0];
     const src = first.preview || first.url;
@@ -779,7 +826,7 @@ $('#batch-back').addEventListener('click', () => {
   closeBatch();
   renderComposer();
 });
-for (const el of [...$$('input[name="batch-platform"]'), ...$$('input[name="batch-when"]'), $('#batch-start'), $('#batch-every')]) {
+for (const el of [...$$('input[name="batch-platform"]'), ...$$('input[name="batch-when"]'), $('#batch-start'), $('#batch-every'), $('#batch-needs-captions')]) {
   el.addEventListener('change', renderBatch);
 }
 $('#batch-start').addEventListener('input', () => { state.batchStartTouched = true; });
@@ -1258,6 +1305,44 @@ $('#tips').addEventListener('submit', async (e) => {
     toast(err.message, 5000);
   }
 });
+
+// The audit of your own posts: sent by the growth desk after /growth audit.
+// Read-only here; each run replaces the last.
+
+const AUDIT_VERDICT = { more: 'Do more', stop: 'Stop', fix: 'Fix', watch: 'Keep watching' };
+const AUDIT_CONFIDENCE = {
+  strong: 'Shows up clearly in the numbers',
+  some: 'Shows up, on a small sample',
+  thin: 'A hint so far, not a pattern',
+};
+
+function findingCard(f) {
+  const posts = (f.posts || []).map((p, i) => `<li><a href="${esc(p.permalink)}" target="_blank" rel="noopener noreferrer">${esc(p.note || `Post ${i + 1}`)} ↗</a></li>`).join('');
+  return `<article class="tip finding">
+    <div class="lead-head"><h3>${esc(f.title)}</h3><span class="chip v-${esc(f.verdict)}">${AUDIT_VERDICT[f.verdict] || 'Finding'}</span></div>
+    <p class="tip-idea">${esc(f.advice)}</p>
+    <p class="tip-why"><span class="label">The numbers</span> ${esc(f.evidence)}</p>
+    <p class="finding-conf c-${esc(f.confidence)}">${AUDIT_CONFIDENCE[f.confidence] || ''}</p>
+    ${posts ? `<ul class="finding-posts">${posts}</ul>` : ''}
+  </article>`;
+}
+
+async function loadAudit() {
+  const box = $('#post-audit');
+  let audit;
+  try {
+    audit = await api('/api/post-audit');
+  } catch (err) {
+    box.innerHTML = `<p class="empty">${esc(err.message)}</p>`;
+    return;
+  }
+  if (!audit.findings.length) {
+    box.innerHTML = '<p class="empty">No audit yet. Run /growth audit in Claude Code and what it finds lands here.</p>';
+    return;
+  }
+  $('#audit-meta').textContent = `From the ${audit.report || fmtDate(audit.updatedAt)} audit${audit.sample ? ` of ${audit.sample}` : ''}. Run /growth audit in Claude Code for a fresh one.`;
+  box.innerHTML = (audit.summary ? `<p class="audit-summary">${esc(audit.summary)}</p>` : '') + audit.findings.map(findingCard).join('');
+}
 
 // ─── Boot ────────────────────────────────────────────────────────────────────
 

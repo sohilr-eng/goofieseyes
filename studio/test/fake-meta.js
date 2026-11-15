@@ -6,7 +6,8 @@
  * Video containers report IN_PROGRESS on their first status check and FINISHED
  * after, which exercises the publisher's re-check path. `fake.failNext(match,
  * error)` makes the next call whose path includes `match` answer with a Graph
- * error.
+ * error. `fake.withholdMedia(id)` leaves `media_url` off that Instagram post, as
+ * Meta does for a Reel with licensed music.
  */
 
 // A small Instagram back catalogue for the picker. Media links point at real
@@ -14,11 +15,20 @@
 const PHOTO = (f) => `https://goofieseyes.live/content/photos/${f}`;
 const LONG = 'Three days in the Caroni swamp before sunrise, waiting on the scarlet ibis to come home. '.repeat(6).trim();
 const IG_LIBRARY = [
-  { id: '17900000000000001', media_type: 'IMAGE', media_product_type: 'FEED', media_url: PHOTO('img-2428.webp'), caption: 'tobago, late light. #tobago #caribbean #photography', permalink: 'https://www.instagram.com/p/AAA1/', timestamp: '2026-10-20T18:00:00+0000' },
-  { id: '17900000000000002', media_type: 'CAROUSEL_ALBUM', media_product_type: 'FEED', media_url: PHOTO('img-2438.webp'), caption: `${LONG} #caroni #scarletibis #trinidad #birdphotography`, permalink: 'https://www.instagram.com/p/AAA2/', timestamp: '2026-10-12T18:00:00+0000',
+  { id: '17900000000000001', media_type: 'IMAGE', media_product_type: 'FEED', media_url: PHOTO('img-2428.webp'), caption: 'tobago, late light. #tobago #caribbean #photography', like_count: 140, comments_count: 6, permalink: 'https://www.instagram.com/p/AAA1/', timestamp: '2026-10-20T18:00:00+0000' },
+  { id: '17900000000000002', media_type: 'CAROUSEL_ALBUM', media_product_type: 'FEED', media_url: PHOTO('img-2438.webp'), caption: `${LONG} #caroni #scarletibis #trinidad #birdphotography`, like_count: 310, comments_count: 22, permalink: 'https://www.instagram.com/p/AAA2/', timestamp: '2026-10-12T18:00:00+0000',
     children: { data: [{ id: '17900000000000021', media_type: 'IMAGE', media_url: PHOTO('img-2438.webp') }, { id: '17900000000000022', media_type: 'IMAGE', media_url: PHOTO('img-2428.webp') }] } },
-  { id: '17900000000000003', media_type: 'VIDEO', media_product_type: 'REELS', media_url: 'https://goofieseyes.live/assets/film/film-01-720.mp4', thumbnail_url: PHOTO('img-2428.webp'), caption: 'nyfw, backstage in motion.', permalink: 'https://www.instagram.com/reel/AAA3/', timestamp: '2026-09-15T18:00:00+0000' },
+  { id: '17900000000000003', media_type: 'VIDEO', media_product_type: 'REELS', media_url: 'https://goofieseyes.live/assets/film/film-01-720.mp4', thumbnail_url: PHOTO('img-2428.webp'), caption: 'nyfw, backstage in motion.', like_count: 95, comments_count: 3, permalink: 'https://www.instagram.com/reel/AAA3/', timestamp: '2026-09-15T18:00:00+0000' },
 ];
+
+// What Meta reports for our own posts. Feed posts have follows and profile
+// visits, reels have watch time; asking a post for the other kind's metric
+// fails the call, as it does on the real API.
+const IG_INSIGHTS = {
+  '17900000000000001': { reach: 1800, views: 2400, saved: 12, shares: 4, total_interactions: 162, follows: 3, profile_visits: 40 },
+  '17900000000000002': { reach: 9600, views: 15200, saved: 210, shares: 96, total_interactions: 638, follows: 41, profile_visits: 380 },
+  '17900000000000003': { reach: 2100, views: 3900, saved: 8, shares: 2, total_interactions: 108, ig_reels_avg_watch_time: 4200 },
+};
 
 // Accounts Business Discovery can see. Anything else answers like a personal
 // or missing account does. One reel hides its likes, which Meta allows.
@@ -43,12 +53,15 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
   const calls = [];
   const containers = new Map();
   const failures = [];
+  const withheld = new Set();
+  const visible = (m) => { if (!withheld.has(m.id)) return m; const { media_url, ...rest } = m; return rest; };
   let seq = 1000;
   const id = () => String(seq++);
 
   const fake = {
     calls,
     failNext(match, error) { failures.push({ match, error }); },
+    withholdMedia(igId) { withheld.add(String(igId)); },
     restore() { globalThis.fetch = passthrough; },
   };
 
@@ -79,12 +92,24 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
     // ── Instagram media library ──
     if (path === '/IG1/media' && method === 'GET') {
       const start = params.after ? Number(params.after) : 0;
-      const page = IG_LIBRARY.slice(start, start + Number(params.limit || 24));
+      const page = IG_LIBRARY.slice(start, start + Number(params.limit || 24)).map(visible);
       const more = start + page.length < IG_LIBRARY.length;
       return json(200, { data: page, paging: more ? { cursors: { after: String(start + page.length) }, next: 'more' } : { cursors: {} } });
     }
+    const insightsOf = method === 'GET' && /^\/(\d+)\/insights$/.exec(path);
+    if (insightsOf) {
+      const numbers = IG_INSIGHTS[insightsOf[1]];
+      if (!numbers) return json(400, { error: { message: 'Unsupported get request.', code: 100, error_subcode: 33 } });
+      const wanted = String(params.metric || '').split(',');
+      const unknown = wanted.find((name) => !(name in numbers));
+      if (unknown) return json(400, { error: { message: `(#100) The Media Insights API does not support the ${unknown} metric for this media product type.`, code: 100 } });
+      return json(200, { data: wanted.map((name) => ({ name, period: 'lifetime', values: [{ value: numbers[name] }], id: `${insightsOf[1]}/insights/${name}/lifetime` })) });
+    }
+    if (path === '/IG1' && method === 'GET' && String(params.fields).startsWith('username')) {
+      return json(200, { id: 'IG1', username: 'goofieseyes', name: 'goofieseyes', biography: 'photographer and creative director', website: 'https://goofieseyes.live/', followers_count: 5200, follows_count: 410, media_count: IG_LIBRARY.length });
+    }
     const libraryItem = method === 'GET' && IG_LIBRARY.find((m) => `/${m.id}` === path);
-    if (libraryItem) return json(200, libraryItem);
+    if (libraryItem) return json(200, visible(libraryItem));
 
     // ── Facebook ──
     if (/^\/PAGE1\/(feed|photos|videos)$/.test(path) && method === 'POST') {

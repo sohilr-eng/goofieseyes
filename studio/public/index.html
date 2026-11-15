@@ -29,6 +29,7 @@
   <main>
     <!-- ── Compose ─────────────────────────────────────────────────────── -->
     <div data-panel="compose">
+      <div class="card import-note" id="import-note" role="status" hidden></div>
       <form id="composer" class="card" novalidate>
         <h2 id="composer-title">New post</h2>
         <p class="from-ig" id="composer-source" hidden></p>
@@ -75,6 +76,7 @@
         </details>
 
         <label class="desk-opt"><input type="checkbox" id="needs-captions"> Let the caption desk write the Facebook &amp; Threads captions <span class="label">(runs in Claude Code)</span></label>
+        <p class="hint desk-hint" id="desk-hint" hidden></p>
 
         <div class="field-head" style="margin-top:18px"><span class="label">When</span></div>
         <div class="when">
@@ -112,6 +114,7 @@
         </div>
 
         <label class="desk-opt"><input type="checkbox" id="batch-needs-captions" checked> Let the caption desk write the Facebook &amp; Threads captions <span class="label">(runs in Claude Code)</span></label>
+        <p class="hint desk-hint" id="batch-desk-hint" hidden></p>
 
         <div class="field-head" style="margin-top:18px"><span class="label">When</span></div>
         <div class="when">
@@ -155,6 +158,12 @@
         <p class="hint" id="tips-meta">What the people you're studying do that works, turned into things to try on goofieseyes. Run <code>/growth</code> in Claude Code for fresh ones.</p>
         <div class="filters" id="tip-filter" role="group" aria-label="Show"></div>
         <div id="tips"><p class="empty">Loading…</p></div>
+      </div>
+
+      <div class="card">
+        <h2>What your own posts say</h2>
+        <p class="hint" id="audit-meta">An audit of your own posts' numbers: what travelled, what didn't, and what to change. Run <code>/growth audit</code> in Claude Code for one.</p>
+        <div id="post-audit"><p class="empty">Loading…</p></div>
       </div>
 
       <div class="card">
@@ -213,6 +222,7 @@
     <div class="sheet-body">
       <p class="hint">Tap the posts to bring over. Each becomes its own Facebook and Threads post, with the photos copied so scheduled ones still work later.</p>
       <div class="photos" id="ig-grid"></div>
+      <p class="hint" id="ig-blocked" hidden></p>
       <div style="text-align:center;margin-top:12px"><button class="btn small" type="button" id="ig-more" hidden>Load older posts</button></div>
     </div>
   </dialog>

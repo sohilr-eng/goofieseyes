@@ -71,3 +71,17 @@ test('the Threads caption suggestion', () => {
 test('import refuses anything that is not an Instagram media id', async () => {
   await assert.rejects(importInstagram('../me'), /Not an Instagram media id/);
 });
+
+test('a Reel whose file Meta withholds is marked in the picker and refused with the reason', async () => {
+  fake.withholdMedia('17900000000000003');
+  const { items } = await listInstagram();
+  assert.deepEqual(items.map((i) => i.copyable), [true, true, false]);
+  assert.ok(items[2].thumb, 'it still shows, so the owner can see which one it is');
+
+  await assert.rejects(importInstagram('17900000000000003'), (err) => {
+    assert.equal(err.status, 422);
+    assert.match(err.message, /licensed music/);
+    assert.match(err.message, /from your device/);
+    return true;
+  });
+});
