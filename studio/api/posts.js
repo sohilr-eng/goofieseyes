@@ -5,6 +5,8 @@
  * POST   /api/posts?id=…&action=retry   → re-run the platforms that failed
  * POST   /api/posts?id=…&action=cancel  → stop a scheduled post going out
  * POST   /api/posts?id=…&action=release → "Post as is": stop waiting for the caption desk
+ * POST   /api/posts?id=…&action=approve → sign off a post waiting for approval; body { scheduledAt? | publishNow? }
+ * POST   /api/posts?id=…&action=reject  → turn it down: cancelled, never published
  * DELETE /api/posts?id=…                → remove it from the list (never deletes anything on Meta)
  */
 
@@ -24,6 +26,8 @@ module.exports = handler(async (req, res) => {
   if (req.method === 'POST' && q.get('action') === 'retry') return send(res, 200, { post: await posts.retryPost(id) });
   if (req.method === 'POST' && q.get('action') === 'cancel') return send(res, 200, { post: await posts.cancelPost(id) });
   if (req.method === 'POST' && q.get('action') === 'release') return send(res, 200, { post: await posts.releasePost(id) });
+  if (req.method === 'POST' && q.get('action') === 'approve') return send(res, 200, { post: await posts.approvePost(id, await readJson(req)) });
+  if (req.method === 'POST' && q.get('action') === 'reject') return send(res, 200, { post: await posts.rejectPost(id) });
 
   if (req.method === 'PUT' && id) return send(res, 200, { post: await posts.updatePost(id, await readJson(req)) });
 

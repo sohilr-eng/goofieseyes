@@ -10,6 +10,12 @@
  *     needsCaptions — the caption desk (/captions in Claude Code) should write them,
  *     held?: 'captions' — its time came while it still needed captions, so it waited,
  *     captionsBy?: 'claude', captionsAt — set when the desk wrote them, so the Queue can flag them for review,
+ *     createdBy?: 'agent' — pushed in by a desk (POST /api/agent?action=create-draft),
+ *     source?: { type: 'desk', desk, file } — which desk and file an agent draft came from,
+ *     approval?: 'waiting' | 'approved' | 'rejected' — the owner's sign-off. Missing (older
+ *       posts) counts as approved. Agent drafts start waiting, and so does any post the
+ *       caption desk writes captions for; a waiting post never publishes.
+ *     held?: 'approval' — its time came while it still waited for approval,
  *     targets: { <platform>: { state, containerId?, children?, mediaId?, permalink?, error?, attempts } } }
  *
  * Status: scheduled → publishing → published | partial | failed, or cancelled.
@@ -49,6 +55,10 @@ function clean(input) {
 }
 
 function cleanSource(source) {
+  if (source?.type === 'desk') {
+    const text = (v, max) => String(v || '').replace(/[\u0000-\u001f]/g, ' ').trim().slice(0, max) || null;
+    return { type: 'desk', desk: text(source.desk, 80), file: text(source.file, 200) };
+  }
   if (!source || source.type !== 'instagram' || !/^\d+$/.test(String(source.id))) return null;
   const permalink = /^https:\/\/(www\.)?instagram\.com\//.test(source.permalink || '') ? source.permalink : null;
   return { type: 'instagram', id: String(source.id), permalink };
@@ -81,7 +91,16 @@ async function listPosts(limit = 200) {
   return posts.filter(Boolean);
 }
 
-async function createPost(input, now = Date.now()) {
+// Old posts have no `approval`; they were all the owner's own, so approved.
+const approvalOf = (post) => post.approval || 'approved';
+const fromInstagram = (post) => post.source?.type === 'instagram';
+
+/**
+ * `by: 'agent'` marks a desk's draft: it waits for the owner's approval.
+ * Anything composed in the browser is the owner's own and starts approved.
+ */
+async function createPost(input, now = Date.now(), { by } = {}) {
+  const agent = by === 'agent';
   const post = {
     id: `${now.toString(36)}-${crypto.randomBytes(3).toString('hex')}`,
     rev: 1,
@@ -91,6 +110,8 @@ async function createPost(input, now = Date.now()) {
     source: cleanSource(input.source),
     scheduledAt: parseWhen(input, now),
     status: 'scheduled',
+    approval: agent ? 'waiting' : 'approved',
+    ...(agent ? { createdBy: 'agent' } : {}),
     targets: {},
   };
   const errors = validatePost(post);
@@ -98,7 +119,7 @@ async function createPost(input, now = Date.now()) {
 
   await savePost(post);
   await getStore().zadd(INDEX, { score: post.createdAt, member: post.id });
-  if (post.source) await markShared(post.source.id, post.id);
+  if (fromInstagram(post)) await markShared(post.source.id, post.id);
   await schedule(post);
   await savePost(post);
   return post;
@@ -109,6 +130,7 @@ async function updatePost(id, input, now = Date.now()) {
   if (!post) throw httpError(404, 'No such post');
   if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}; only scheduled posts can be edited.`);
 
+  // `approval` is deliberately left as it is: editing a draft is not approving it.
   Object.assign(post, clean(input), { scheduledAt: parseWhen(input, now), rev: post.rev + 1, updatedAt: now, held: null, captionsBy: null });
   const errors = validatePost(post);
   if (errors.length) throw httpError(400, errors.join(' '));
@@ -119,15 +141,22 @@ async function updatePost(id, input, now = Date.now()) {
   return post;
 }
 
-async function cancelPost(id) {
+async function cancelPost(id, { approval } = {}) {
   const post = await getPost(id);
   if (!post) throw httpError(404, 'No such post');
   if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status} and can't be cancelled.`);
   post.status = 'cancelled';
+  if (approval) post.approval = approval;
+  post.held = null;
   post.rev += 1; // strands the queued message
   await savePost(post);
-  if (post.source) await releaseShared(post.source.id, post.id);
+  if (fromInstagram(post)) await releaseShared(post.source.id, post.id);
   return post;
+}
+
+// The owner turns a draft down: it's cancelled, so it never publishes.
+async function rejectPost(id) {
+  return cancelPost(id, { approval: 'rejected' });
 }
 
 async function deletePost(id) {
@@ -136,7 +165,7 @@ async function deletePost(id) {
   if (post.status === 'publishing') throw httpError(409, 'This post is publishing right now.');
   await getStore().del(key(id));
   await getStore().zrem(INDEX, id);
-  if (post.source) await releaseShared(post.source.id, post.id);
+  if (fromInstagram(post)) await releaseShared(post.source.id, post.id);
 }
 
 async function retryPost(id, now = Date.now()) {
@@ -174,6 +203,41 @@ async function releasePost(id, now = Date.now()) {
   const errors = validatePost(post);
   if (errors.length) throw httpError(400, errors.join(' '));
   post.needsCaptions = false;
+  // A post still waiting for approval keeps waiting (and stays held if it was).
+  if (approvalOf(post) === 'waiting') return holdForApproval(post, now);
+  return requeue(post, now);
+}
+
+// Saves a post that has to wait for the owner. If its time already came it
+// stays held; otherwise the message already queued for its time is left alone
+// and the worker holds the post when it arrives.
+async function holdForApproval(post, now) {
+  post.approval = 'waiting';
+  if (post.held) post.held = 'approval';
+  post.updatedAt = now;
+  await savePost(post);
+  return post;
+}
+
+/**
+ * The owner signs a waiting post off in the Queue. `when` can move it:
+ * { publishNow: true } or { scheduledAt: ISO }. If its time has passed (or it
+ * was held waiting) it goes out now; otherwise it keeps its slot.
+ */
+async function approvePost(id, when = {}, now = Date.now()) {
+  const post = await getPost(id);
+  if (!post) throw httpError(404, 'No such post');
+  if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}.`);
+  if (approvalOf(post) !== 'waiting') throw httpError(409, `This post is already ${approvalOf(post)}.`);
+  if (post.needsCaptions) throw httpError(409, 'It still needs captions: write or release captions first.');
+  const errors = validatePost(post);
+  if (errors.length) throw httpError(400, errors.join(' '));
+
+  if (when.publishNow) post.scheduledAt = now;
+  else if (when.scheduledAt) post.scheduledAt = parseWhen({ scheduledAt: when.scheduledAt }, now);
+  post.scheduledAt = Math.max(post.scheduledAt, now);
+  post.approval = 'approved';
+  post.approvedAt = now;
   return requeue(post, now);
 }
 
@@ -191,7 +255,8 @@ async function applyCaptions(id, captions, now = Date.now()) {
   post.needsCaptions = false;
   post.captionsBy = 'claude';
   post.captionsAt = now;
-  return requeue(post, now);
+  // Nothing the desk writes goes out until the owner has seen it.
+  return holdForApproval(post, now);
 }
 
 /**
@@ -212,6 +277,17 @@ async function runPost({ postId, rev, kind }, now = Date.now()) {
     post.updatedAt = now;
     await savePost(post);
     return { skipped: 'needs-captions' };
+  }
+  // Nothing publishes without the owner's say-so; approving in the Queue
+  // (approvePost above) sends it on. Rejected posts are cancelled anyway.
+  if (approvalOf(post) === 'rejected') return { skipped: 'rejected' };
+  if (approvalOf(post) === 'waiting') {
+    if (kind === 'run') {
+      post.held = 'approval';
+      post.updatedAt = now;
+      await savePost(post);
+    }
+    return { skipped: 'awaiting-approval' };
   }
   if (kind === 'check' && post.status !== 'publishing') return { skipped: post.status };
 
@@ -245,4 +321,7 @@ async function queueDuePosts() {
   return queued;
 }
 
-module.exports = { createPost, updatePost, cancelPost, deletePost, retryPost, releasePost, applyCaptions, getPost, listPosts, runPost, queueDuePosts };
+module.exports = {
+  createPost, updatePost, cancelPost, rejectPost, approvePost, deletePost, retryPost, releasePost, applyCaptions,
+  getPost, listPosts, runPost, queueDuePosts, approvalOf,
+};

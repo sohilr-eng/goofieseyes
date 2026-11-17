@@ -301,8 +301,8 @@ function renderCounters() {
 function deskHint(box, hint, hasCaption) {
   hint.hidden = !box.checked;
   hint.textContent = !box.checked ? ''
-    : hasCaption ? 'The caption that\'s there now is only the desk\'s notes. It writes new Facebook and Threads captions from it and the photos, and nothing goes out until it has (or you press "Post as is" in Queue).'
-      : 'The desk writes the Facebook and Threads captions from the photos. Nothing goes out until it has (or you press "Post as is" in Queue).';
+    : hasCaption ? 'The caption that\'s there now is only the desk\'s notes. It writes new Facebook and Threads captions from it and the photos, and nothing goes out until it has and you\'ve approved them in Queue (or pressed "Post as is").'
+      : 'The desk writes the Facebook and Threads captions from the photos. Nothing goes out until it has and you\'ve approved them in Queue (or pressed "Post as is").';
 }
 
 const laterSelected = () => $('input[name="when"]:checked').value === 'later';
@@ -912,16 +912,63 @@ function postCard(p) {
     : p.captionsBy === 'claude' ? '<p class="from-ig" style="margin:0 0 8px"><span class="chip desk">Captions by Claude: review</span></p>'
     : '';
 
+  const status = p.approval === 'rejected' ? 'rejected' : p.status;
   return `<article class="card post">
     ${cover}
     <div>
-      <div class="status ${p.status}">${p.status}</div>
+      <div class="status ${p.status}">${status}</div>
       <div class="when">${when}</div>
       ${desk}
       <p class="caption">${esc(p.captions?.facebook || p.captions?.threads || p.caption || '')}</p>
       ${p.source?.permalink ? `<p class="from-ig" style="margin:0 0 8px">From <a href="${esc(p.source.permalink)}" target="_blank" rel="noopener">Instagram ↗</a></p>` : ''}
       <div class="targets">${targets}</div>
       <div class="btn-row">${actions.join('')}</div>
+    </div>
+  </article>`;
+}
+
+// Posts a desk made or captioned wait here until the owner approves them.
+// Older posts have no `approval` and count as approved.
+const isWaiting = (p) => p.status === 'scheduled' && p.approval === 'waiting';
+const ownCaption = (p, pl) => (p.captions?.[pl] || '').trim() || (p.needsCaptions ? '' : (p.caption || '').trim());
+
+function waitCard(p) {
+  const first = p.media?.[0];
+  const preview = !first
+    ? '<div class="preview text">Aa</div>'
+    : first.type === 'video'
+      ? `<video class="preview" src="${esc(first.url)}" controls playsinline preload="metadata"></video>`
+      : `<img class="preview" src="${esc(first.url)}" alt="" loading="lazy">`;
+  const extra = (p.media?.length || 0) > 1 ? `<span class="chip">+${p.media.length - 1} more</span>` : '';
+  const platforms = p.platforms.map((pl) => `<span class="chip">${NAMES[pl]}</span>`).join('');
+  const passed = p.held || p.scheduledAt <= Date.now();
+  const when = passed ? `Was due ${fmtTime(p.scheduledAt)}` : `Goes out ${fmtTime(p.scheduledAt)}`;
+  const from = p.createdBy === 'agent'
+    ? `<p class="from">From ${esc(p.source?.desk || 'a desk')}${p.source?.file ? ` · ${esc(p.source.file)}` : ''}</p>` : '';
+  const caps = p.needsCaptions
+    ? `<div class="cap-block"><span class="chip desk">Waiting for the caption desk</span>
+        ${p.caption ? `<p><span class="label">Notes</span> ${esc(p.caption)}</p>` : ''}</div>`
+    : p.platforms.map((pl) => {
+      const text = ownCaption(p, pl);
+      return `<div class="cap-block"><span class="label">${NAMES[pl]}</span>${text ? `<p>${esc(text)}</p>` : '<p class="none">No caption</p>'}</div>`;
+    }).join('');
+  const decide = p.needsCaptions
+    ? `<button class="btn big" data-act="release" data-id="${p.id}">Post as is</button>`
+    : `<button class="btn primary big" data-act="approve" data-id="${p.id}">Approve</button>`;
+
+  return `<article class="card wait">
+    ${preview}
+    <div class="body">
+      <div class="when">${when}</div>
+      ${passed ? '<p class="clash">Its time has passed. Approving sends it now, or pick a new time.</p>' : ''}
+      <div class="meta">${platforms}${extra}${p.captionsBy === 'claude' ? '<span class="chip desk">Captions by Claude</span>' : ''}</div>
+      ${from}
+      ${caps}
+      <div class="decide">
+        <button class="btn big danger" data-act="reject" data-id="${p.id}">Reject</button>
+        ${decide}
+      </div>
+      <div class="btn-row more"><button class="btn small ghost" data-act="edit" data-id="${p.id}">Edit first</button></div>
     </div>
   </article>`;
 }
@@ -935,11 +982,18 @@ async function loadQueue() {
     $('#queue').innerHTML = `<p class="empty">${esc(err.message)}</p>`;
     return;
   }
-  const upcoming = state.posts.filter((p) => p.status === 'scheduled').sort((a, b) => a.scheduledAt - b.scheduledAt);
+  const waiting = state.posts.filter(isWaiting).sort((a, b) => a.scheduledAt - b.scheduledAt);
+  const upcoming = state.posts.filter((p) => p.status === 'scheduled' && !isWaiting(p)).sort((a, b) => a.scheduledAt - b.scheduledAt);
   const rest = state.posts.filter((p) => p.status !== 'scheduled');
   $('#queue-count').textContent = upcoming.length ? String(upcoming.length) : '';
+  const badge = $('#approval-count');
+  badge.textContent = String(waiting.length);
+  badge.hidden = !waiting.length;
+  badge.title = `${waiting.length} waiting for your approval`;
   $('#queue').innerHTML = state.posts.length
     ? [
+      waiting.length ? `<section class="wait-group"><div class="wait-head"><h2>Waiting for you</h2><span class="label">${waiting.length}</span></div>
+        <p class="hint">Nothing here goes out until you approve it.</p>${waiting.map(waitCard).join('')}</section>` : '',
       upcoming.length ? `<p class="label">Scheduled</p>${upcoming.map(postCard).join('')}` : '',
       rest.length ? `<p class="label" style="margin-top:20px">Recent</p>${rest.map(postCard).join('')}` : '',
     ].join('')
@@ -958,18 +1012,73 @@ $('#queue').addEventListener('click', async (e) => {
   const post = state.posts.find((p) => p.id === id);
   try {
     if (act === 'edit') return editPost(post);
+    if (act === 'approve') return openApprove(post);
+    if (act === 'reject' && !confirm('Reject this post? It won\'t be posted anywhere.')) return;
     if (act === 'cancel' && !confirm('Cancel this scheduled post?')) return;
     if (act === 'remove' && !confirm('Remove it from this list? Nothing is deleted on Facebook, Instagram or Threads.')) return;
     btn.disabled = true;
     if (act === 'cancel') await api(`/api/posts?id=${id}&action=cancel`, { method: 'POST' });
     if (act === 'retry') await api(`/api/posts?id=${id}&action=retry`, { method: 'POST' });
     if (act === 'release') await api(`/api/posts?id=${id}&action=release`, { method: 'POST' });
+    if (act === 'reject') { await api(`/api/posts?id=${id}&action=reject`, { method: 'POST' }); toast('Rejected. It won\'t be posted.'); }
     if (act === 'remove') await api(`/api/posts?id=${id}`, { method: 'DELETE' });
     loadQueue();
   } catch (err) {
     toast(err.message, 5000);
     btn.disabled = false;
   }
+});
+
+// ─── Approve sheet ───────────────────────────────────────────────────────────
+
+const approveSheet = $('#approve-sheet');
+let approving = null;
+
+function openApprove(post) {
+  approving = post;
+  const passed = post.held || post.scheduledAt <= Date.now();
+  const input = $('#approve-at');
+  input.min = toLocalInput(Date.now());
+  input.value = passed ? '' : toLocalInput(post.scheduledAt);
+  $('#approve-what').textContent = `To ${post.platforms.map((pl) => NAMES[pl]).join(', ')}.`;
+  renderApproveNote();
+  approveSheet.showModal();
+}
+
+function renderApproveNote() {
+  if (!approving) return;
+  const v = $('#approve-at').value;
+  const at = v ? new Date(v).getTime() : null;
+  const passed = approving.held || approving.scheduledAt <= Date.now();
+  $('#approve-note').textContent = !at
+    ? (passed ? 'Its time has passed. Pick a new time, or post it now.' : 'Pick a time, or post it now.')
+    : at < Date.now() - 60e3 ? 'That time has passed. Pick a later one, or post it now.'
+      : `Goes out ${fmtTime(at)}.`;
+  $('#approve-go').disabled = !at || at < Date.now() - 60e3;
+}
+$('#approve-at').addEventListener('input', renderApproveNote);
+$('#approve-close').addEventListener('click', () => approveSheet.close());
+
+async function sendApproval(body, btn) {
+  const post = approving;
+  btn.disabled = true;
+  try {
+    const { post: saved } = await api(`/api/posts?id=${post.id}&action=approve`, { method: 'POST', body });
+    approveSheet.close();
+    toast(saved.scheduledAt <= Date.now() + 60e3 ? 'Approved. Posting now — watch it here.' : `Approved for ${fmtTime(saved.scheduledAt)}`);
+    loadQueue();
+  } catch (err) {
+    toast(err.message, 5000);
+  } finally {
+    btn.disabled = false;
+  }
+}
+$('#approve-now').addEventListener('click', (e) => sendApproval({ publishNow: true }, e.currentTarget));
+$('#approve-go').addEventListener('click', (e) => {
+  const v = $('#approve-at').value;
+  // Unchanged keeps the exact original time; the input only shows minutes.
+  const same = !approving.held && approving.scheduledAt > Date.now() && v === toLocalInput(approving.scheduledAt);
+  sendApproval(same ? {} : { scheduledAt: new Date(v).toISOString() }, e.currentTarget);
 });
 
 function editPost(post) {

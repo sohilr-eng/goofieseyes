@@ -172,3 +172,44 @@ test('the Threads token refresh is stored and used from then on', async () => {
   assert.equal((await threadsToken()).token, 'THREADS_REFRESHED');
   assert.ok(await getStore().get('threads:token'));
 });
+
+test('a Facebook video goes out as a Reel: start, hosted-file upload, finish', async () => {
+  const post = await posts.createPost({ caption: 'nyfw, backstage', media: [VID], platforms: ['facebook'], publishNow: true }, T0);
+  const done = await drive(post);
+  assert.equal(done.status, 'published');
+
+  const steps = fake.calls.filter((c) => c.path === '/PAGE1/video_reels' || c.host === 'rupload.facebook.com');
+  assert.deepEqual(steps.map((c) => c.params.upload_phase || c.host), ['start', 'rupload.facebook.com', 'finish']);
+  const [, upload, finish] = steps;
+  const videoId = finish.params.video_id;
+  assert.equal(upload.path, `/video-upload/${videoId}`);
+  assert.equal(upload.params.file_url, VID.url);
+  assert.equal(upload.authScheme, 'OAuth');
+  assert.equal(finish.params.video_state, 'PUBLISHED');
+  assert.equal(finish.params.description, 'nyfw, backstage');
+  assert.ok(!fake.calls.some((c) => c.path === '/PAGE1/videos'));
+
+  const t = done.targets.facebook;
+  assert.equal(t.format, 'reel');
+  assert.equal(t.mediaId, videoId);
+  assert.equal(t.permalink, `https://www.facebook.com/reel/${videoId}/`);
+  assert.ok(!t.fallback);
+});
+
+test('if a Reel step fails, the video goes out as a plain Page video', async () => {
+  for (const step of ['/video_reels', '/video-upload']) {
+    fake.calls.length = 0;
+    fake.failNext(step, { message: 'Video does not meet Reels requirements', code: 100 });
+    const post = await posts.createPost({ caption: 'landscape cut', media: [VID], platforms: ['facebook'], publishNow: true }, T0);
+    const done = await drive(post);
+    assert.equal(done.status, 'published', step);
+    const t = done.targets.facebook;
+    assert.equal(t.fallback, 'page-video', step);
+    assert.match(t.reelError, /Reels requirements/, step);
+    assert.ok(!/TOKEN/.test(JSON.stringify(t)), step);
+    const video = fake.calls.find((c) => c.path === '/PAGE1/videos');
+    assert.equal(video.params.file_url, VID.url, step);
+    assert.equal(video.params.description, 'landscape cut', step);
+    assert.match(t.permalink, /^https:\/\/www\.facebook\.com\//, step);
+  }
+});

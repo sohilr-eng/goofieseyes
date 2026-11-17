@@ -21,7 +21,7 @@
 
   <nav class="tabs" role="tablist">
     <button class="tab" role="tab" data-tab="compose" aria-selected="true">Compose</button>
-    <button class="tab" role="tab" data-tab="queue" aria-selected="false">Queue<span class="count" id="queue-count"></span></button>
+    <button class="tab" role="tab" data-tab="queue" aria-selected="false">Queue<span class="count" id="queue-count"></span><span class="badge-wait" id="approval-count" hidden></span></button>
     <button class="tab" role="tab" data-tab="growth" aria-selected="false">Growth<span class="count" id="lead-count"></span></button>
     <button class="tab" role="tab" data-tab="connections" aria-selected="false">Connections</button>
   </nav>
@@ -224,6 +224,23 @@
       <div class="photos" id="ig-grid"></div>
       <p class="hint" id="ig-blocked" hidden></p>
       <div style="text-align:center;margin-top:12px"><button class="btn small" type="button" id="ig-more" hidden>Load older posts</button></div>
+    </div>
+  </dialog>
+
+  <dialog class="sheet" id="approve-sheet">
+    <div class="sheet-head">
+      <h2>Approve</h2>
+      <button class="btn ghost small" type="button" id="approve-close">Close</button>
+    </div>
+    <div class="sheet-body">
+      <p class="hint" id="approve-what"></p>
+      <div class="field-head"><label class="label" for="approve-at">Goes out</label></div>
+      <div class="when"><input type="datetime-local" id="approve-at"></div>
+      <p class="hint when-hint" id="approve-note"></p>
+      <div class="decide">
+        <button class="btn big" type="button" id="approve-now">Post now</button>
+        <button class="btn primary big" type="button" id="approve-go">Approve for this time</button>
+      </div>
     </div>
   </dialog>
 

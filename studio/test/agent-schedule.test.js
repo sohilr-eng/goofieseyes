@@ -125,7 +125,8 @@ test('per-platform state and permalink come from targets; no media or full capti
     instagram: { state: 'failed', permalink: null },
     threads: { state: null, permalink: null },
   });
-  assert.deepEqual(Object.keys(p).sort(), ['caption', 'held', 'id', 'needsCaptions', 'platformState', 'platforms', 'scheduledAt', 'status']);
+  assert.equal(p.approval, 'approved'); // an older post with no approval field
+  assert.deepEqual(Object.keys(p).sort(), ['approval', 'caption', 'held', 'id', 'needsCaptions', 'platformState', 'platforms', 'scheduledAt', 'status']);
   assert.ok(!JSON.stringify(json).includes('blob.vercel-storage.com'));
 });
 

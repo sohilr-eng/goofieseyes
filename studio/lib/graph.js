@@ -61,9 +61,34 @@ async function call(base, method, path, params = {}, token) {
   });
 }
 
+// Facebook's resumable upload host. A "hosted file" upload hands it a public
+// URL in the `file_url` header and Facebook fetches the video itself, so no
+// bytes pass through the function. Errors come back as { debug_info } or the
+// usual { error }.
+const RUPLOAD = `https://rupload.facebook.com/video-upload/${API_VERSION}`;
+
+async function rupload(videoId, fileUrl, token) {
+  let res;
+  try {
+    res = await fetch(`${RUPLOAD}/${encodeURIComponent(videoId)}`, {
+      method: 'POST',
+      headers: { Authorization: `OAuth ${token}`, file_url: fileUrl },
+    });
+  } catch (err) {
+    throw new GraphError(`Couldn't reach Facebook's upload server: ${err.message}`, { transient: true });
+  }
+  const data = await res.json().catch(() => ({}));
+  if (res.ok && data.success !== false && !data.error && !data.debug_info) return data;
+  const e = data.error || data.debug_info || {};
+  throw new GraphError(e.message || `Facebook's upload server answered HTTP ${res.status}`, {
+    code: e.code, status: res.status, transient: Boolean(e.retriable) || res.status >= 500,
+  });
+}
+
 const facebook = {
   get: (path, params, token) => call(FACEBOOK, 'GET', path, params, token),
   post: (path, params, token) => call(FACEBOOK, 'POST', path, params, token),
+  rupload,
 };
 const threads = {
   get: (path, params, token) => call(THREADS, 'GET', path, params, token),

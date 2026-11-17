@@ -406,3 +406,29 @@ dialog.sheet::backdrop { background: rgba(31, 29, 27, 0.5); }
 .import-note { border-color: var(--warn); }
 .import-note p { margin: 0 0 8px; overflow-wrap: anywhere; }
 .desk-hint { margin: 6px 0 0 26px; }
+
+/* ── Waiting for approval ──────────────────────────────────────────────── */
+.tab .badge-wait {
+  display: inline-grid; place-items: center;
+  min-width: 20px; height: 20px; padding: 0 6px; margin-left: 6px;
+  border-radius: 999px; background: var(--lens); color: var(--lens-ink);
+  font-size: 12px; font-weight: 700; vertical-align: 1px;
+}
+.wait-head { display: flex; align-items: baseline; gap: 8px; margin: 0 0 8px; }
+.wait-head h2 { font-family: 'Fraunces', Georgia, serif; font-weight: 900; letter-spacing: -0.02em; font-size: 22px; margin: 0; }
+.wait-group { margin-bottom: 24px; }
+.card.wait { border-color: var(--lens); padding: 0; overflow: hidden; }
+.wait .preview { display: block; width: 100%; max-height: 62vh; object-fit: contain; background: var(--ink); }
+.wait .preview.text { display: grid; place-items: center; height: 120px; background: var(--sand); font-family: 'Fraunces', serif; font-weight: 900; font-size: 32px; color: var(--muted); }
+.wait .body { padding: 14px 16px 16px; }
+.wait .when { font-weight: 600; font-size: 17px; }
+.wait .meta { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0; }
+.wait .from { font-size: 14px; color: var(--muted); margin: 0 0 8px; overflow-wrap: anywhere; }
+.cap-block { border-top: 1px solid var(--line); padding: 10px 0 0; margin-top: 10px; }
+.cap-block p { margin: 4px 0 0; white-space: pre-line; overflow-wrap: anywhere; color: var(--umber); }
+.cap-block p.none { color: var(--muted); font-style: italic; }
+.decide { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 16px; }
+.btn.big { min-height: 56px; font-size: 17px; padding: 0 12px; }
+.btn.big.danger { border-color: currentColor; }
+.wait .more { margin-top: 8px; }
+

@@ -8,6 +8,12 @@
  * error)` makes the next call whose path includes `match` answer with a Graph
  * error. `fake.withholdMedia(id)` leaves `media_url` off that Instagram post, as
  * Meta does for a Reel with licensed music.
+ *
+ * Facebook Reels go through /PAGE1/video_reels (start, finish) and the hosted-file
+ * upload on rupload.facebook.com; the rupload call is recorded with host
+ * 'rupload.facebook.com', its file_url header in params, and only the scheme of
+ * its Authorization header (never the token). failNext('/video-upload', …) or
+ * failNext('/video_reels', …) makes a Reel step fail.
  */
 
 // A small Instagram back catalogue for the picker. Media links point at real
@@ -54,6 +60,7 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
   const containers = new Map();
   const failures = [];
   const withheld = new Set();
+  const reels = new Set();
   const visible = (m) => { if (!withheld.has(m.id)) return m; const { media_url, ...rest } = m; return rest; };
   let seq = 1000;
   const id = () => String(seq++);
@@ -69,6 +76,20 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
 
   globalThis.fetch = async (input, init = {}) => {
     const url = new URL(typeof input === 'string' ? input : input.url ?? String(input));
+    if (url.hostname === 'rupload.facebook.com') {
+      const headers = new Headers(init.headers || {});
+      const path = url.pathname.replace(/^\/video-upload\/v[\d.]+/, '/video-upload');
+      calls.push({ host: url.hostname, method: (init.method || 'GET').toUpperCase(), path, params: { file_url: headers.get('file_url') }, authScheme: (headers.get('authorization') || '').split(' ')[0] });
+      const failure = failures.findIndex((f) => path.includes(f.match));
+      if (failure >= 0) {
+        const [{ error }] = failures.splice(failure, 1);
+        return json(400, { debug_info: { retriable: false, type: 'ProcessingFailedError', message: error.message } });
+      }
+      if (!reels.has(path.split('/').pop()) || !headers.get('file_url') || !/^OAuth \S+/.test(headers.get('authorization') || '')) {
+        return json(400, { debug_info: { retriable: false, type: 'BadRequest', message: 'Bad hosted-file upload' } });
+      }
+      return json(200, { success: true });
+    }
     if (url.hostname !== 'graph.facebook.com' && url.hostname !== 'graph.threads.net') return passthrough(input, init);
 
     const method = (init.method || 'GET').toUpperCase();
@@ -117,6 +138,17 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
       return json(200, path.endsWith('photos') && params.published !== 'false' ? { id: newId, post_id: `PAGE1_${newId}` } : { id: path.endsWith('feed') ? `PAGE1_${newId}` : newId });
     }
 
+    // ── Facebook Reels ──
+    if (path === '/PAGE1/video_reels' && method === 'POST') {
+      if (params.upload_phase === 'start') {
+        const vid = id();
+        reels.add(vid);
+        return json(200, { video_id: vid, upload_url: `https://rupload.facebook.com/video-upload/v24.0/${vid}` });
+      }
+      if (params.upload_phase === 'finish' && reels.has(params.video_id)) return json(200, { success: true });
+      return json(400, { error: { message: 'Invalid upload_phase or video_id', code: 100 } });
+    }
+
     // ── Instagram / Threads containers ──
     if ((path === '/IG1/media' || path === '/TH1/threads') && method === 'POST') {
       const cid = id();
@@ -148,6 +180,7 @@ function installFakeMeta({ passthrough = globalThis.fetch } = {}) {
       const code = c.published ? 'PUBLISHED' : c.isVideo && c.checks === 1 ? 'IN_PROGRESS' : 'FINISHED';
       return json(200, url.hostname === 'graph.threads.net' ? { status: code, id: objectId } : { status_code: code, id: objectId });
     }
+    if (method === 'GET' && params.fields === 'permalink_url' && reels.has(objectId)) return json(200, { permalink_url: `/reel/${objectId}/` });
     if (method === 'GET' && params.fields === 'permalink_url') return json(200, { permalink_url: `https://www.facebook.com/${objectId}` });
     if (method === 'GET' && params.fields === 'permalink') {
       return json(200, { permalink: url.hostname === 'graph.threads.net' ? `https://www.threads.net/@goofieseyes/post/${objectId}` : `https://www.instagram.com/p/${objectId}/` });

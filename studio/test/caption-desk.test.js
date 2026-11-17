@@ -51,18 +51,22 @@ test('a post still waiting on the desk is held, not published with placeholder t
   assert.equal(fake.calls.filter((c) => c.method === 'POST').length, 0);
 });
 
-test('captions from the desk land, and a held post goes straight out', async () => {
+test('captions from the desk land; a held post then waits for approval, and goes out once approved', async () => {
   const post = await waiting();
   await posts.runPost({ postId: post.id, rev: post.rev, kind: 'run' }, T0 + DAY); // held
   const later = T0 + DAY + 3600e3;
   const updated = await posts.applyCaptions(post.id, { facebook: 'Long caption…', threads: 'Short one.', instagram: 'ignored, not a platform here' }, later);
   assert.equal(updated.needsCaptions, false);
-  assert.equal(updated.held, null);
+  assert.equal(updated.held, 'approval');
+  assert.equal(updated.approval, 'waiting');
   assert.equal(updated.captionsBy, 'claude');
-  assert.equal(updated.scheduledAt, later);
   assert.deepEqual(updated.captions, { facebook: 'Long caption…', threads: 'Short one.' });
+  assert.equal(fake.calls.filter((c) => c.method === 'POST').length, 0);
 
-  await posts.runPost({ postId: post.id, rev: updated.rev, kind: 'run' }, later);
+  const approved = await posts.approvePost(post.id, {}, later);
+  assert.equal(approved.held, null);
+  assert.equal(approved.scheduledAt, later);
+  await posts.runPost({ postId: post.id, rev: approved.rev, kind: 'run' }, later);
   // Facebook is live straight away; Threads is in its ~30s settle wait.
   assert.equal((await posts.getPost(post.id)).targets.facebook.state, 'published');
   assert.equal(fake.calls.find((c) => c.path === '/PAGE1/photos').params.message, 'Long caption…');

@@ -77,6 +77,27 @@ function validatePost(post) {
 
 // ─── Facebook ────────────────────────────────────────────────────────────────
 // Facebook takes the whole post in one go, so it has no processing state.
+// A video goes out as a Reel (Page Reels API: start → hosted-file upload →
+// finish). If any step of that fails, for example a landscape or too-long
+// video Reels won't take, it falls back to a plain Page video and says so on
+// the target (`fallback: 'page-video'`).
+
+const fbLink = (link) => (link && link.startsWith('/') ? `https://www.facebook.com${link}` : link || null);
+
+async function facebookReel(pageId, pageToken, url, description) {
+  const start = await facebook.post(`/${pageId}/video_reels`, { upload_phase: 'start' }, pageToken);
+  const videoId = start.video_id;
+  if (!videoId) throw new Error('Facebook did not return a video id for the Reel.');
+  await facebook.rupload(videoId, url, pageToken);
+  const finish = await facebook.post(`/${pageId}/video_reels`, {
+    upload_phase: 'finish', video_id: videoId, video_state: 'PUBLISHED', description,
+  }, pageToken);
+  if (finish.success === false) throw new Error('Facebook did not accept the Reel.');
+  const permalink = await facebook.get(`/${videoId}`, { fields: 'permalink_url' }, pageToken)
+    .then((r) => fbLink(r.permalink_url))
+    .catch(() => null);
+  return { videoId, permalink: permalink || `https://www.facebook.com/reel/${videoId}` };
+}
 
 async function stepFacebook(post, target) {
   const { pageId, pageToken } = await metaAccount();
@@ -87,7 +108,19 @@ async function stepFacebook(post, target) {
   if (media.length === 0) {
     ({ id: postId } = await facebook.post(`/${pageId}/feed`, { message }, pageToken));
   } else if (media[0].type === 'video') {
-    ({ id: postId } = await facebook.post(`/${pageId}/videos`, { file_url: media[0].url, description: message }, pageToken));
+    try {
+      const reel = await facebookReel(pageId, pageToken, media[0].url, message);
+      target.mediaId = reel.videoId;
+      target.format = 'reel';
+      target.fallback = null;
+      target.permalink = reel.permalink;
+      return { done: true };
+    } catch (err) {
+      // Only Meta's message is kept; tokens never appear in it.
+      target.fallback = 'page-video';
+      target.reelError = String(err.message || err).slice(0, 300);
+      ({ id: postId } = await facebook.post(`/${pageId}/videos`, { file_url: media[0].url, description: message }, pageToken));
+    }
   } else if (media.length === 1) {
     const photo = await facebook.post(`/${pageId}/photos`, { url: media[0].url, message }, pageToken);
     postId = photo.post_id || photo.id;
@@ -103,7 +136,7 @@ async function stepFacebook(post, target) {
 
   target.mediaId = postId;
   target.permalink = await facebook.get(`/${postId}`, { fields: 'permalink_url' }, pageToken)
-    .then((r) => r.permalink_url || null)
+    .then((r) => fbLink(r.permalink_url))
     .catch(() => `https://www.facebook.com/${postId}`);
   return { done: true };
 }

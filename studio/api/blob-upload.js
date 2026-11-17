@@ -16,8 +16,7 @@
 const { handleUpload } = require('@vercel/blob/client');
 const { handler, readJson, send, httpError } = require('../lib/http');
 const { requireAuth } = require('../lib/auth');
-
-const MAX_BYTES = 300 * 1024 * 1024;
+const { TOKEN_LIMITS } = require('../lib/uploads');
 
 module.exports = handler(async (req, res) => {
   if (req.method !== 'POST') throw httpError(405, 'Method not allowed');
@@ -31,11 +30,8 @@ module.exports = handler(async (req, res) => {
     request: req,
     onBeforeGenerateToken: async (pathname) => {
       if (!pathname.startsWith('media/')) throw httpError(400, 'Uploads go under media/');
-      return {
-        allowedContentTypes: ['image/jpeg', 'video/mp4', 'video/quicktime'],
-        maximumSizeInBytes: MAX_BYTES,
-        addRandomSuffix: true,
-      };
+      // Same limits as a desk's token (lib/uploads.js).
+      return { ...TOKEN_LIMITS };
     },
   });
   send(res, 200, result);

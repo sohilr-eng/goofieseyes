@@ -23,7 +23,7 @@ Run `node studio/scripts/caption-desk.js pull` from the repo root.
 - A photo that fails to download in a cloud session usually means the environment's network
   access doesn't allow `*.public.blob.vercel-storage.com`. Say so and write that post from its
   notes.
-- Posts marked **HELD** go out the moment their captions land, so do those first.
+- Posts marked **HELD** are past their time; do those first. Once captioned, every post waits in the Queue for the owner's Approve before it goes out.
 
 ## 3. Write each post
 For each post, **open every listed image with the Read tool and actually look at it** before
