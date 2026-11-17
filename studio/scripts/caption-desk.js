@@ -10,8 +10,9 @@
  *
  *   node studio/scripts/caption-desk.js push <captions.json>
  *     Sends captions back. The file is [{ "id": "...", "captions": { "facebook": "...",
- *     "threads": "...", "instagram": "..." } }]. Each one is checked first (Threads
- *     under 500 characters, no hashtags) and anything that fails is reported and skipped.
+ *     "threads": "..." } }]. Each one is checked first (Threads under 500 characters, no
+ *     hashtags, no Instagram: that caption is always the owner's own) and anything that
+ *     fails is reported and skipped.
  *
  * Needs the studio's agent token, from STUDIO_AGENT_TOKEN, a file at
  * ~/.goofieseyes-studio/agent-token, or (in a Claude Code cloud session) a
@@ -100,6 +101,8 @@ async function pull() {
   for (const p of posts) {
     console.log(`── ${p.id}  ${p.held ? 'HELD, its time has passed, it goes out as soon as captions land' : `goes out ${p.scheduledAt}`}`);
     console.log(`   platforms: ${p.platforms.join(', ')}`);
+    const write = p.writablePlatforms || p.platforms.filter((pl) => pl !== 'instagram');
+    console.log(`   write for: ${write.join(', ') || '(nothing)'}${p.platforms.includes('instagram') ? " (Instagram is the owner's own, never write it)" : ''}`);
     if (p.instagram) console.log(`   from Instagram: ${p.instagram}`);
     console.log(`   notes / original caption: ${p.notes ? JSON.stringify(p.notes) : '(none)'}`);
     for (const img of p.images) console.log(`   image: ${img}`);
@@ -117,6 +120,7 @@ function check(entry) {
   for (const [platform, text] of Object.entries(c)) {
     if (/(^|\s)#[^\s#]+/.test(text)) problems.push(`${platform} has a hashtag`);
   }
+  if (typeof c.instagram === 'string' && c.instagram.trim()) problems.push("instagram is the owner's to write, leave it out");
   if (c.threads && c.threads.length > THREADS_LIMIT) problems.push(`threads is ${c.threads.length} characters (max ${THREADS_LIMIT})`);
   if (!Object.keys(c).length) problems.push('no captions');
   return problems;

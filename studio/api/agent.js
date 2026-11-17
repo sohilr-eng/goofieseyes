@@ -11,7 +11,9 @@
  *
  * GET  /api/agent          → { posts, recentEndings } — scheduled posts marked "needs captions",
  *                            soonest first, plus how recent Facebook/Threads captions ended
- *                            so the desk doesn't repeat an invitation
+ *                            so the desk doesn't repeat an invitation. Each post has
+ *                            writablePlatforms: its platforms minus Instagram (Instagram
+ *                            captions are always the owner's own).
  * GET  /api/agent?view=schedule
  *                          → { generatedAt, posts } — read-only snapshot of the queue for a desk:
  *                            every post scheduled from 14 days ago onward (any status), soonest
@@ -21,9 +23,11 @@
  *                            { <platform>: { state, permalink } } from post.targets. No media
  *                            URLs, no full captions. Changes nothing in storage.
  *                          Any other `view` → 400.
- * POST /api/agent?id=…     { captions: { facebook?, threads?, instagram? } } → writes them and
+ * POST /api/agent?id=…     { captions: { facebook?, threads? } } → writes them and
  *                            puts the post (back) to waiting for the owner's approval
  *                          → { id, scheduledAt, queued, approval }
+ *                            A non-empty `instagram` caption refuses the whole request (400):
+ *                            Instagram captions are the owner's to write.
  *
  * POST /api/agent?action=upload-token
  *      { pathname: 'media/<name>.mp4', contentType: 'video/mp4', size: <bytes> }
@@ -36,7 +40,13 @@
  *        scheduledAt?: ISO, source?: { desk, file } }
  *   → 201 { id, scheduledAt, approval: 'waiting' }. Without scheduledAt it gets a placeholder
  *     (3 days out, 12:00 New York) that the owner moves when approving. needsCaptions defaults
- *     to true. Any other action → 400; actions are POST only (405).
+ *     to true.
+ * POST /api/agent?action=set-time&id=…  { scheduledAt: ISO }
+ *   → { id, scheduledAt, approval } — the scheduling agent picks the time of a draft that is
+ *     still waiting for approval. 400 if the time isn't a date, has passed or is over a year
+ *     away; 404 no such post; 409 if it isn't scheduled or is already approved (only the owner
+ *     moves it then). Never changes approval; the old queued message goes stale.
+ * Any other action → 400; actions are POST only (405).
  *
  * Env: STUDIO_AGENT_TOKEN — sent as `Authorization: Bearer …`. Separate from the
  * login password so it can be rotated without signing every device out.
@@ -44,12 +54,12 @@
 
 const { handler, readJson, send, query, httpError } = require('../lib/http');
 const { requireAgent } = require('../lib/auth');
-const { listPosts, applyCaptions, createPost, approvalOf } = require('../lib/posts');
+const { listPosts, applyCaptions, createPost, approvalOf, setAgentTime, DESK_PLATFORMS } = require('../lib/posts');
 const { PLATFORMS } = require('../lib/publish');
 const { deskUploadToken, isBlobUrl } = require('../lib/uploads');
 
 const DAY = 86400e3;
-const ACTIONS = ['upload-token', 'create-draft'];
+const ACTIONS = ['upload-token', 'create-draft', 'set-time'];
 const MAX_MEDIA = 10;
 const MAX_NOTES = 5000;
 const PLACEHOLDER_DAYS = 3;
@@ -150,6 +160,12 @@ module.exports = handler(async (req, res) => {
     if (req.method !== 'POST') throw httpError(405, 'Method not allowed');
     const body = await readJson(req);
     if (action === 'upload-token') return send(res, 200, await deskUploadToken(body));
+    if (action === 'set-time') {
+      const id = query(req).get('id');
+      if (!id) throw httpError(400, 'Which post? Add &id=');
+      const post = await setAgentTime(id, body?.scheduledAt);
+      return send(res, 200, { id: post.id, scheduledAt: new Date(post.scheduledAt).toISOString(), approval: approvalOf(post) });
+    }
     return send(res, 201, await createDraft(body));
   }
 
@@ -170,6 +186,7 @@ module.exports = handler(async (req, res) => {
         scheduledAt: new Date(p.scheduledAt).toISOString(),
         held: Boolean(p.held),
         platforms: p.platforms,
+        writablePlatforms: p.platforms.filter((pl) => DESK_PLATFORMS.includes(pl)),
         notes: p.caption,
         captions: p.captions,
         media: p.media.map((m) => ({ type: m.type, url: m.url })),
@@ -187,6 +204,9 @@ module.exports = handler(async (req, res) => {
     const id = query(req).get('id');
     if (!id) throw httpError(400, 'Which post? Add ?id=');
     const { captions } = await readJson(req);
+    if (typeof captions?.instagram === 'string' && captions.instagram.trim()) {
+      throw httpError(400, "Instagram captions are Sohil's to write");
+    }
     const post = await applyCaptions(id, captions);
     return send(res, 200, { id: post.id, scheduledAt: new Date(post.scheduledAt).toISOString(), queued: post.queued, approval: approvalOf(post) });
   }

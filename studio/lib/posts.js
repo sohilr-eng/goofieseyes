@@ -16,6 +16,12 @@
  *       posts) counts as approved. Agent drafts start waiting, and so does any post the
  *       caption desk writes captions for; a waiting post never publishes.
  *     held?: 'approval' — its time came while it still waited for approval,
+ *     captionsOwner?: { instagram: 'owner' } — the Instagram caption is the owner's own words,
+ *       saved through the browser (composer, edit, or carried over from his Instagram post).
+ *       Instagram captions are always his: the caption desk never writes them, and a
+ *       waiting post that goes to Instagram can't be approved without one.
+ *     scheduledBy?: 'agent', scheduledByAt — the scheduling agent picked the time of a
+ *       waiting draft (POST /api/agent?action=set-time); cleared when the owner moves it,
  *     targets: { <platform>: { state, containerId?, children?, mediaId?, permalink?, error?, attempts } } }
  *
  * Status: scheduled → publishing → published | partial | failed, or cancelled.
@@ -26,7 +32,7 @@
 const crypto = require('crypto');
 const { getStore } = require('./store');
 const { enqueue } = require('./queue');
-const { validatePost, advancePost, resetFailed, PLATFORMS } = require('./publish');
+const { validatePost, advancePost, resetFailed, captionFor, PLATFORMS } = require('./publish');
 const { httpError } = require('./http');
 const { markShared, releaseShared } = require('./instagram');
 
@@ -95,6 +101,22 @@ async function listPosts(limit = 200) {
 const approvalOf = (post) => post.approval || 'approved';
 const fromInstagram = (post) => post.source?.type === 'instagram';
 
+// The platforms the caption desk may write for. Instagram is the owner's own voice.
+const DESK_PLATFORMS = PLATFORMS.filter((p) => p !== 'instagram');
+
+// Only called on saves from the browser (the owner's session): an Instagram
+// caption he typed, or the one carried over from his own Instagram post.
+function ownerCaptions(post) {
+  const ig = (post.captions?.instagram || '').trim() || (fromInstagram(post) ? String(post.caption || '').trim() : '');
+  return ig ? { instagram: 'owner' } : null;
+}
+
+// True while a post going to Instagram has no Instagram caption of the owner's.
+function needsOwnerInstagram(post) {
+  if (!post.platforms?.includes('instagram')) return false;
+  return !(post.captionsOwner?.instagram === 'owner' && captionFor(post, 'instagram').trim());
+}
+
 /**
  * `by: 'agent'` marks a desk's draft: it waits for the owner's approval.
  * Anything composed in the browser is the owner's own and starts approved.
@@ -114,6 +136,10 @@ async function createPost(input, now = Date.now(), { by } = {}) {
     ...(agent ? { createdBy: 'agent' } : {}),
     targets: {},
   };
+  if (!agent) {
+    const owner = ownerCaptions(post);
+    if (owner) post.captionsOwner = owner;
+  }
   const errors = validatePost(post);
   if (errors.length) throw httpError(400, errors.join(' '));
 
@@ -131,7 +157,11 @@ async function updatePost(id, input, now = Date.now()) {
   if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}; only scheduled posts can be edited.`);
 
   // `approval` is deliberately left as it is: editing a draft is not approving it.
-  Object.assign(post, clean(input), { scheduledAt: parseWhen(input, now), rev: post.rev + 1, updatedAt: now, held: null, captionsBy: null });
+  const scheduledAt = parseWhen(input, now);
+  if (scheduledAt !== post.scheduledAt) post.scheduledBy = null;
+  Object.assign(post, clean(input), { scheduledAt, rev: post.rev + 1, updatedAt: now, held: null, captionsBy: null });
+  // Edits only come from the browser, so whatever Instagram caption is there now is his.
+  post.captionsOwner = ownerCaptions(post);
   const errors = validatePost(post);
   if (errors.length) throw httpError(400, errors.join(' '));
 
@@ -230,9 +260,11 @@ async function approvePost(id, when = {}, now = Date.now()) {
   if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}.`);
   if (approvalOf(post) !== 'waiting') throw httpError(409, `This post is already ${approvalOf(post)}.`);
   if (post.needsCaptions) throw httpError(409, 'It still needs captions: write or release captions first.');
+  if (needsOwnerInstagram(post)) throw httpError(409, 'Write the Instagram caption yourself first.');
   const errors = validatePost(post);
   if (errors.length) throw httpError(400, errors.join(' '));
 
+  if (when.publishNow || when.scheduledAt) post.scheduledBy = null;
   if (when.publishNow) post.scheduledAt = now;
   else if (when.scheduledAt) post.scheduledAt = parseWhen({ scheduledAt: when.scheduledAt }, now);
   post.scheduledAt = Math.max(post.scheduledAt, now);
@@ -242,12 +274,13 @@ async function approvePost(id, when = {}, now = Date.now()) {
 }
 
 // The caption desk hands back captions. Only the platforms it wrote for
-// change; anything the owner typed for another platform is kept.
+// change; anything the owner typed for another platform is kept. Instagram is
+// never written here (api/agent.js refuses a request that tries).
 async function applyCaptions(id, captions, now = Date.now()) {
   const post = await getPost(id);
   if (!post) throw httpError(404, 'No such post');
   if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}; captions can only be written for scheduled posts.`);
-  for (const p of PLATFORMS) {
+  for (const p of DESK_PLATFORMS) {
     if (typeof captions?.[p] === 'string' && captions[p].trim() && post.platforms.includes(p)) post.captions[p] = captions[p].trim();
   }
   const errors = validatePost(post);
@@ -257,6 +290,30 @@ async function applyCaptions(id, captions, now = Date.now()) {
   post.captionsAt = now;
   // Nothing the desk writes goes out until the owner has seen it.
   return holdForApproval(post, now);
+}
+
+const MAX_AHEAD = 366 * 86400e3;
+
+/**
+ * The scheduling agent picks the time of a draft still waiting for the owner.
+ * It never touches `approval`: the post still waits (and the worker holds it
+ * when the new time comes) until the owner approves it. The rev bump strands
+ * the message queued for the old time.
+ */
+async function setAgentTime(id, scheduledAt, now = Date.now()) {
+  if (typeof scheduledAt !== 'string' || Number.isNaN(Date.parse(scheduledAt))) throw httpError(400, 'scheduledAt must be an ISO date.');
+  const at = Date.parse(scheduledAt);
+  if (at <= now) throw httpError(400, 'That time has already passed.');
+  if (at > now + MAX_AHEAD) throw httpError(400, 'That is more than a year away.');
+  const post = await getPost(id);
+  if (!post) throw httpError(404, 'No such post');
+  if (post.status !== 'scheduled') throw httpError(409, `This post is ${post.status}.`);
+  if (approvalOf(post) !== 'waiting') throw httpError(409, 'Already approved: only Sohil can move it now.');
+  post.scheduledAt = at;
+  post.scheduledBy = 'agent';
+  post.scheduledByAt = now;
+  // requeue bumps rev, clears any hold (the new time hasn't come) and queues the new time.
+  return requeue(post, now);
 }
 
 /**
@@ -323,5 +380,5 @@ async function queueDuePosts() {
 
 module.exports = {
   createPost, updatePost, cancelPost, rejectPost, approvePost, deletePost, retryPost, releasePost, applyCaptions,
-  getPost, listPosts, runPost, queueDuePosts, approvalOf,
+  getPost, listPosts, runPost, queueDuePosts, approvalOf, setAgentTime, needsOwnerInstagram, DESK_PLATFORMS,
 };

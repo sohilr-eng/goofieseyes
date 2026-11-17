@@ -1,6 +1,6 @@
 ---
 name: captions
-description: Caption desk for goofieseyes studio. Writes Facebook and Threads (and sometimes Instagram) captions for scheduled posts marked "needs captions", by looking at their photos and following studio/caption-voice.md, then saves them to the studio. Use when the owner says /captions, "write my captions", or "run the caption desk".
+description: Caption desk for goofieseyes studio. Writes Facebook and Threads captions (never Instagram) for scheduled posts marked "needs captions", by looking at their photos and following studio/caption-voice.md, then saves them to the studio. Use when the owner says /captions, "write my captions", or "run the caption desk".
 ---
 
 # Caption desk
@@ -30,11 +30,12 @@ For each post, **open every listed image with the Read tool and actually look at
 writing. Then use the notes or original Instagram caption as facts, the voice guide for tone, and
 the list of recent endings so the invitation is worded freshly.
 
-Write only for the platforms the post lists:
+Write only for the platforms the post lists under "write for":
 - `facebook`: the full version.
 - `threads`: under 500 characters; count them.
-- `instagram`: only if the post lists Instagram and has no Instagram link (it didn't come from
-  Instagram). Short, art-first, no invitation.
+
+Never write an Instagram caption, even when the post lists Instagram: Instagram is the owner's
+own voice and he writes it himself. The studio refuses a push that includes one.
 
 Decide the invitation per post from what's in the photos (creative direction / a shoot /
 prints) and say which you chose when you report. Vary the wording across the batch too, not only

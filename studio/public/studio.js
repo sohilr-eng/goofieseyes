@@ -931,6 +931,9 @@ function postCard(p) {
 // Older posts have no `approval` and count as approved.
 const isWaiting = (p) => p.status === 'scheduled' && p.approval === 'waiting';
 const ownCaption = (p, pl) => (p.captions?.[pl] || '').trim() || (p.needsCaptions ? '' : (p.caption || '').trim());
+// Instagram captions are always the owner's own (lib/posts.js needsOwnerInstagram).
+const igCaption = (p) => (p.captions?.instagram || '').trim() || (p.source?.type === 'instagram' ? (p.caption || '').trim() : '');
+const needsOwnerIg = (p) => p.platforms.includes('instagram') && !(p.captionsOwner?.instagram === 'owner' && igCaption(p));
 
 function waitCard(p) {
   const first = p.media?.[0];
@@ -945,21 +948,28 @@ function waitCard(p) {
   const when = passed ? `Was due ${fmtTime(p.scheduledAt)}` : `Goes out ${fmtTime(p.scheduledAt)}`;
   const from = p.createdBy === 'agent'
     ? `<p class="from">From ${esc(p.source?.desk || 'a desk')}${p.source?.file ? ` · ${esc(p.source.file)}` : ''}</p>` : '';
+  const igMissing = needsOwnerIg(p);
+  const igBlock = `<div class="cap-block"><span class="label">Instagram caption: yours to write</span>
+      <p class="none">The caption desk never writes Instagram.</p>
+      <div class="btn-row"><button class="btn small" data-act="write-ig" data-id="${p.id}">Write it</button></div></div>`;
   const caps = p.needsCaptions
     ? `<div class="cap-block"><span class="chip desk">Waiting for the caption desk</span>
-        ${p.caption ? `<p><span class="label">Notes</span> ${esc(p.caption)}</p>` : ''}</div>`
+        ${p.caption ? `<p><span class="label">Notes</span> ${esc(p.caption)}</p>` : ''}</div>${igMissing ? igBlock : ''}`
     : p.platforms.map((pl) => {
+      if (pl === 'instagram') return igMissing ? igBlock : `<div class="cap-block"><span class="label">${NAMES[pl]} · yours</span><p>${esc(igCaption(p))}</p></div>`;
       const text = ownCaption(p, pl);
       return `<div class="cap-block"><span class="label">${NAMES[pl]}</span>${text ? `<p>${esc(text)}</p>` : '<p class="none">No caption</p>'}</div>`;
     }).join('');
   const decide = p.needsCaptions
     ? `<button class="btn big" data-act="release" data-id="${p.id}">Post as is</button>`
-    : `<button class="btn primary big" data-act="approve" data-id="${p.id}">Approve</button>`;
+    : `<button class="btn primary big" data-act="approve" data-id="${p.id}"${igMissing ? ' disabled title="Write the Instagram caption yourself first."' : ''}>Approve</button>`;
+  const scheduler = p.scheduledBy === 'agent' ? '<p class="from">Time set by the scheduler</p>' : '';
 
   return `<article class="card wait">
     ${preview}
     <div class="body">
       <div class="when">${when}</div>
+      ${scheduler}
       ${passed ? '<p class="clash">Its time has passed. Approving sends it now, or pick a new time.</p>' : ''}
       <div class="meta">${platforms}${extra}${p.captionsBy === 'claude' ? '<span class="chip desk">Captions by Claude</span>' : ''}</div>
       ${from}
@@ -968,6 +978,7 @@ function waitCard(p) {
         <button class="btn big danger" data-act="reject" data-id="${p.id}">Reject</button>
         ${decide}
       </div>
+      ${igMissing && !p.needsCaptions ? '<p class="from" style="margin:8px 0 0">Approve opens once your Instagram caption is in.</p>' : ''}
       <div class="btn-row more"><button class="btn small ghost" data-act="edit" data-id="${p.id}">Edit first</button></div>
     </div>
   </article>`;
@@ -1012,6 +1023,11 @@ $('#queue').addEventListener('click', async (e) => {
   const post = state.posts.find((p) => p.id === id);
   try {
     if (act === 'edit') return editPost(post);
+    if (act === 'write-ig') {
+      editPost(post);
+      $('#custom').open = true;
+      return $('#cap-instagram').focus();
+    }
     if (act === 'approve') return openApprove(post);
     if (act === 'reject' && !confirm('Reject this post? It won\'t be posted anywhere.')) return;
     if (act === 'cancel' && !confirm('Cancel this scheduled post?')) return;
