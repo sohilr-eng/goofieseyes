@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en" data-gf-spin="full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cart | GoofiesEyes</title>
+  <meta name="robots" content="noindex, nofollow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/pages.css">
+  <link rel="stylesheet" href="/assets/store.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <script defer src="/assets/site.js"></script>
+  <script defer src="/assets/store.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body class="gf-body" data-gf-store="cart">
+
+<main class="gf" id="top">
+
+  <nav class="gf-nav">
+    <a class="gf-wordmark" href="index.html">goofieseyes</a>
+    <div class="gf-nav-links gf-meta">
+      <a href="portfolios.html">The crate</a>
+      <a href="professional.html">Portfolio</a>
+      <a href="store.html">Store</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#liner-notes">Liner notes</a>
+      <a href="index.html#pressing">Contact</a>
+      <a href="cart.html" aria-current="page">Cart <span data-gf-cart-count></span></a>
+    </div>
+    <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="gf-mobile-menu" id="gf-mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">The crate</a>
+    <a href="professional.html">Portfolio</a>
+    <a href="store.html">Store</a>
+    <a href="journal.html">Journal</a>
+    <a href="index.html#liner-notes">Liner notes</a>
+    <a href="index.html#pressing">Contact</a>
+    <a href="cart.html">Cart <span data-gf-cart-count></span></a>
+  </div>
+
+  <section class="gf-page gf-page--alt">
+    <div class="gf-page-inner">
+      <a class="gf-back" href="store.html">
+        <svg aria-hidden="true" viewBox="0 0 24 12" width="20" height="10" fill="none">
+          <path d="M24 6H2M7 1L2 6l5 5" stroke="currentColor" stroke-width="1"/>
+        </svg>
+        Keep shopping
+      </a>
+
+      <h1 class="gf-product-title" style="margin-bottom: 2rem">Your cart.</h1>
+
+      <div class="gf-state" id="cart-empty" hidden>
+        Your cart is empty. <a href="store.html">Browse the store</a>.
+      </div>
+
+      <div class="gf-checkout" id="cart-full" hidden>
+        <ul class="gf-cart-lines" id="cart-lines"></ul>
+
+        <aside class="gf-summary">
+          <p class="gf-meta" style="margin-bottom: 1.2rem">Order summary</p>
+          <div class="gf-summary-row">
+            <span>Subtotal</span><span id="cart-subtotal"></span>
+          </div>
+          <div class="gf-summary-row">
+            <span>Shipping</span><span id="cart-shipping"></span>
+          </div>
+          <div class="gf-summary-row">
+            <span>Tax</span><span>At checkout</span>
+          </div>
+
+          <label class="gf-field">
+            <span>Email (optional)</span>
+            <input id="cart-email" type="email" autocomplete="email">
+          </label>
+          <p class="gf-slip-note" style="margin-top: 0.6rem">
+            Digital files and your receipt go to this address. You can also add
+            it on the next step.
+          </p>
+
+          <button class="gf-cta-slip" id="cart-checkout" type="button" style="margin-top: 1.6rem; width: 100%; justify-content: center">
+            <span id="cart-checkout-label">Checkout</span>
+          </button>
+          <p class="gf-error" id="cart-error" hidden role="alert"></p>
+          <p class="gf-slip-note" style="margin-top: 1rem; text-align: center">
+            Secure checkout by Stripe
+          </p>
+        </aside>
+      </div>
+    </div>
+  </section>
+
+  <footer class="gf-foot">
+    <div class="gf-foot-mark">goofieseyes</div>
+    <div class="gf-meta" style="text-align: right">
+      <div class="gf-foot-links">
+        <a href="store.html">Store</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+      <div>Photography and motion</div>
+      <div>All frames the photographer's own</div>
+    </div>
+  </footer>
+
+</main>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+{
+  "_note": "Store catalogue for everything that is not a photograph. Prints stay in prints.json (the admin portal writes that file); the storefront merges both. kind: digital | merch. status: live | coming-soon. price is in USD; 0 means free. A coming-soon product shows a notify-me form instead of a buy button.",
+  "collections": [
+    { "id": "prints",  "name": "Prints",  "blurb": "Archival fine art prints, signed and numbered, and full-resolution files." },
+    { "id": "digital", "name": "Digital", "blurb": "Grading tools and downloads, delivered to your inbox." },
+    { "id": "merch",   "name": "Merch",   "blurb": "Coming soon." }
+  ],
+  "products": [
+    {
+      "id": "lut-powergrade-pack",
+      "collection": "digital",
+      "kind": "digital",
+      "status": "coming-soon",
+      "featured": true,
+      "badge": "Free",
+      "price": 0,
+      "title": "LUTs + PowerGrades",
+      "subtitle": "Color grading pack",
+      "image": "/assets/store/lut-powergrade-pack.png",
+      "imageLarge": "/assets/store/lut-powergrade-pack@2x.png",
+      "imageAlt": "LUTs + PowerGrades colour grading pack cover: lift, gamma and gain wheels",
+      "description": "The grade from the GoofiesEyes films, as .cube LUTs for any editor that reads them and node-for-node PowerGrades for DaVinci Resolve.",
+      "includes": [
+        ".cube LUTs for Premiere, Final Cut, CapCut and any editor that reads LUTs",
+        "PowerGrades (.drx) for DaVinci Resolve, node for node"
+      ]
+    }
+  ]
+}

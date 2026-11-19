@@ -1244,3 +1244,9 @@ body.gf-body {
     animation: none;
   }
 }
+
+/* Cart count in the nav (filled by assets/store.js); hidden while empty. */
+[data-gf-cart-count]:empty {
+  display: none;
+}
+

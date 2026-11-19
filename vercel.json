@@ -3,6 +3,8 @@
   "outputDirectory": ".",
   "framework": null,
   "redirects": [
+    { "source": "/prints.html", "destination": "/store.html", "permanent": true },
+    { "source": "/prints", "destination": "/store.html", "permanent": true },
     { "source": "/studio", "destination": "/", "permanent": false },
     { "source": "/studio/:path*", "destination": "/", "permanent": false }
   ],

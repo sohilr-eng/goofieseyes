@@ -88,9 +88,60 @@ async function sendEmail({ to, replyTo, subject, html, text }) {
 
 /* ── Fulfilment ─────────────────────────────────────────────────────────── */
 
-async function confirmDigital(session) {
+/* The cart as create-checkout-session.js packed it into metadata l0, l1, ...:
+ * [[productId, format, size], ...] in line-item order. Empty for sessions made
+ * by the old single-item checkout, which carried product_id/type/size instead. */
+function packedCart(meta) {
+  let joined = '';
+  for (let i = 0; meta[`l${i}`] != null; i++) joined += meta[`l${i}`];
+  if (!joined) return [];
+  try {
+    const rows = JSON.parse(joined);
+    return Array.isArray(rows) ? rows : [];
+  } catch (e) {
+    console.error('Unreadable cart metadata:', e.message);
+    return [];
+  }
+}
+
+/* What was bought, one entry per line item. Line items give names, quantities
+ * and amounts; the packed metadata gives product ids, formats and sizes. Only
+ * read access to Checkout Sessions is needed for either. */
+async function orderItems(stripe, session) {
   const meta = session.metadata || {};
-  const title = meta.product_title || meta.product_id;
+  const packed = packedCart(meta);
+
+  let lines;
+  try {
+    const list = await stripe.checkout.sessions.listLineItems(session.id, { limit: 100 });
+    lines = list.data || [];
+  } catch (err) {
+    // Throwing makes Stripe retry rather than acknowledge an order whose
+    // contents we could not read.
+    throw new Error(`Could not read line items for ${session.id}: ${err.message}`);
+  }
+
+  return lines.map((li, i) => {
+    const row = packed[i] || [];
+    const legacyFormat = meta.type === 'digital' ? 'digital' : 'physical';
+    return {
+      productId: row[0] || meta.product_id || li.description,
+      title: li.description || meta.product_title || row[0] || '',
+      format: row[1] || legacyFormat,
+      size: row[2] || (lines.length === 1 ? meta.size : '') || '',
+      quantity: li.quantity || 1,
+      amount: li.amount_total
+    };
+  });
+}
+
+function itemLabel(item) {
+  return `${item.quantity > 1 ? item.quantity + ' × ' : ''}${item.title}` +
+    `${item.size ? ' · ' + item.size : ''} · ${item.format === 'digital' ? 'digital file' : 'physical'}`;
+}
+
+async function confirmDigital(session, items) {
+  const digital = items.filter(i => i.format === 'digital');
   const buyer = (session.customer_details && session.customer_details.email) || session.customer_email;
 
   if (!buyer) {
@@ -98,16 +149,24 @@ async function confirmDigital(session) {
     return;
   }
 
+  const names = digital.map(i => i.title);
+  const listHtml = names.map(n => `<li><strong>${escapeHtml(n)}</strong></li>`).join('');
+  const physicalToo = items.some(i => i.format !== 'digital');
+
   const html = `
     <h2 style="font-family:Georgia,serif">Thank you for your order</h2>
-    <p>You bought the full-resolution digital file of <strong>${escapeHtml(title)}</strong>.</p>
-    <p>It will be emailed to this address within 24 hours. Any questions in the
-       meantime, just reply to this email.</p>
+    <p>Your digital ${names.length > 1 ? 'files' : 'file'}:</p>
+    <ul>${listHtml}</ul>
+    <p>${names.length > 1 ? 'They' : 'It'} will be emailed to this address within 24 hours.
+       ${physicalToo ? 'The physical items in your order ship separately, with tracking.' : ''}
+       Any questions in the meantime, just reply to this email.</p>
     <p style="color:#666">Order ref: ${escapeHtml(orderRef(session.id))}</p>
   `;
-  const text = `Thank you for your order.\n\nYou bought the full-resolution digital file of ${title}.\n` +
-    `It will be emailed to this address within 24 hours. Any questions, just reply to this email.\n\n` +
-    `Order ref: ${orderRef(session.id)}\n`;
+  const text = `Thank you for your order.\n\nYour digital ${names.length > 1 ? 'files' : 'file'}:\n` +
+    names.map(n => `- ${n}`).join('\n') + '\n\n' +
+    `${names.length > 1 ? 'They' : 'It'} will be emailed to this address within 24 hours. ` +
+    `${physicalToo ? 'The physical items in your order ship separately, with tracking. ' : ''}` +
+    `Any questions, just reply to this email.\n\nOrder ref: ${orderRef(session.id)}\n`;
 
   // orders@goofieseyes.live has no inbox (the domain has no MX record), so
   // replies are pointed at the owner.
@@ -120,42 +179,64 @@ async function confirmDigital(session) {
   });
 }
 
-async function notifyOwner(session, kind) {
+async function notifyOwner(session, items) {
   const details = session.customer_details || {};
-  const address = (session.shipping_details && session.shipping_details.address) || details.address || {};
+  const shipping = session.collected_information && session.collected_information.shipping_details;
+  const address = (shipping && shipping.address) ||
+    (session.shipping_details && session.shipping_details.address) || details.address || {};
   const addressLines = [address.line1, address.line2, address.city, address.state, address.postal_code, address.country]
     .filter(Boolean).map(escapeHtml).join('<br>');
 
   const meta = session.metadata || {};
   const totals = session.total_details || {};
-  const isDigital = kind === 'digital';
+  const digital = items.filter(i => i.format === 'digital');
+  const physical = items.filter(i => i.format !== 'digital');
 
-  // Replying goes to the buyer (reply_to below), so for a digital order the
-  // whole job is: hit reply, attach the original, send.
-  const todo = isDigital
-    ? `<p style="background:#FFF4D6;padding:10px 12px"><strong>To do:</strong> send the
-         full-resolution original of <strong>${escapeHtml(meta.product_id)}</strong> within
-         24 hours. Reply to this email with it attached — the reply goes to the buyer.</p>`
-    : '';
+  // Replying goes to the buyer (reply_to below), so for digital items the
+  // whole job is: hit reply, attach the originals, send.
+  const todo = [
+    digital.length
+      ? `<p style="background:#FFF4D6;padding:10px 12px"><strong>To do:</strong> send
+           ${digital.map(i => `<strong>${escapeHtml(i.productId)}</strong>`).join(', ')} within
+           24 hours. Reply to this email with ${digital.length > 1 ? 'them' : 'it'} attached — the reply goes to the buyer.</p>`
+      : '',
+    physical.length
+      ? `<p style="background:#E6F2EF;padding:10px 12px"><strong>To make and ship:</strong>
+           ${physical.length} physical ${physical.length > 1 ? 'items' : 'item'} (below).</p>`
+      : ''
+  ].join('');
+
+  const rows = items.map(i => `
+      <tr>
+        <td style="padding:4px 12px 4px 0">${escapeHtml(itemLabel(i))}</td>
+        <td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(i.productId)}</td>
+        <td style="padding:4px 0;text-align:right">${escapeHtml(money(i.amount, session.currency))}</td>
+      </tr>`).join('');
+
+  const kind = digital.length && physical.length ? 'mixed' : (digital.length ? 'digital' : 'print');
 
   const html = `
     <h2 style="font-family:Georgia,serif">New ${escapeHtml(kind)} order</h2>
     ${todo}
-    <p><strong>Item:</strong> ${escapeHtml(meta.product_id)}${meta.size ? ' · ' + escapeHtml(meta.size) : ''}</p>
+    <table style="border-collapse:collapse">${rows}</table>
     <p><strong>Paid:</strong> ${escapeHtml(money(session.amount_total, session.currency))}
-       (tax ${escapeHtml(money(totals.amount_tax, session.currency))})</p>
+       (tax ${escapeHtml(money(totals.amount_tax, session.currency))},
+        shipping ${escapeHtml(money(totals.amount_shipping, session.currency))})</p>
     <p><strong>Buyer:</strong> ${escapeHtml(details.name || meta.customer_name || '')}
        &lt;${escapeHtml(details.email || '')}&gt;</p>
-    ${addressLines ? `<p><strong>Ship to:</strong><br>${addressLines}</p>` : ''}
-    <p style="color:#666">Session: ${escapeHtml(session.id)}</p>
+    ${addressLines && physical.length ? `<p><strong>Ship to:</strong><br>${addressLines}</p>` : ''}
+    <p style="color:#666">Order ref: ${escapeHtml(orderRef(session.id))} · Session: ${escapeHtml(session.id)}</p>
   `;
+
+  const first = items[0] ? items[0].title : (meta.product_title || meta.product_id || 'order');
+  const what = items.length > 1 ? `${items.length} items` : first;
 
   await sendEmail({
     to: process.env.PRESSING_TO || DEFAULT_TO,
     replyTo: details.email || undefined,
-    subject: isDigital
-      ? `Send file: ${meta.product_title || meta.product_id} — new digital order`
-      : `New print order — ${meta.product_id || 'print'}`,
+    subject: digital.length
+      ? `Send file${digital.length > 1 ? 's' : ''}: ${what} — new ${kind} order`
+      : `New print order — ${what}`,
     html,
     text: html.replace(/<[^>]+>/g, ' ')
   });
@@ -200,9 +281,9 @@ module.exports = async function handler(req, res) {
           break;
         }
 
-        const isDigital = session.metadata && session.metadata.type === 'digital';
-        if (isDigital) await confirmDigital(session);
-        await notifyOwner(session, isDigital ? 'digital' : 'print');
+        const items = await orderItems(stripe, session);
+        if (items.some(i => i.format === 'digital')) await confirmDigital(session, items);
+        await notifyOwner(session, items);
         break;
       }
 

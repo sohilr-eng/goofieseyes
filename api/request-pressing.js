@@ -18,6 +18,8 @@ const KINDS = {
   print: 'A print',
   commission: 'A shoot',
   motion: 'Motion work',
+  // Store "notify me" list for the free LUT + PowerGrade pack (store.html).
+  pack: 'Free LUT pack signup',
   other: 'Something else'
 };
 

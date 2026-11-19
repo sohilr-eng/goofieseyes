@@ -15,6 +15,7 @@
   <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
   <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
   <script defer src="/assets/site.js"></script>
+  <script defer src="/assets/store.js"></script>
   <script defer src="/_vercel/insights/script.js"></script>
 </head>
 <body class="gf-body">
@@ -26,9 +27,10 @@
     <div class="gf-nav-links gf-meta">
       <a href="portfolios.html">The crate</a>
       <a href="professional.html">Portfolio</a>
-      <a href="prints.html">Prints</a>
+      <a href="store.html">Store</a>
       <a href="journal.html">Journal</a>
       <a href="index.html#pressing">Contact</a>
+      <a href="cart.html">Cart <span data-gf-cart-count></span></a>
     </div>
     <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
       <span></span><span></span><span></span>
@@ -39,9 +41,10 @@
     <a href="index.html">Home</a>
     <a href="portfolios.html">The crate</a>
     <a href="professional.html">Portfolio</a>
-    <a href="prints.html">Prints</a>
+    <a href="store.html">Store</a>
     <a href="journal.html">Journal</a>
     <a href="index.html#pressing">Contact</a>
+    <a href="cart.html">Cart <span data-gf-cart-count></span></a>
   </div>
 
   <section class="gf-page gf-page--alt">
@@ -52,8 +55,8 @@
 
       <div class="gf-success-ref" id="order-ref">Processing…</div>
 
-      <a class="gf-cta-tab" href="prints.html">
-        Back to prints
+      <a class="gf-cta-tab" href="store.html">
+        Back to store
         <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
           <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
         </svg>
@@ -81,14 +84,24 @@
   function boot() {
     var params = new URLSearchParams(window.location.search);
     var sessionId = params.get('session_id');
-    var isDigital = params.get('type') === 'digital';
+    var type = params.get('type');
+
+    // Paid: the cart has done its job. (Key shared with assets/store.js.)
+    if (sessionId) {
+      try { localStorage.removeItem('gf-cart-v1'); } catch (e) { /* private mode */ }
+    }
 
     document.getElementById('order-kind').textContent =
-      isDigital ? 'Digital download' : 'Fine art print';
+      type === 'digital' ? 'Digital download'
+        : type === 'mixed' ? 'Prints and digital files'
+        : 'Your order';
 
-    document.getElementById('order-body').textContent = isDigital
-      ? 'Thank you. Your full-resolution file will be emailed to the address you gave at checkout within 24 hours. A confirmation is on its way now; if you cannot see it, check your spam folder.'
-      : 'Thank you. Your print will be made and shipped, and you will get a confirmation email with tracking as soon as it is on its way.';
+    document.getElementById('order-body').textContent =
+      type === 'digital'
+        ? 'Thank you. Your files will be emailed to the address you gave at checkout within 24 hours. A confirmation is on its way now; if you cannot see it, check your spam folder.'
+      : type === 'mixed'
+        ? 'Thank you. Your digital files will be emailed within 24 hours, and your physical items will be made and shipped with tracking. A confirmation is on its way now.'
+        : 'Thank you. Your order will be made and shipped, and you will get a confirmation email with tracking as soon as it is on its way.';
 
     var ref = document.getElementById('order-ref');
     if (sessionId) {

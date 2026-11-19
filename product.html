@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en" data-gf-spin="full">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Store | GoofiesEyes</title>
+  <meta name="description" content="Fine art prints, digital files, grading tools and merch from GoofiesEyes." />
+  <meta name="robots" content="index, follow" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/site.css">
+  <link rel="stylesheet" href="/assets/pages.css">
+  <link rel="stylesheet" href="/assets/store.css">
+  <link rel="icon" type="image/svg+xml" href="/assets/favicon.svg">
+  <link rel="icon" type="image/png" sizes="32x32" href="/assets/favicon-32.png">
+  <link rel="apple-touch-icon" href="/assets/apple-touch-icon.png">
+  <script defer src="/assets/site.js"></script>
+  <script defer src="/assets/store.js"></script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</head>
+<body class="gf-body" data-gf-store="product">
+
+<main class="gf" id="top">
+
+  <nav class="gf-nav">
+    <a class="gf-wordmark" href="index.html">goofieseyes</a>
+    <div class="gf-nav-links gf-meta">
+      <a href="portfolios.html">The crate</a>
+      <a href="professional.html">Portfolio</a>
+      <a href="store.html" aria-current="page">Store</a>
+      <a href="journal.html">Journal</a>
+      <a href="index.html#liner-notes">Liner notes</a>
+      <a href="index.html#pressing">Contact</a>
+      <a href="cart.html">Cart <span data-gf-cart-count></span></a>
+    </div>
+    <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
+      <span></span><span></span><span></span>
+    </button>
+  </nav>
+
+  <div class="gf-mobile-menu" id="gf-mobile-menu">
+    <a href="index.html">Home</a>
+    <a href="portfolios.html">The crate</a>
+    <a href="professional.html">Portfolio</a>
+    <a href="store.html">Store</a>
+    <a href="journal.html">Journal</a>
+    <a href="index.html#liner-notes">Liner notes</a>
+    <a href="index.html#pressing">Contact</a>
+    <a href="cart.html">Cart <span data-gf-cart-count></span></a>
+  </div>
+
+  <section class="gf-page">
+    <div class="gf-page-inner">
+      <a class="gf-back" id="product-back" href="store.html">
+        <svg aria-hidden="true" viewBox="0 0 24 12" width="20" height="10" fill="none">
+          <path d="M24 6H2M7 1L2 6l5 5" stroke="currentColor" stroke-width="1"/>
+        </svg>
+        <span id="product-back-label">Back to store</span>
+      </a>
+
+      <div class="gf-product">
+        <div class="gf-product-img" id="product-img-wrap">
+          <img id="product-img" src="data:," alt="">
+        </div>
+
+        <div class="gf-product-info">
+          <p class="gf-meta" id="product-kicker"></p>
+          <h1 class="gf-product-title" id="product-title">Loading…</h1>
+          <p class="gf-product-price" id="product-price"></p>
+          <p class="gf-product-desc" id="product-desc"></p>
+
+          <div id="product-includes-wrap" hidden>
+            <p class="gf-section-label" style="margin-top: 2rem">What's inside</p>
+            <ul class="gf-product-includes" id="product-includes"></ul>
+          </div>
+
+          <!-- Buy: shown for live products. -->
+          <div id="product-buy" hidden>
+            <div id="product-format-section" hidden>
+              <p class="gf-section-label" style="margin-top: 2rem">Format</p>
+              <div class="gf-sizes" id="product-formats"></div>
+            </div>
+
+            <div id="product-size-section" hidden>
+              <p class="gf-section-label" style="margin-top: 2rem">Size</p>
+              <div class="gf-sizes" id="product-sizes"></div>
+            </div>
+
+            <div id="product-qty-section" hidden>
+              <p class="gf-section-label" style="margin-top: 2rem">Quantity</p>
+              <label class="gf-cart-qty">
+                <input id="product-qty" type="number" min="1" max="10" value="1" aria-label="Quantity">
+              </label>
+            </div>
+
+            <p class="gf-slip-note" id="product-delivery" style="margin-top: 1.6rem"></p>
+
+            <button class="gf-cta-slip gf-product-add" id="product-add" type="button">
+              <span id="product-add-label">Add to cart</span>
+            </button>
+            <p class="gf-note-box" id="product-added" hidden role="status">
+              Added to your cart. <a href="cart.html">View cart and check out</a>
+              or <a href="store.html">keep browsing</a>.
+            </p>
+          </div>
+
+          <!-- Notify: shown for coming-soon products. -->
+          <div id="product-notify" hidden>
+            <p class="gf-section-label" style="margin-top: 2rem">Get it first</p>
+            <p class="gf-product-desc" style="margin: 0 0 1.4rem">
+              Leave your email and it comes to your inbox the day it is out.
+            </p>
+            <form class="gf-notify" id="notify-form" novalidate>
+              <label class="gf-field" style="margin-top: 0">
+                <span>First name</span>
+                <input id="notify-name" name="name" type="text" autocomplete="given-name" required>
+              </label>
+              <label class="gf-field">
+                <span>Email address</span>
+                <input id="notify-email" name="email" type="email" autocomplete="email" required>
+              </label>
+              <!-- Honeypot: hidden from people, filled in by bots. -->
+              <input class="gf-hp" name="website" type="text" tabindex="-1" autocomplete="off" aria-hidden="true">
+              <button class="gf-cta-slip gf-product-add" id="notify-submit" type="submit">Notify me</button>
+              <p class="gf-error" id="notify-error" hidden role="alert"></p>
+              <p class="gf-note-box" id="notify-done" hidden role="status">
+                You are on the list. It comes to your inbox the day it is out.
+              </p>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="gf-foot">
+    <div class="gf-foot-mark">goofieseyes</div>
+    <div class="gf-meta" style="text-align: right">
+      <div class="gf-foot-links">
+        <a href="store.html">Store</a>
+        <a href="cart.html">Cart</a>
+        <a href="mailto:goofiesfotos@gmail.com">Email</a>
+        <a href="privacy.html">Privacy</a>
+      </div>
+      <div>Photography and motion</div>
+      <div>All frames the photographer's own</div>
+    </div>
+  </footer>
+
+</main>
+
+</body>
+</html>
