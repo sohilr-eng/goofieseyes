@@ -62,102 +62,75 @@
     <a class="gf-nav-work" href="work.html" aria-current="page">Work with me</a>
   </div>
 
-  <!-- ─── hero ─── -->
-  <header class="gf-pro-hero">
-    <div class="gf-pro-hero-inner">
-      <p class="gf-meta gf-work-kicker">Work with me · commissions</p>
-      <h1>Tell me what you're making.</h1>
-      <p>
-        I shoot and cut brand films and launch spots, short films about a shop
-        or a space, and photographs for businesses and the people behind them.
-        Book a short call below, or write to me if you'd rather start that way.
-      </p>
+  <!-- ─── first screen: intro, booking, how it works ───
+       One grid, three areas. Phones read intro → booking → steps; from 800px
+       the intro and steps share the left column and the calendar sits right. -->
+  <header class="gf-work-top">
+    <div class="gf-work-grid">
 
-      <dl class="gf-pro-facts">
-        <div>
-          <dt>Film</dt>
-          <dd>Brand films, launch spots, shop and space films</dd>
-        </div>
-        <div>
-          <dt>Photography</dt>
-          <dd>For businesses and people: portrait, editorial, documentary</dd>
-        </div>
-        <div>
-          <dt>End to end</dt>
-          <dd>Shot, graded and cut by me</dd>
-        </div>
-        <div>
-          <dt>Based</dt>
-          <dd>Trinidad and Tobago · New York City</dd>
-        </div>
-      </dl>
-
-      <div class="gf-work-hero-actions">
-        <a class="gf-cta-tab" href="#book">
-          Book an intro call
-          <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
-            <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
-          </svg>
-        </a>
-        <a class="gf-cta-tab" href="#write">
-          Write to me instead
-          <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
-            <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
-          </svg>
-        </a>
+      <div class="gf-work-intro">
+        <p class="gf-meta gf-work-kicker">Work with me · commissions</p>
+        <h1>Tell me what you're making.</h1>
+        <p class="gf-work-lede">
+          I shoot and cut brand films, launch spots, shop and space films, and
+          photographs for businesses and the people behind them.
+        </p>
+        <p class="gf-meta gf-work-facts">
+          Film · Photography · Shot, graded and cut by me · Trinidad and Tobago · New York City
+        </p>
+        <a class="gf-work-jump" href="#write">Rather write? Jump to the form</a>
       </div>
+
+      <section class="gf-work-book" id="book" aria-labelledby="book-title" tabindex="-1">
+        <h2 class="gf-work-small-h" id="book-title">Pick a time for the intro call.</h2>
+        <div class="gf-cal" id="cal-inline">
+          <p class="gf-cal-placeholder" id="cal-placeholder">
+            Online booking opens shortly. Send the form below or email
+            <a href="mailto:contact@goofieseyes.com">contact@goofieseyes.com</a>
+            and I'll set up a call.
+          </p>
+        </div>
+      </section>
+
+      <section class="gf-work-steps" aria-labelledby="steps-title">
+        <h2 class="gf-work-small-h" id="steps-title">Three steps, no guesswork.</h2>
+        <ol class="gf-work-step-list">
+          <li>
+            <span class="gf-work-step-n gf-meta">01</span>
+            <div>
+              <h3>A 20-minute intro call</h3>
+              <p>
+                We talk through what you're making, who it's for and where it
+                will live. A rough idea is plenty; you don't need a brief.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="gf-work-step-n gf-meta">02</span>
+            <div>
+              <h3>A written quote</h3>
+              <p>
+                After the call I put it in writing: what I'll shoot, what you'll
+                get and what it costs, so you can decide with everything in
+                front of you.
+              </p>
+            </div>
+          </li>
+          <li>
+            <span class="gf-work-step-n gf-meta">03</span>
+            <div>
+              <h3>The shoot and the edit</h3>
+              <p>
+                I shoot it, then grade and cut it myself. The person you spoke
+                to on the call is the one doing the work.
+              </p>
+            </div>
+          </li>
+        </ol>
+      </section>
+
     </div>
   </header>
-
-  <!-- ─── how it works ─── -->
-  <section class="gf-work-steps" aria-labelledby="steps-title">
-    <div class="gf-work-inner">
-      <p class="gf-meta gf-work-soft">How it works</p>
-      <h2 id="steps-title">Three steps, no guesswork.</h2>
-      <ol class="gf-work-step-list">
-        <li>
-          <span class="gf-work-step-n gf-meta">01</span>
-          <h3>A 20-minute intro call</h3>
-          <p>
-            We talk through what you're making, who it's for and where it will
-            live. A rough idea is plenty; you don't need a brief.
-          </p>
-        </li>
-        <li>
-          <span class="gf-work-step-n gf-meta">02</span>
-          <h3>A written quote</h3>
-          <p>
-            After the call I put it in writing: what I'll shoot, what you'll
-            get and what it costs, so you can decide with everything in front
-            of you.
-          </p>
-        </li>
-        <li>
-          <span class="gf-work-step-n gf-meta">03</span>
-          <h3>The shoot and the edit</h3>
-          <p>
-            I shoot it, then grade and cut it myself. The person you spoke to
-            on the call is the one doing the work.
-          </p>
-        </li>
-      </ol>
-    </div>
-  </section>
-
-  <!-- ─── booking ─── -->
-  <section class="gf-work-book" id="book" aria-labelledby="book-title" tabindex="-1">
-    <div class="gf-work-inner">
-      <p class="gf-meta gf-work-soft">Book a call</p>
-      <h2 id="book-title">Pick a time for the intro call.</h2>
-      <div class="gf-cal" id="cal-inline">
-        <p class="gf-cal-placeholder" id="cal-placeholder">
-          Online booking opens shortly. Send the form below or email
-          <a href="mailto:contact@goofieseyes.com">contact@goofieseyes.com</a>
-          and I'll set up a call.
-        </p>
-      </div>
-    </div>
-  </section>
 
   <!-- ─── the form ─── -->
   <section class="gf-press gf-work-write" id="write" aria-labelledby="write-title">

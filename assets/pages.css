@@ -1042,82 +1042,110 @@
    landing page's slip, and the sections in between sit on paper.
 */
 
+/* ---------- first screen ---------- */
+.gf-work-top {
+  background: var(--gf-ink);
+  color: var(--gf-paper);
+  padding: calc(var(--gf-nav-h) + 1.4rem) clamp(1rem, 4vw, 2.6rem) clamp(3rem, 7vw, 5rem);
+}
+
+.gf-work-grid {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: grid;
+  gap: 2rem;
+  grid-template-areas:
+    "intro"
+    "book"
+    "steps";
+}
+
+.gf-work-intro { grid-area: intro; }
+.gf-work-book { grid-area: book; }
+.gf-work-steps { grid-area: steps; }
+
+@media (min-width: 800px) {
+  .gf-work-top {
+    padding-top: calc(var(--gf-nav-h) + 2.2rem);
+  }
+
+  .gf-work-grid {
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.1fr);
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "intro book"
+      "steps book";
+    gap: 2.4rem clamp(2rem, 5vw, 4.5rem);
+    align-items: start;
+  }
+
+  .gf-work-book {
+    position: sticky;
+    top: calc(var(--gf-nav-h) + 1rem);
+  }
+}
+
 .gf-work-kicker {
+  margin: 0;
   color: rgba(247, 244, 238, 0.55);
 }
 
-.gf-work-hero-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 1.2rem 2.4rem;
-  margin-top: clamp(2.2rem, 5vw, 3rem);
-}
-
-.gf-work-inner {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-.gf-work-soft {
-  margin: 0;
-  color: var(--gf-ink-soft);
-}
-
-.gf-work-steps h2,
-.gf-work-book h2 {
+.gf-work-intro h1 {
   font-family: var(--gf-serif);
   font-weight: 400;
-  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
-  line-height: 0.98;
-  margin: 0.9rem 0 0;
-  max-width: 18ch;
-}
-
-/* ---------- how it works ---------- */
-.gf-work-steps {
-  background: var(--gf-paper);
-  padding: clamp(4rem, 9vw, 7rem) clamp(1rem, 4vw, 2.6rem);
-}
-
-.gf-work-step-list {
-  list-style: none;
-  margin: clamp(2.4rem, 5vw, 3.6rem) 0 0;
-  padding: 0;
-  display: grid;
-  gap: 2rem clamp(1.5rem, 4vw, 3rem);
-  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
-}
-
-.gf-work-step-list li {
-  border-top: 1px solid var(--gf-line);
-  padding-top: 1.4rem;
-}
-
-.gf-work-step-n {
-  color: var(--gf-coral);
-}
-
-.gf-work-step-list h3 {
-  font-family: var(--gf-serif);
-  font-weight: 400;
-  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
-  line-height: 1.05;
-  margin: 0.7rem 0 0;
-}
-
-.gf-work-step-list p {
+  font-size: clamp(2.6rem, 6vw, 4.6rem);
+  line-height: 0.94;
+  letter-spacing: -0.015em;
   margin: 0.8rem 0 0;
-  max-width: 38ch;
-  line-height: 1.6;
-  color: var(--gf-ink-soft);
+  max-width: 14ch;
+}
+
+.gf-work-lede {
+  margin: 1rem 0 0;
+  max-width: 46ch;
+  font-size: clamp(1rem, 1.5vw, 1.1rem);
+  line-height: 1.5;
+  color: rgba(247, 244, 238, 0.76);
+}
+
+/* The capability row, reduced to one quiet line. Desktop only: on a phone the
+   calendar matters more than the list. */
+.gf-work-facts {
+  display: none;
+  margin: 1.1rem 0 0;
+  line-height: 1.7;
+  color: rgba(247, 244, 238, 0.5);
+}
+
+.gf-work-jump {
+  display: inline-block;
+  margin-top: 1rem;
+  font-size: 0.95rem;
+  color: var(--gf-paper);
+  text-underline-offset: 0.2em;
+}
+
+@media (min-width: 800px) {
+  .gf-work-facts {
+    display: block;
+  }
+
+  .gf-work-jump {
+    display: none;
+  }
+}
+
+.gf-work-small-h {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(1.45rem, 2.4vw, 1.8rem);
+  line-height: 1.05;
+  margin: 0;
 }
 
 /* ---------- booking ---------- */
 .gf-work-book {
-  background: var(--gf-paper);
-  border-top: 1px solid var(--gf-line);
-  padding: clamp(3.5rem, 8vw, 6rem) clamp(1rem, 4vw, 2.6rem) clamp(4rem, 9vw, 7rem);
-  scroll-margin-top: var(--gf-nav-h);
+  scroll-margin-top: calc(var(--gf-nav-h) + 0.5rem);
 }
 
 .gf-work-book:focus {
@@ -1125,13 +1153,25 @@
 }
 
 .gf-cal {
-  margin-top: clamp(2rem, 4vw, 2.8rem);
-  border: 1px solid var(--gf-line);
-  background: #fff;
+  margin-top: 1rem;
+  background: var(--gf-paper);
+  color: var(--gf-ink);
 }
 
-/* Cal.com sizes its own iframe; this only keeps the space from collapsing
-   while the script loads. */
+/* Roughly a calendar's height from 800px, so the page does not jump when the
+   Cal.com link goes in. */
+@media (min-width: 800px) {
+  .gf-cal {
+    min-height: 420px;
+    display: flex;
+    align-items: center;
+  }
+
+  .gf-cal.is-live {
+    display: block;
+  }
+}
+
 .gf-cal.is-live {
   min-height: 34rem;
   overflow: auto;
@@ -1139,8 +1179,8 @@
 
 .gf-cal-placeholder {
   margin: 0;
-  padding: clamp(1.6rem, 4vw, 2.6rem);
-  max-width: 52ch;
+  padding: clamp(1.4rem, 4vw, 2.6rem);
+  max-width: 44ch;
   font-size: 1.05rem;
   line-height: 1.6;
   color: var(--gf-ink-soft);
@@ -1148,6 +1188,44 @@
 
 .gf-cal-placeholder a {
   color: var(--gf-ink);
+}
+
+/* ---------- how it works, compact ---------- */
+.gf-work-step-list {
+  list-style: none;
+  margin: 1rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1rem;
+}
+
+.gf-work-step-list li {
+  display: grid;
+  grid-template-columns: 2rem 1fr;
+  gap: 0.6rem;
+  border-top: 1px solid rgba(247, 244, 238, 0.16);
+  padding-top: 0.9rem;
+}
+
+.gf-work-step-n {
+  color: var(--gf-coral);
+  padding-top: 0.3rem;
+}
+
+.gf-work-step-list h3 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: 1.3rem;
+  line-height: 1.1;
+  margin: 0;
+}
+
+.gf-work-step-list p {
+  margin: 0.35rem 0 0;
+  max-width: 46ch;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: rgba(247, 244, 238, 0.68);
 }
 
 /* ---------- the form ---------- */
