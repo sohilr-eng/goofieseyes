@@ -6,18 +6,18 @@
   <title>Journal | GoofiesEyes</title>
   <meta name="robots" content="index, follow" />
   <!-- Query-driven page: the index is the canonical home for entries. -->
-  <link rel="canonical" id="canonical" href="https://goofieseyes.live/journal.html" />
+  <link rel="canonical" id="canonical" href="https://goofieseyes.com/journal.html" />
 
   <meta property="og:title" content="Journal | GoofiesEyes" />
   <meta property="og:description" content="Notes from behind the camera." />
   <meta property="og:type" content="article" />
   <meta property="og:site_name" content="GoofiesEyes" />
-  <meta property="og:image" content="https://goofieseyes.live/assets/og-image.jpg" />
+  <meta property="og:image" content="https://goofieseyes.com/assets/og-image.jpg" />
   <meta property="og:image:width" content="1200" />
   <meta property="og:image:height" content="630" />
   <meta property="og:image:alt" content="A shelf of records, each one a GoofiesEyes photography collection" />
   <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:image" content="https://goofieseyes.live/assets/og-image.jpg" />
+  <meta name="twitter:image" content="https://goofieseyes.com/assets/og-image.jpg" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -136,7 +136,7 @@
 
         document.title = post.title + ' | GoofiesEyes Journal';
         document.getElementById('canonical').href =
-          'https://goofieseyes.live/journal-post.html?slug=' + encodeURIComponent(post.slug);
+          'https://goofieseyes.com/journal-post.html?slug=' + encodeURIComponent(post.slug);
 
         var meta = esc(longDate(post.date));
         if (post.tags && post.tags.length) meta += ' · ' + esc(post.tags.join(' · '));

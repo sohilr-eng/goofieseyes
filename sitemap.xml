@@ -1,44 +1,44 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://goofieseyes.live/</loc>
+    <loc>https://goofieseyes.com/</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/portfolios.html</loc>
+    <loc>https://goofieseyes.com/portfolios.html</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/portfolio.html</loc>
+    <loc>https://goofieseyes.com/portfolio.html</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/prints.html</loc>
+    <loc>https://goofieseyes.com/prints.html</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/journal.html</loc>
+    <loc>https://goofieseyes.com/journal.html</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <url>
-    <loc>https://goofieseyes.live/professional.html</loc>
+    <loc>https://goofieseyes.com/professional.html</loc>
     <lastmod>2026-08-21</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/privacy</loc>
+    <loc>https://goofieseyes.com/privacy</loc>
     <lastmod>2026-10-28</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.2</priority>
@@ -46,43 +46,43 @@
 
   <!-- Collections (collection.html is a ?slug=-driven template; each sets its own canonical) -->
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=tobago</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=tobago</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=trinidad-s-northern-range</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=trinidad-s-northern-range</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=caroni-swamp</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=caroni-swamp</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=macaws</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=macaws</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=my-model</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=my-model</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=smoky-mountains</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=smoky-mountains</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://goofieseyes.live/collection.html?slug=new-york-city</loc>
+    <loc>https://goofieseyes.com/collection.html?slug=new-york-city</loc>
     <lastmod>2026-08-14</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
@@ -90,7 +90,7 @@
 
   <!-- Journal posts (journal-post.html is ?slug=-driven) -->
   <url>
-    <loc>https://goofieseyes.live/journal-post.html?slug=curated-perspective</loc>
+    <loc>https://goofieseyes.com/journal-post.html?slug=curated-perspective</loc>
     <lastmod>2026-04-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.6</priority>
