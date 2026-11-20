@@ -122,8 +122,12 @@ async function confirmDigital(session) {
 
 async function notifyOwner(session, kind) {
   const details = session.customer_details || {};
-  const address = (session.shipping_details && session.shipping_details.address) || details.address || {};
-  const addressLines = [address.line1, address.line2, address.city, address.state, address.postal_code, address.country]
+  // On the pinned API version the shipping address lives under collected_information;
+  // session.shipping_details no longer exists. Keep the old field as a fallback.
+  const shipping = (session.collected_information && session.collected_information.shipping_details) ||
+    session.shipping_details || null;
+  const address = (shipping && shipping.address) || details.address || {};
+  const addressLines = [shipping && shipping.name, address.line1, address.line2, address.city, address.state, address.postal_code, address.country]
     .filter(Boolean).map(escapeHtml).join('<br>');
 
   const meta = session.metadata || {};
