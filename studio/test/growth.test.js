@@ -105,6 +105,16 @@ test('the audit form only answers the site, and refuses bad requests', async () 
   assert.equal(preflight.status, 204);
   assert.equal(preflight.headers['access-control-allow-origin'], 'https://www.goofieseyes.live');
 
+  // goofieseyes.com is the main address now.
+  for (const origin of ['https://goofieseyes.com', 'https://www.goofieseyes.com']) {
+    const pre = await call('audit', { method: 'OPTIONS', headers: { origin } });
+    assert.equal(pre.status, 204);
+    assert.equal(pre.headers['access-control-allow-origin'], origin);
+    const post = await call('audit', { method: 'POST', body: REQUEST, headers: { origin }, ip: '7.7.7.7' });
+    assert.equal(post.status, 200);
+    assert.equal(post.headers['access-control-allow-origin'], origin);
+  }
+
   assert.equal((await call('audit', { method: 'POST', body: { ...REQUEST, email: 'nope' } })).status, 400);
   assert.equal((await call('audit', { method: 'POST', body: { ...REQUEST, instagram: '' } })).status, 400);
   assert.equal((await call('audit', { method: 'POST', body: { ...REQUEST, website: 'javascript:alert(1)' } })).status, 400);

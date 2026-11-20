@@ -460,7 +460,7 @@ let openAlbum = null;
 async function showAlbums() {
   openAlbum = null;
   picked = [];
-  $('#site-title').textContent = 'From goofieseyes.live';
+  $('#site-title').textContent = 'From goofieseyes.com';
   $('#site-back').hidden = true;
   $('#site-add').hidden = true;
   const body = $('#site-body');
@@ -1139,7 +1139,7 @@ async function loadConnections() {
 }
 
 // ─── Growth ──────────────────────────────────────────────────────────────────
-// Audit requests from goofieseyes.live/audit, and one-off account lookups.
+// Audit requests from goofieseyes.com/audit, and one-off account lookups.
 // The research and drafting happen in Claude Code (/growth); this is the
 // at-a-glance view and the place to move a lead along from your phone.
 
@@ -1207,7 +1207,7 @@ function renderLeads() {
   const shown = growth.leads.filter((l) => growth.filter === 'all' || (growth.filter === 'open' ? isOpen(l) : l.status === growth.filter));
   $('#leads').innerHTML = shown.length
     ? shown.map(leadCard).join('')
-    : `<p class="empty">${growth.leads.length ? 'None here.' : 'No requests yet. Once goofieseyes.live/audit is live and in your bio, they show up here.'}</p>`;
+    : `<p class="empty">${growth.leads.length ? 'None here.' : 'No requests yet. Once goofieseyes.com/audit is live and in your bio, they show up here.'}</p>`;
 }
 
 async function loadLeads() {

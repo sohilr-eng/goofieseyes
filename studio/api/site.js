@@ -4,7 +4,7 @@
  * GET /api/site?portfolios       → content/data/portfolios.json
  * GET /api/site?photo=<filename> → that photo's bytes
  *
- * This exists because goofieseyes.live sends no CORS headers: the browser can't
+ * This exists because the site (goofieseyes.com) sends no CORS headers: the browser can't
  * read those files from another origin, and it has to read them to convert the
  * site's WebP copies into the JPEG Instagram insists on. Only those two kinds
  * of path are fetched, so this can't be turned into a general proxy.
@@ -13,7 +13,7 @@
 const { handler, send, query, httpError } = require('../lib/http');
 const { requireAuth } = require('../lib/auth');
 
-const SITE = process.env.SITE_URL || 'https://goofieseyes.live';
+const SITE = process.env.SITE_URL || 'https://goofieseyes.com';
 const PHOTO_NAME = /^[a-z0-9][a-z0-9._-]*\.(webp|jpe?g|png)$/i;
 
 module.exports = handler(async (req, res) => {

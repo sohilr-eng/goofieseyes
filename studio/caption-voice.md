@@ -43,11 +43,11 @@ door, not a business pushing a sale.
   "If you've been meaning to get portraits done…"). Never "Contact us for services".
 - **Match it to the work:**
   - Brand, product, commercial or campaign work → creative direction. "That's the part I love
-    figuring out. I'd be glad to hear about it." Link: https://goofieseyes.live/#pressing
+    figuring out. I'd be glad to hear about it." Link: https://goofieseyes.com/#pressing
   - Portraits, couples, graduations, events, fashion → a shoot. "Tell me what you're picturing
-    and we'll shape it from there." Link: https://goofieseyes.live/#pressing
+    and we'll shape it from there." Link: https://goofieseyes.com/#pressing
   - Landscapes, wildlife, travel, fine art → prints. "This one's available as a print, if it
-    feels like it belongs on one of your walls." Link: https://goofieseyes.live/prints.html
+    feels like it belongs on one of your walls." Link: https://goofieseyes.com/prints.html
 - **Never the same line twice in a row.** The desk is shown how your recent captions ended and
   must word this one differently.
 - **Never:** "DM now", "book today", "limited spots", "don't miss out", "link in bio", 👇,

@@ -1,6 +1,6 @@
 /**
  * Audit requests: businesses asking for a free content audit through the form
- * on goofieseyes.live/audit. The growth desk reads them, researches each one
+ * on goofieseyes.com/audit. The growth desk reads them, researches each one
  * and drafts the audit; the owner sends it.
  *
  * Stored as `lead:<id>` → record, with `leads` a sorted set by creation time.

@@ -1,5 +1,5 @@
 /**
- * The public end of the funnel: the audit request form on goofieseyes.live/audit
+ * The public end of the funnel: the audit request form on goofieseyes.com/audit
  * posts here. The only studio route open without a password or token, so it
  * accepts one thing (a new request), from the site's own origins, rate-limited
  * per IP (lib/leads.js).
@@ -11,7 +11,11 @@ const { handler, readJson, send, httpError } = require('../lib/http');
 const { clientIp } = require('../lib/auth');
 const { createAuditRequest } = require('../lib/leads');
 
-const ORIGINS = new Set(['https://goofieseyes.live', 'https://www.goofieseyes.live']);
+const ORIGINS = new Set([
+  'https://goofieseyes.com', 'https://www.goofieseyes.com',
+  // The old address; kept while goofieseyes.live still serves pages.
+  'https://goofieseyes.live', 'https://www.goofieseyes.live',
+]);
 
 function allowOrigin(req, res) {
   const origin = req.headers.origin;

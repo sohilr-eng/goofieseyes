@@ -8,7 +8,7 @@
  *   node studio/scripts/growth-desk.js lookup <username> [--posts 25]
  *     The same for one account (a lead, or one you're thinking of watching).
  *   node studio/scripts/growth-desk.js leads [status]
- *     Audit requests from goofieseyes.live/audit, newest first (default: new).
+ *     Audit requests from goofieseyes.com/audit, newest first (default: new).
  *   node studio/scripts/growth-desk.js lead <id> <status> [note]
  *     Moves a lead along: new, researched, sent, call, client or closed.
  *   node studio/scripts/growth-desk.js tips <file.json>
