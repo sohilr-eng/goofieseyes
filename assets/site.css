@@ -1244,3 +1244,53 @@ body.gf-body {
     animation: none;
   }
 }
+
+/* ---------- nav: "Work with me" ----------
+ * The one link in the row that hires. A hairline pill in the nav's own colour,
+ * so it stays legible under the nav's difference blend over any background.
+ */
+.gf-nav-links a.gf-nav-work {
+  padding: 0.38rem 0.85rem 0.34rem;
+  margin: -0.38rem 0;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  white-space: nowrap;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.gf-nav-links a.gf-nav-work::after {
+  display: none;
+}
+
+.gf-nav-links a.gf-nav-work:hover,
+.gf-nav-links a.gf-nav-work[aria-current="page"] {
+  background: #fff;
+  color: #000;
+}
+
+.gf-mobile-menu a.gf-nav-work {
+  padding: 0.5rem 1.2rem 0.6rem;
+  border: 1px solid var(--gf-ink);
+  border-radius: 999px;
+}
+
+.gf-mobile-menu a.gf-nav-work:hover {
+  border-color: var(--gf-coral);
+}
+
+@media (min-width: 800px) and (max-width: 1010px) {
+  .gf-nav-links a.gf-nav-work {
+    padding: 0.32rem 0.6rem 0.28rem;
+  }
+}
+
+/* The print slip on the landing page points people hiring to work.html. */
+.gf-slip-aside {
+  margin: 1rem 0 0;
+  font-size: 0.98rem;
+  color: var(--gf-ink-soft);
+}
+
+.gf-slip-aside a {
+  color: var(--gf-ink);
+}

@@ -19,7 +19,8 @@
     { "source": "/studio/:path*", "destination": "/", "permanent": false }
   ],
   "rewrites": [
-    { "source": "/privacy", "destination": "/privacy.html" }
+    { "source": "/privacy", "destination": "/privacy.html" },
+    { "source": "/work", "destination": "/work.html" }
   ],
   "headers": [
     {

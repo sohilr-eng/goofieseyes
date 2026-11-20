@@ -1034,3 +1034,195 @@
     transition: none !important;
   }
 }
+
+/* ============================================================
+   work.html — "Work with me", the client intake page
+   ============================================================
+   Plain like the portfolio: the hero reuses .gf-pro-hero, the form reuses the
+   landing page's slip, and the sections in between sit on paper.
+*/
+
+.gf-work-kicker {
+  color: rgba(247, 244, 238, 0.55);
+}
+
+.gf-work-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.2rem 2.4rem;
+  margin-top: clamp(2.2rem, 5vw, 3rem);
+}
+
+.gf-work-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.gf-work-soft {
+  margin: 0;
+  color: var(--gf-ink-soft);
+}
+
+.gf-work-steps h2,
+.gf-work-book h2 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(2.2rem, 5.5vw, 3.8rem);
+  line-height: 0.98;
+  margin: 0.9rem 0 0;
+  max-width: 18ch;
+}
+
+/* ---------- how it works ---------- */
+.gf-work-steps {
+  background: var(--gf-paper);
+  padding: clamp(4rem, 9vw, 7rem) clamp(1rem, 4vw, 2.6rem);
+}
+
+.gf-work-step-list {
+  list-style: none;
+  margin: clamp(2.4rem, 5vw, 3.6rem) 0 0;
+  padding: 0;
+  display: grid;
+  gap: 2rem clamp(1.5rem, 4vw, 3rem);
+  grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+}
+
+.gf-work-step-list li {
+  border-top: 1px solid var(--gf-line);
+  padding-top: 1.4rem;
+}
+
+.gf-work-step-n {
+  color: var(--gf-coral);
+}
+
+.gf-work-step-list h3 {
+  font-family: var(--gf-serif);
+  font-weight: 400;
+  font-size: clamp(1.5rem, 2.6vw, 1.9rem);
+  line-height: 1.05;
+  margin: 0.7rem 0 0;
+}
+
+.gf-work-step-list p {
+  margin: 0.8rem 0 0;
+  max-width: 38ch;
+  line-height: 1.6;
+  color: var(--gf-ink-soft);
+}
+
+/* ---------- booking ---------- */
+.gf-work-book {
+  background: var(--gf-paper);
+  border-top: 1px solid var(--gf-line);
+  padding: clamp(3.5rem, 8vw, 6rem) clamp(1rem, 4vw, 2.6rem) clamp(4rem, 9vw, 7rem);
+  scroll-margin-top: var(--gf-nav-h);
+}
+
+.gf-work-book:focus {
+  outline: none;
+}
+
+.gf-cal {
+  margin-top: clamp(2rem, 4vw, 2.8rem);
+  border: 1px solid var(--gf-line);
+  background: #fff;
+}
+
+/* Cal.com sizes its own iframe; this only keeps the space from collapsing
+   while the script loads. */
+.gf-cal.is-live {
+  min-height: 34rem;
+  overflow: auto;
+}
+
+.gf-cal-placeholder {
+  margin: 0;
+  padding: clamp(1.6rem, 4vw, 2.6rem);
+  max-width: 52ch;
+  font-size: 1.05rem;
+  line-height: 1.6;
+  color: var(--gf-ink-soft);
+}
+
+.gf-cal-placeholder a {
+  color: var(--gf-ink);
+}
+
+/* ---------- the form ---------- */
+.gf-work-write {
+  scroll-margin-top: var(--gf-nav-h);
+}
+
+.gf-work-form,
+.gf-work-thanks {
+  margin: 0 auto;
+}
+
+.gf-work-pair {
+  display: grid;
+  gap: 0 clamp(1.2rem, 3vw, 2rem);
+}
+
+@media (min-width: 640px) {
+  .gf-work-pair {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.gf-field > span em {
+  font-style: normal;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.gf-field input::placeholder,
+.gf-field textarea::placeholder {
+  color: var(--gf-ink-soft);
+  opacity: 0.7;
+}
+
+.gf-work-thanks h2:focus {
+  outline: none;
+}
+
+.gf-work-thanks p:not(.gf-meta) {
+  margin: 1rem 0 0;
+  max-width: 48ch;
+  line-height: 1.6;
+  color: var(--gf-ink-soft);
+}
+
+.gf-work-thanks p a,
+.gf-inherit {
+  color: inherit;
+}
+
+.gf-work-thanks .gf-cta-tab {
+  margin-top: 1.8rem;
+}
+
+.gf-work-thanks .gf-cta-tab[hidden],
+.gf-work-thanks p[hidden] {
+  display: none;
+}
+
+.gf-foot-right {
+  text-align: right;
+}
+
+/* professional.html: the ask, repeated under the films. */
+.gf-pro-cta--mid {
+  padding-top: 0;
+}
+
+.gf-pro-cta--mid .gf-pro-cta-inner {
+  border-top: 1px solid rgba(247, 244, 238, 0.18);
+  padding-top: clamp(3rem, 7vw, 4.5rem);
+}
+
+.gf-pro-cta--mid .gf-cta-sleeve {
+  max-width: 28rem;
+}
+

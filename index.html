@@ -39,7 +39,7 @@
       "name": "GoofiesEyes",
       "url": "https://goofieseyes.com/",
       "jobTitle": "Photographer",
-      "email": "goofiesfotos@gmail.com",
+      "email": "contact@goofieseyes.com",
       "knowsAbout": ["wildlife photography", "landscape photography", "street photography", "documentary photography", "portrait photography", "fine art prints"],
       "sameAs": []
     }
@@ -97,7 +97,7 @@
       <a href="#video">Video</a>
       <a href="prints.html">Prints</a>
       <a href="journal.html">Journal</a>
-      <a href="#pressing">Contact</a>
+      <a class="gf-nav-work" href="work.html">Work with me</a>
     </div>
     <button class="gf-burger" type="button" aria-expanded="false" aria-label="Toggle navigation" aria-controls="gf-mobile-menu">
       <span></span><span></span><span></span>
@@ -112,7 +112,7 @@
     <a href="#liner-notes">Liner notes</a>
     <a href="prints.html">Prints</a>
     <a href="journal.html">Journal</a>
-    <a href="#pressing">Contact</a>
+    <a class="gf-nav-work" href="work.html">Work with me</a>
   </div>
 
   <!-- ─── 1. the journey: scroll-scrub film ─── -->
@@ -221,6 +221,12 @@
             <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
           </svg>
         </a>
+        <a class="gf-cta-tab" href="work.html">
+          Work with me
+          <svg aria-hidden="true" viewBox="0 0 24 12" width="24" height="12" fill="none">
+            <path d="M0 6h22M17 1l5 5-5 5" stroke="currentColor" stroke-width="1"/>
+          </svg>
+        </a>
         <span class="gf-meta gf-reel-muted">Sound off</span>
       </div>
     </div>
@@ -314,8 +320,9 @@
           what the light was doing that day.
         </p>
         <p>
-          Every frame here is my own. If you want a print, a shoot, or just to ask
-          about a photograph, the slip below reaches me directly.
+          Every frame here is my own. If you want a print, or just to ask about a
+          photograph, the slip below reaches me directly. For a shoot,
+          <a href="work.html" style="color: inherit">start here</a>.
         </p>
         <dl class="gf-credits">
           <div>
@@ -328,18 +335,22 @@
           </div>
           <div>
             <dt>Commissions</dt>
-            <dd><a href="#pressing" style="color: inherit">Portrait and editorial</a></dd>
+            <dd><a href="work.html" style="color: inherit">Portrait and editorial</a></dd>
           </div>
         </dl>
       </div>
     </div>
   </section>
 
-  <!-- ─── 7. request a pressing ─── -->
+  <!-- ─── 7. ask about a print ───
+       Prints only now: anyone hiring for a shoot is sent to work.html. -->
   <section class="gf-press" id="pressing">
     <form class="gf-slip" id="pressing-form" novalidate>
       <p class="gf-meta">Order slip</p>
-      <h2>Request a pressing</h2>
+      <h2>Ask about a print</h2>
+      <p class="gf-slip-aside">
+        Hiring me for a shoot? <a href="work.html">Work with me &rarr;</a>
+      </p>
 
       <label class="gf-field">
         <span>Name</span>
@@ -349,15 +360,7 @@
         <span>Email</span>
         <input name="email" type="email" required maxlength="200" autocomplete="email">
       </label>
-      <label class="gf-field">
-        <span>What for</span>
-        <select name="kind">
-          <option value="print">A print</option>
-          <option value="commission">A shoot</option>
-          <option value="motion">Motion work</option>
-          <option value="other">Something else</option>
-        </select>
-      </label>
+      <input type="hidden" name="kind" value="print">
       <label class="gf-field">
         <span>Details</span>
         <textarea name="message" required maxlength="2000"></textarea>
@@ -390,7 +393,7 @@
         <a href="prints.html">Prints</a>
         <a href="journal.html">Journal</a>
         <a href="#liner-notes">Liner notes</a>
-        <a href="mailto:goofiesfotos@gmail.com">Email</a>
+        <a href="mailto:contact@goofieseyes.com">Email</a>
         <a href="privacy.html">Privacy</a>
       </div>
       <div>Photography and motion</div>
@@ -585,7 +588,7 @@
         body: JSON.stringify({
           name: data.get('name') || '',
           email: data.get('email') || '',
-          kind: data.get('kind') || 'other',
+          kind: data.get('kind') || 'print',
           message: data.get('message') || '',
           website: data.get('website') || ''
         })
@@ -599,7 +602,7 @@
         .catch(function () {
           note.setAttribute('data-state', 'error');
           note.innerHTML = 'That did not send. Email me at ' +
-            '<a href="mailto:goofiesfotos@gmail.com" style="color:inherit">goofiesfotos@gmail.com</a>.';
+            '<a href="mailto:contact@goofieseyes.com" style="color:inherit">contact@goofieseyes.com</a>.';
         })
         .then(function () {
           button.disabled = false;
